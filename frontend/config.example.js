@@ -11,7 +11,7 @@ module.exports = {
     // Configuración del entorno
     environment: process.env.NODE_ENV || 'development',
     
-    // Configuración de la base de datos (si es necesaria)
+    // Configuración de la base de datos ----
     database: {
         url: process.env.DATABASE_URL || 'mongodb://localhost:27017/skilltrade'
     },

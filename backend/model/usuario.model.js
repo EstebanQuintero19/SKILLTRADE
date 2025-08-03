@@ -1,59 +1,39 @@
-const mongoose = require('../config/db');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const schemaUser = new mongoose.Schema({
+const usuarioSchema = new Schema({
     nombre: {
         type: String,
-        required: true,
-        minlength: 1,
-        maxlength: 150
+        required: [true, 'El nombre es obligatorio'],
+        minlength: 2,
+        maxlength: 100,
+        trim: true
     },
-    nombreUsuario: {
+    email: {
         type: String,
-        required: true,
+        required: [true, 'El email es obligatorio'],
         unique: true,
-        minlength: 1,
-        maxlength: 150
-    },
-    fechaNacimiento: {
-        type: Date,
-        required: true
+        match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Email inválido'],
+        lowercase: true,
+        trim: true
     },
     fechaRegistro: {
         type: Date,
+        required: true,
         default: Date.now
     },
-    correo: {
+    rol: {
         type: String,
-        required: true,
-        unique: true,
-        match: [/^\S+@\S+\.\S+$/, 'El correo debe ser válido']
+        enum: ['admin', 'usuario', 'moderador'],
+        default: 'usuario'
     },
-    cursosPagos: {
-        type: Array,
-        default: []
-    },
-    cursosInscritos: {
-        type: Array,
-        default: []
-    },
-    suscriptores: {
-        type: Number,
-        default: 0
-    },
-    suscripciones: {
-        type: Array,
-        default: []
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: [6, 'La contraseña debe tener al menos 6 caracteres']
+    activo: {
+        type: Boolean,
+        default: true
     }
 }, {
-    versionKey: false
+    collection: 'usuarios',
+    timestamps: false
 });
 
-const users = mongoose.model('users', schemaUser);
-module.exports = users;
-
-//cuando el usuario pasa a ser un owner se le agrega el atributo rating(calificación)
+module.exports = mongoose.model('Usuario', usuarioSchema);

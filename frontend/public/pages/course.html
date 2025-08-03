@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/course.css">
+    <link rel="stylesheet" href="../styles/responsive.css">
+    <link rel="stylesheet" href="../styles/landing.css">
+    <title>SkillTrade – Programación de Cero a Senior en Java</title>
+</head>
+
+<body>
+    <header class="py-3 border-bottom navbar navbar-expand-lg fixed-top bg-white shadow-sm">
+        <nav class="container d-flex align-items-center">
+            <a class="navbar-brand fw-bold text-primary" href="/index.html">SKILLTRADE</a>
+            <form class="d-flex flex-fill mx-4" role="search">
+                <input class="form-control me-2 rounded-pill" type="search" placeholder="Buscar curso..."
+                    aria-label="Buscar">
+                <button class="btn btn-outline-primary rounded-pill" type="submit">Buscar</button>
+            </form>
+        </nav>
+    </header>
+
+    <div class="container" style="margin-top: 6rem;">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-white px-0">
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-primary">Informática y
+                                software</a></li>
+                        <li class="breadcrumb-item"><a href="#"
+                                class="text-decoration-none text-primary">Programación</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Programación en Java</li>
+                    </ol>
+                </nav>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1 class="display-5 fw-bold mb-3 text-primary">
+                            PROGRAMACIÓN DE CERO A SENIOR EN JAVA
+                            <span class="text-muted fs-5">. Domina Java y buenas prácticas</span>
+                        </h1>
+                        <p class="lead">
+                            Desde sintaxis básica hasta arquitecturas empresariales con Spring Boot,
+                            construye aplicaciones robustas siguiendo principios de Clean Code y SOLID.
+                        </p>
+                        <div class="d-flex align-items-center mb-4">
+                            <span class="badge bg-success me-3">Lo más vendido</span>
+                            <span class="fw-bold text-primary me-2">4,8</span>
+                            <span class="text-warning me-1">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </span>
+                            <span class="text-muted me-3">(4 512 valoraciones)</span>
+                            <span class="text-muted">12 470 estudiantes</span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex mb-5">
+                            <button class="btn btn-outline-primary me-2 position-relative" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                                Añadir al carrito
+                            </button>
+                            <button class="btn btn-outline-primary me-2 position-relative rounded-pill">Comprar
+                                ahora</button>
+                        </div>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">¿Qué aprenderás?</h2>
+                            <div class="row border-bottom pb-3">
+                                <div class="col-sm-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">✔️ Sintaxis y estructuras de control en Java</li>
+                                        <li class="mb-2">✔️ Programación orientada a objetos y patrones de diseño</li>
+                                        <li class="mb-2">✔️ Colecciones, genéricos y Streams en Java 8+</li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">✔️ Tests unitarios con JUnit y Mockito</li>
+                                        <li class="mb-2">✔️ Desarrollo de APIs REST con Spring Boot</li>
+                                        <li class="mb-2">✔️ Principios SOLID y Clean Code aplicados a Java</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Incluye</h2>
+                            <div class="row row-cols-1 row-cols-md-2 g-3 border-bottom pb-3">
+                                <div class="col d-flex align-items-center">
+                                    <span class="me-2">🎥</span>12 horas de vídeo bajo demanda
+                                </div>
+                                <div class="col d-flex align-items-center">
+                                    <span class="me-2">📄</span>5 artículos detallados
+                                </div>
+                                <div class="col d-flex align-items-center">
+                                    <span class="me-2">📥</span>30 recursos descargables
+                                </div>
+                                <div class="col d-flex align-items-center">
+                                    <span class="me-2">📱</span>Acceso en móviles y TV
+                                </div>
+                                <div class="col d-flex align-items-center">
+                                    <span class="me-2">🏆</span>Certificado de finalización
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Contenido del curso</h2>
+                            <p class="text-muted">16 secciones · 48 clases · 12 h 30 m</p>
+                            <ul class="list-unstyled">
+                                <li>✔️ Fundamentos de Java y programación orientada a objetos</li>
+                                <li>✔️ Colecciones, genéricos, streams y manejo de excepciones</li>
+                                <li>✔️ Testing, principios SOLID y Clean Code</li>
+                                <li>✔️ Desarrollo de APIs REST con Spring Boot y seguridad</li>
+                                <li>✔️ Persistencia con JPA y despliegue en la nube</li>
+                                <li>✔️ Introducción a microservicios, concurrencia y CI/CD</li>
+                                <li>✔️ Proyecto final práctico</li>
+                            </ul>
+                            <a class="text-primary text-decoration-none" data-bs-toggle="collapse" href="#fullContent"
+                                role="button" aria-expanded="false" aria-controls="fullContent">
+                                Ver temario detallado
+                            </a>
+                            <div class="collapse mt-3" id="fullContent">
+                                <div class="accordion" id="accordionSections">
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Requisitos</h2>
+                            <ul>
+                                <li>Conocimientos básicos de cualquier lenguaje de programación.</li>
+                                <li>JDK 11 o superior instalado.</li>
+                                <li>IDE recomendado: IntelliJ IDEA, Eclipse o VS Code.</li>
+                            </ul>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Descripción</h2>
+                            <p>
+                                Este curso te guía desde los conceptos más básicos de Java hasta el desarrollo de
+                                aplicaciones
+                                empresariales con Spring Boot. Aprenderás a escribir código limpio, mantenible y probado
+                                mediante buenas prácticas de ingeniería de software.
+                            </p>
+                            <div class="collapse" id="descCollapse">
+                                <p>
+                                    <strong>Bloque 1 – Fundamentos de Java:</strong> sintaxis, OOP, colecciones y
+                                    Streams.
+                                    <br>
+                                    <strong>Bloque 2 – Desarrollo con Spring Boot:</strong> creación de APIs REST,
+                                    seguridad,
+                                    pruebas y despliegue.
+                                </p>
+                            </div>
+                            <a class="text-primary text-decoration-none" data-bs-toggle="collapse" href="#descCollapse"
+                                role="button" aria-expanded="false" aria-controls="descCollapse">
+                                Ver más
+                            </a>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Instructor</h2>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="../images/human-profile-green.png" alt="Carlos Martínez"
+                                    class="rounded-circle me-3 border border-2 border-primary" width="64" height="64">
+                                <div>
+                                    <h5 class="mb-1 text-primary">Carlos Martínez</h5>
+                                    <p class="mb-0 text-muted">Senior Java Developer</p>
+                                </div>
+                            </div>
+                            <p>
+                                Con más de 8 años de experiencia en Java backend, he liderado proyectos de alto
+                                rendimiento
+                                en Spring Boot y microservicios.
+                            </p>
+                            <div class="collapse" id="bioCollapse">
+                                <p>
+                                    Experto en arquitecturas limpias, testing automatizado y despliegue en Kubernetes.
+                                    Ponente en conferencias Java y mentor de desarrolladores.
+                                </p>
+                            </div>
+                            <a class="text-primary text-decoration-none" data-bs-toggle="collapse" href="#bioCollapse"
+                                role="button" aria-expanded="false" aria-controls="bioCollapse">
+                                Ver más
+                            </a>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">Valoraciones</h2>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card p-3 h-100 border-0 shadow-sm">
+                                        <p class="mb-1">
+                                            <strong>María Gómez</strong>
+                                            <span class="text-warning">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-half"></i>
+                                            </span>
+                                        </p>
+                                        <p class="mb-0">
+                                            Excelente explicación de conceptos avanzados de Spring Boot.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card p-3 h-100 border-0 shadow-sm">
+                                        <p class="mb-1">
+                                            <strong>Juan Pérez</strong>
+                                            <span class="text-warning">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star"></i>
+                                            </span>
+                                        </p>
+                                        <p class="mb-0">
+                                            Muy completo, solo echo en falta más ejemplos de concurrencia.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button class="btn btn-outline-primary rounded-pill text-primary border-primary">Mostrar
+                                    todas
+                                    las reseñas</button>
+                            </div>
+                        </section>
+
+                        <section class="mb-5">
+                            <h2 class="h4 mb-3 text-primary">también compraron</h2>
+                            <div class="list-group">
+                                <div class="list-group-item d-flex align-items-start">
+                                    <img src="../images/desarrollo-web.jpeg" alt="Herramientas Digitales para el aula"
+                                        class="rounded me-3" width="56" height="56">
+                                    <div class="flex-fill">
+                                        <div class="fw-semibold">Desarrollo web</div>
+                                        <span class="badge bg-success mb-1">Lo más vendido</span>
+                                        <div class="small text-success fw-semibold">11,5 horas en total</div>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <div class="fw-bold text-primary">4,8 <i
+                                                class="bi bi-star-fill text-warning"></i></div>
+                                        <div class="fw-bold">38.900 COL$ <span
+                                                class="text-muted text-decoration-line-through small">109.900
+                                                COL$</span></div>
+                                    </div>
+                                    <button class="btn btn-link ms-2"><i class="bi bi-heart"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex align-items-start">
+                                    <img src="../images/ciber-seguridad.jpeg"
+                                        alt="Educación Superior y Docencia Universitaria" class="rounded me-3"
+                                        width="56" height="56">
+                                    <div class="flex-fill">
+                                        <div class="fw-semibold">CIBERSEGURIDAD</div>
+                                        <span class="badge bg-success mb-1">Lo más vendido</span>
+                                        <div class="small text-success fw-semibold">9 horas en total</div>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <div class="fw-bold text-primary">4,6 <i
+                                                class="bi bi-star-fill text-warning"></i></div>
+                                        <div class="fw-bold">52.900 COL$ <span
+                                                class="text-muted text-decoration-line-through small">299.900
+                                                COL$</span></div>
+                                    </div>
+                                    <button class="btn btn-link ms-2"><i class="bi bi-heart"></i></button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-5"></section>
+                        <h2 class="h4 mb-3 text-primary">Más cursos de Carlos Martínez</h2>
+                        <div class="row row-cols-1 row-cols-md-3 g-3">
+                            <div class="col">
+                                <div class="card h-100 border-0 shadow-sm" style="max-width: 16rem;">
+                                    <img src="../images/desarrollo-web.jpeg" class="card-img-top rounded-top"
+                                        alt="APIs REST con Spring Boot" style="height: 120px; object-fit: cover;">
+                                    <div class="card-body p-3">
+                                        <h6 class="card-title mb-1 fw-semibold text-primary" style="font-size: 1rem;">
+                                            DESARROLLO WEB - DESDE CERO A USO DE FRAMEWORKS</h6>
+                                        <p class="text-muted mb-1" style="font-size: 0.9rem;">Carlos Martínez</p>
+                                        <p class="mb-1" style="font-size: 0.9rem;">
+                                            <span class="text-warning">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-half"></i>
+                                            </span> 4,7 
+                                        </p>
+                                        <p class="fw-bold mb-0" style="font-size: 1rem;">149.900 <span
+                                                class="text-muted fw-normal"
+                                                style="text-decoration:line-through;">199.900</span> COL$</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card h-100 border-0 shadow-sm" style="max-width: 16rem;">
+                                    <img src="../images/machine-learning.jpeg" class="card-img-top rounded-top"
+                                        alt="Java Concurrente y Multihilo" style="height: 120px; object-fit: cover;">
+                                    <div class="card-body p-3">
+                                        <h6 class="card-title mb-1 fw-semibold text-primary" style="font-size: 1rem;">
+                                            MACHINE LEARNING BÁSICO</h6>
+                                        <p class="text-muted mb-1" style="font-size: 0.9rem;">Carlos Martínez</p>
+                                        <p class="mb-1" style="font-size: 0.9rem;">
+                                            <span class="text-warning">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                            </span> 5,0 
+                                        </p>
+                                        <p class="fw-bold mb-0" style="font-size: 1rem;">129.900 <span
+                                                class="text-muted fw-normal"
+                                                style="text-decoration:line-through;">179.900</span> COL$</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card h-100 border-0 shadow-sm" style="max-width: 16rem;">
+                                    <img src="../images/ciencia-datos.jpeg" class="card-img-top rounded-top"
+                                        alt="Patrones de Diseño en Java" style="height: 120px; object-fit: cover;">
+                                    <div class="card-body p-3">
+                                        <h6 class="card-title mb-1 fw-semibold text-primary" style="font-size: 1rem;">
+                                            CIENCIA DE DATOS</h6>
+                                        <p class="text-muted mb-1" style="font-size: 0.9rem;">Carlos Martínez</p>
+                                        <p class="mb-1" style="font-size: 0.9rem;">
+                                            <span class="text-warning">
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star-fill"></i>
+                                                <i class="bi bi-star"></i>
+                                            </span> 4,8
+                                        </p>
+                                        <p class="fw-bold mb-0" style="font-size: 1rem;">139.900 <span
+                                                class="text-muted fw-normal"
+                                                style="text-decoration:line-through;">189.900</span> COL$</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </section>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card sticky-top shadow-sm border-0" style="top: 6rem;">
+                            <div class="position-relative">
+                                <img src="../images/java-develop.webp" class="card-img-top rounded-top"
+                                    alt="Vista previa del curso">
+                                <button
+                                    class="btn btn-light rounded-circle position-absolute top-50 start-50 translate-middle shadow"
+                                    style="width: 56px; height: 56px;">
+                                    <i class="bi bi-play-fill fs-2 text-primary"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <span class="fs-3 fw-bold text-primary">190.000 COL$</span>
+                                    <span class="text-muted text-decoration-line-through ms-2">200.000 COL$</span>
+                                    <div class="text-danger small mt-1">¡Esta oferta termina en 2 días!</div>
+                                </div>
+                                <button class="btn btn-outline-primary w-100 mb-2 rounded-pill fw-semibold">
+                                    <i class="bi bi-cart"></i> Añadir al carrito
+                                </button>
+                                <button class="btn btn-primary w-100 mb-3 rounded-pill fw-semibold text-white">
+                                    <i class="bi bi-credit-card"></i> Comprar ahora
+                                </button>
+                                <div class="text-center mb-3">
+                                    <small class="text-muted">Garantía de reembolso de 30 días</small>
+                                </div>
+                                <hr>
+                                <h6 class="fw-bold mb-2">Este curso incluye:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2"><i class="bi bi-camera-video me-2 text-primary"></i>12 horas de
+                                        vídeo</li>
+                                    <li class="mb-2"><i class="bi bi-file-earmark-text me-2 text-primary"></i>5
+                                        artículos</li>
+                                    <li class="mb-2"><i class="bi bi-download me-2 text-primary"></i>30 recursos</li>
+                                    <li class="mb-2"><i class="bi bi-phone me-2 text-primary"></i>Acceso móvil</li>
+                                    <li class="mb-2"><i class="bi bi-award me-2 text-primary"></i>Certificado</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

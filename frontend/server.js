@@ -177,6 +177,23 @@ app.get('/mis-cursos', async (req, res) => {
     }
 });
 
+// Ruta de prueba para verificar estilos
+app.get('/test', (req, res) => {
+    res.render('test', {
+        title: 'SKILLTRADE - Prueba de Estilos'
+    });
+});
+
+// Ruta de prueba simple
+app.get('/test-simple', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'test-simple.ejs'));
+});
+
+// Ruta de prueba directa sin layout
+app.get('/test-direct', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index-direct.ejs'));
+});
+
 // API Routes para el frontend
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Frontend funcionando correctamente' });
