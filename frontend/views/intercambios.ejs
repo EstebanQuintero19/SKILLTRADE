@@ -1,0 +1,42 @@
+<div class="container py-5">
+    <h1 class="text-center mb-5">Intercambios de Habilidades</h1>
+    
+    <div class="row">
+        <div class="col-md-6 text-center mb-4">
+            <button class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Crear Intercambio
+            </button>
+        </div>
+        <div class="col-md-6 text-center mb-4">
+            <button class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-search"></i> Buscar Intercambio
+            </button>
+        </div>
+    </div>
+    
+    <div class="row">
+        <% if (exchanges && exchanges.length > 0) { %>
+            <% exchanges.forEach(exchange => { %>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= exchange.curso ? exchange.curso.titulo : 'Curso' %></h5>
+                            <p class="card-text">
+                                <strong>De:</strong> <%= exchange.emisor ? exchange.emisor.nombre : 'Anónimo' %><br>
+                                <strong>Para:</strong> <%= exchange.receptor ? exchange.receptor.nombre : 'Anónimo' %>
+                            </p>
+                            <span class="badge bg-primary"><%= exchange.tipo %></span>
+                            <span class="badge bg-<%= exchange.estado === 'aceptado' ? 'success' : 'warning' %>">
+                                <%= exchange.estado %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="col-12 text-center">
+                <p>No hay intercambios disponibles.</p>
+            </div>
+        <% } %>
+    </div>
+</div> 

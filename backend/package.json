@@ -1,24 +1,21 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "backend de la aplicación de skilltrade donde se construirá todo lo relacionado al aplicativo",
+  "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/EstebanQuintero19/SKILLTRADE-proyect_node.git#main"
-  },
-  "author": "Esteban Quintero Marin",
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/EstebanQuintero19/SKILLTRADE-proyect_node/issues"
-  },
-  "homepage": "https://github.com/EstebanQuintero19/SKILLTRADE-proyect_node/tree/main#readme",
   "dependencies": {
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0"
-  },
-  "keywords": []
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.0.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.10"
+  }
 }

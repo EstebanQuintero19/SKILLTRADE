@@ -1,0 +1,59 @@
+<div class="container py-5">
+    <% if (curso) { %>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Comprar: <%= curso.titulo %></h1>
+                        <p class="lead"><%= curso.descripcion %></p>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6>Categorías</h6>
+                                <% curso.categoria.forEach(cat => { %>
+                                    <span class="badge bg-primary me-2"><%= cat %></span>
+                                <% }); %>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Instructor</h6>
+                                <p><%= curso.owner ? curso.owner.usuario : 'Anónimo' %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Resumen de Compra</h5>
+                        <div class="text-center mb-4">
+                            <span class="display-4 text-success">$<%= curso.costo %></span>
+                        </div>
+                        
+                        <form>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre completo</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-credit-card"></i> Pagar Ahora
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-5">
+            <h3>Curso no encontrado</h3>
+            <a href="/cursos" class="btn btn-primary">Volver a Cursos</a>
+        </div>
+    <% } %>
+</div> 

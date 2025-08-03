@@ -1,0 +1,205 @@
+/* Responsive Design */
+
+/* Extra Large Devices */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Large Devices */
+@media (max-width: 1199px) {
+    .hero-content-glass h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Medium Devices */
+@media (max-width: 991px) {
+    .hero-content-glass {
+        padding: 2rem;
+    }
+    
+    .hero-content-glass h1 {
+        font-size: 2rem;
+    }
+    
+    .navbar-nav {
+        text-align: center;
+    }
+}
+
+/* Small Devices */
+@media (max-width: 767px) {
+    .hero-banner {
+        min-height: 80vh;
+    }
+    
+    .hero-content-glass {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .hero-content-glass h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero-content-glass p {
+        font-size: 0.9rem;
+    }
+    
+    .btn-banner {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.8rem;
+    }
+    
+    .category-card {
+        padding: 1.5rem;
+    }
+    
+    .category-card i {
+        font-size: 2rem;
+    }
+}
+
+/* Extra Small Devices */
+@media (max-width: 575px) {
+    .hero-content-glass h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-content-glass p {
+        font-size: 0.8rem;
+    }
+    
+    .btn-banner {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.8rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Navigation Responsive */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        margin-top: 1rem;
+        padding: 1rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .navbar-nav .nav-link:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Table Responsive */
+@media (max-width: 767px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+
+/* Form Responsive */
+@media (max-width: 575px) {
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Modal Responsive */
+@media (max-width: 575px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Grid System Adjustments */
+@media (max-width: 767px) {
+    .col-md-4,
+    .col-md-6,
+    .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Footer Responsive */
+@media (max-width: 767px) {
+    footer .row > div {
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+}
+
+/* Admin Panel Responsive */
+@media (max-width: 991px) {
+    .admin-sidebar {
+        margin-bottom: 2rem;
+    }
+    
+    .tab-content {
+        margin-top: 1rem;
+    }
+}
+
+/* Course Cards Responsive */
+@media (max-width: 575px) {
+    .curso-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .curso-card .card-title {
+        font-size: 1rem;
+    }
+    
+    .curso-card .card-text {
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+} 
