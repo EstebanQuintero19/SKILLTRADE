@@ -1,0 +1,153 @@
+:root {
+    --morado: #5a2d7b;
+    --morado-claro: #8e4dbf;
+    --negro-gris: #2c2c2c;
+    --gris-claro: #e6e6e6;
+    --blanco: #f5f5f5;
+    --sombra: rgba(90, 45, 123, 0.15);
+    --neon: 0 0 6px rgba(174, 123, 255, 0.6);
+    --transicion: all 0.3s ease-in-out
+}
+
+body {
+    font-family: Inter, sans-serif;
+    background-color: var(--blanco);
+    color: var(--negro-gris);
+    transition: var(--transicion)
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    color: var(--morado)
+}
+
+.table th {
+    background-color: var(--morado);
+    color: #fff;
+    text-align: center
+}
+
+.table td {
+    vertical-align: middle;
+    text-align: center
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--gris-claro)
+}
+
+.btn {
+    transition: background-color .3s ease, transform .2s ease
+}
+
+.btn:hover {
+    transform: scale(1.02)
+}
+
+.btn-primary {
+    background-color: var(--morado);
+    border: none
+}
+
+.btn-primary:hover {
+    background-color: var(--morado-claro);
+    box-shadow: var(--neon)
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none
+}
+
+.btn-secondary:hover {
+    background-color: #5c636a
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #000;
+    border: none
+}
+
+.btn-warning:hover {
+    background-color: #e0a800
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b
+}
+
+.btn-success {
+    background-color: #198754;
+    border: none
+}
+
+.btn-success:hover {
+    background-color: #157347
+}
+
+.btn-close {
+    background-color: var(--gris-claro);
+    border-radius: 50%;
+    padding: 6px
+}
+
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .2)
+}
+
+.modal-header {
+    background-color: var(--morado);
+    color: #fff;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px
+}
+
+.modal-title {
+    font-weight: 600
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px
+}
+
+.badge {
+    font-size: .85rem;
+    padding: 5px 10px;
+    border-radius: 10px
+}
+
+.btn-group .btn {
+    margin-right: 5px
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0
+}
+
+@media (max-width:768px) {
+
+    .table td,
+    .table th {
+        font-size: .85rem
+    }
+
+    .modal-content {
+        font-size: .9rem
+    }
+
+    .btn {
+        font-size: .85rem;
+        padding: 6px 12px
+    }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis Cursos - SkillTrade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/mycourses.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-dark text-white">
+
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="p-3">
+        <div class="text-center mb-4">
+          <img src="assets/images/logo_skill.png" alt="Logo SkillTrade" width="80">
+          <h2 class="mt-2 fw-bold">SkillTrade</h2>
+        </div>
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#"><i class="fas fa-home me-2"></i>INICIO</a>
+          <a class="nav-link" href="intercambio.html"><i class="fas fa-handshake me-2"></i>INTERCAMBIO</a>
+          <a class="nav-link" href="/adminpanel.html"><i class="fas fa-handshake me-2"></i>PANEL PRINCIPAL</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-fill p-4">
+      <h4 class="fw-bold mb-3">Esta es tu biblioteca de cursos</h4>
+
+      <div class="d-flex align-items-center mb-3 gap-2">
+        <input type="text" class="form-control" placeholder="busca los cursos..." style="max-width: 300px;">
+        <button class="btn btn-secondary">categorías <i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <label class="form-check-label">Ordenar A - Z</label>
+            <input type="checkbox" class="form-check-input">
+        </div>
+      </div>
+
+      <!-- Cursos -->
+      <div class="row g-4" id="cursosContainer">
+        <!-- Curso existente -->
+        <div class="col-md-4">
+          <div class="card text-dark">
+            <img src="assets/images/partituras.jpg" class="card-img-top" alt="Curso de inglés">
+            <div class="card-body">
+              <h5 class="card-title fw-bold">Aprende inglés en 50 horas</h5>
+              <button class="btn btn-purple w-100 mt-2" data-bs-toggle="modal" data-bs-target="#agregarSesionModal">agregar sesión</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón Crear Curso -->
+        <div class="col-md-4">
+          <div class="card crear-curso-btn text-center text-white bg-gradient-dark h-100 d-flex align-items-center justify-content-center"
+               style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#crearCursoModal">
+            <div class="d-flex flex-column align-items-center">
+              <i class="fas fa-plus-circle fa-5x mb-3"></i>
+              <h5 class="fw-bold">CREAR CURSO</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<!-- Modal Crear Curso -->
+<div class="modal fade" id="crearCursoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Crear nuevo curso</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formCrearCurso">
+            <div class="mb-3">
+              <label for="imagenCurso" class="form-label">Imagen del curso</label>
+              <input type="file" class="form-control" id="imagenCurso" accept="image/*" required>
+            </div>
+            <div class="mb-3">
+              <label for="tituloCurso" class="form-label">Título</label>
+              <input type="text" class="form-control" id="tituloCurso" required>
+            </div>
+            <div class="mb-3">
+              <label for="categoriaCurso" class="form-label">Categoría</label>
+              <select class="form-select" id="categoriaCurso" required>
+                <option value="" disabled selected>Selecciona una categoría</option>
+                <option>Idiomas</option>
+                <option>Programación</option>
+                <option>Música</option>
+                <option>Diseño gráfico</option>
+                <option>Marketing</option>
+                <option>Redes</option>
+                <option>Ofimática</option>
+                <option>Fotografía</option>
+                <option>Videojuegos</option>
+                <option>Cine</option>
+                <option>Arte</option>
+                <option>Cocina</option>
+                <option>Fitness</option>
+                <option>Negocios</option>
+                <option>Finanzas</option>
+                <option>Matemáticas</option>
+                <option>Ciencia</option>
+                <option>Robótica</option>
+                <option>IA y Machine Learning</option>
+                <option>Desarrollo personal</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="descripcionCurso" class="form-label">Descripción</label>
+              <textarea class="form-control" id="descripcionCurso" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-purple w-100">Agregar curso</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal Agregar Sesión -->
+<div class="modal fade" id="agregarSesionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar nueva sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAgregarSesion">
+          <div class="mb-3">
+            <label for="tituloSesion" class="form-label">Título de la sesión</label>
+            <input type="text" class="form-control" id="tituloSesion" required>
+          </div>
+          <div class="mb-3">
+            <label for="descripcionSesion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcionSesion" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="videoSesion" class="form-label">Video de la sesión</label>
+            <input type="file" class="form-control" id="videoSesion" accept="video/*" required>
+          </div>
+          <div class="mb-3">
+            <label for="nombreCursoSesion" class="form-label">Curso al que pertenece</label>
+            <input type="text" class="form-control" id="nombreCursoSesion" required>
+          </div>
+          <button type="submit" class="btn btn-purple w-100">Agregar sesión</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../scripts/miscursos.js"></script>
+</body>
+</html>

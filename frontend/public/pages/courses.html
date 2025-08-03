@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../styles/landing.css">
+    <link rel="stylesheet" href="../styles/responsive.css">
+    <title>SKILLTRADE - Cursos</title>
+</head>
+
+<body class="bg-light">
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top shadow-sm">
+            <div class="container-fluid navitagion">
+                <a class="navbar-brand fw-bold" href="/index.html">SKILLTRADE</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#destacados" id="featured">Destacados</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#valorados" id="rated">Más valorados</a>
+                        </li>   
+                        <li class="nav-item">
+                            <a class="nav-link" href="/index.html">Inicio</a>
+                        </li>   
+                    </ul>
+                    <form class="d-flex me-3" role="search">
+                        <input class="form-control me-2 rounded-pill" type="search" placeholder="Buscar cursos, temas..." aria-label="Buscar" style="min-width:180px;">
+                        <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" type="submit" style="width:38px; height:38px;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                    <button class="btn btn-outline-primary position-relative me-2 bton-login" data-bs-toggle="modal"
+                        data-bs-target="#cartModal">
+                        <i class="bi bi-cart"></i>
+                        <span id="cart-count"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            style="font-size:0.75em;">0</span>
+                    </button>
+                    <button class="btn btn-outline-primary me-2 bton-login" data-bs-toggle="modal"
+                        data-bs-target="#loginModal">Iniciar Sesión</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#registerModal">Registrarse</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-5 pt-5">
+        <!-- Cursos Destacados -->
+        <section id="destacados" class="mb-5">
+            <h2 class="h3 fw-bold mb-4">Cursos destacados</h2>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/cocina.jpeg" alt="cocina image">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold"><a href="course.html" style="color: #111; text-decoration: none;">COCINA PARA LOS QUE NO COCINAN</a></h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <span class="ms-2 text-muted">(4.5)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Aprende lo escencial en la cocina, viaja por las diferentes gastronomias latinas.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 220 000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/ciber-seguridad.jpeg" alt="Fundamentos de Ciberseguridad">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold"><a href="course.html" style="color: #111; text-decoration: none;">FUNDAMENTOS DE CIBERSEGURIDAD</a></h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                                <span class="ms-2 text-muted">(4.2)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Conceptos clave de seguridad en redes y sistemas.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 240 000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/IA.jpeg" alt="ia image">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold"><a href="course.html" style="color: #111; text-decoration: none;">IA - APRENDE LA CONSTUCCIÓN DE LA IA</a></h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <span class="ms-2 text-muted">(4.6)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Aventúrate y atrévete a construir una IA, desde teoría a ejemplos prácticos</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 260 000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container py-5 importan-courses" id="valorados">
+            <div class="row mb-4">
+                <div class="col text-center">
+                    <h2 class="fw-bolder mb-0">Cursos recomendados por valoración</h2>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/java-develop.webp" alt="programación avanzada">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold">
+                                    <a href="course.html" style="color: #111; text-decoration: none;">PROGRAMACIÓN DE CERO A SENIOR EN JAVA</a>
+                                </h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <span class="ms-2 text-muted">(5.0)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Domina estructuras complejas, conexiones a bases de datos y
+                                    patrones de diseño.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 200.000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/figma-ui.jpg" alt="UX diseño de interfaces">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold"><a href="course.html" style="color: #111; text-decoration: none;">DISEÑO UX/UI CON FIGMA</a></h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <span class="ms-2 text-muted">(4.7)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Aprende a diseñar interfaces atractivas y funcionales con
+                                    enfoque en el usuario.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 180.000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/digital-marketing.jpeg" alt="SEO y marketing">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold">SEO Y MARKETING DIGITAL</h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <span class="ms-2 text-muted">(4.8)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Posiciona tu web en buscadores, optimiza campañas y mide
+                                    resultados.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">
+                                COP 130.000
+                            </button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/machine-learning.jpeg" alt="Machine Learning">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold">MACHINE LEARNING BÁSICO</h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                                <span class="ms-2 text-muted">(4.5)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Introducción a algoritmos de ML y casos prácticos.</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">COP 220.000</button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/ciencia-datos.jpeg" alt="ciencia de datos">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold">CIENCIA DE DATOS</h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                                <span class="ms-2 text-muted">(4.2)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Conceptos claves y primarios sobre la ciencia de datos. Analiza, propone, constuye</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">COP 240.000</button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card p-3 d-flex flex-column h-100 card-course">
+                        <img src="../images/desarrollo-web.jpeg" alt="AWS Serverless">
+                        <div class="card-text-wrapper">
+                            <div class="card-title-tittle">
+                                <h4 class="fw-semibold">DESARROLLO WEB - DESDE CERO A USO DE FRAMEWORKS</h4>
+                            </div>
+                            <div class="course-rating mb-2">
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-fill text-warning"></i>
+                                <i class="bi bi-star-half text-warning"></i>
+                                <i class="bi bi-star text-warning"></i>
+                                <span class="ms-2 text-muted">(4.6)</span>
+                            </div>
+                            <div class="card-subtitle-limit">
+                                <h6 class="fw-semibold">Aprende con las tecnologías básicas para luego desarrollar como todo un profesional</h6>
+                            </div>
+                        </div>
+                        <div class="mt-auto btn-action">
+                            <button type="button" class="btn btn-primary btn-price">COP 260.000</button>
+                            <button type="button" class="btn btn-primary btn-cart" data-bs-toggle="modal"
+                                data-bs-target="#cartModal">
+                                <i class="bi bi-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- topics -->
+        <section class="container py-5 recommended-topics" id="temas">
+            <h2 class="fw-bold mb-4">Temas recomendados para ti</h2>
+            <div class="topics-wrapper">
+                <div class="topics-fade left-fade"></div>
+                <div class="topics-fade right-fade"></div>
+                <div class="topics-track">
+                    <div class="scroll-content">
+                        <a href="#" class="btn-tema">Educación ambiental</a>
+                        <a href="#" class="btn-tema">Diseño gráfico</a>
+                        <a href="#" class="btn-tema">Python</a>
+                        <a href="#" class="btn-tema">Historia del arte</a>
+                        <a href="#" class="btn-tema">Marketing digital</a>
+                        <a href="#" class="btn-tema">Mindfulness</a>
+                        <a href="#" class="btn-tema">Música</a>
+                        <a href="#" class="btn-tema">Emprendimiento</a>
+                        <a href="#" class="btn-tema">Redacción creativa</a>
+                        <a href="#" class="btn-tema">Salud y nutrición</a>
+                        <a href="#" class="btn-tema">Bases de datos</a>
+                        <a href="#" class="btn-tema">Idiomas</a>
+                        <a href="#" class="btn-tema">Dibujo</a>
+                        <a href="#" class="btn-tema">Jardinería</a>
+                        <a href="#" class="btn-tema">Programación</a>
+                        <a href="#" class="btn-tema">Diseño</a>
+                        <a href="#" class="btn-tema">Ciencia de datos</a>
+                        <a href="#" class="btn-tema">Astronomía</a>
+                        <a href="#" class="btn-tema">Blockchain</a>
+                        <a href="#" class="btn-tema">Robótica</a>
+                        <a href="#" class="btn-tema">UX/UI</a>
+                        <a href="#" class="btn-tema">Cocina saludable</a>
+                        <!-- Duplicado -->
+                        <a href="#" class="btn-tema">Educación ambiental</a>
+                        <a href="#" class="btn-tema">Diseño gráfico</a>
+                        <a href="#" class="btn-tema">Python</a>
+                        <a href="#" class="btn-tema">Historia del arte</a>
+                        <a href="#" class="btn-tema">Marketing digital</a>
+                        <a href="#" class="btn-tema">Mindfulness</a>
+                        <a href="#" class="btn-tema">Música</a>
+                        <a href="#" class="btn-tema">Emprendimiento</a>
+                        <a href="#" class="btn-tema">Redacción creativa</a>
+                        <a href="#" class="btn-tema">Salud y nutrición</a>
+                        <a href="#" class="btn-tema">Bases de datos</a>
+                        <a href="#" class="btn-tema">Idiomas</a>
+                        <a href="#" class="btn-tema">Dibujo</a>
+                        <a href="#" class="btn-tema">Jardinería</a>
+                        <a href="#" class="btn-tema">Programación</a>
+                        <a href="#" class="btn-tema">Diseño</a>
+                        <a href="#" class="btn-tema">Ciencia de datos</a>
+                        <a href="#" class="btn-tema">Astronomía</a>
+                        <a href="#" class="btn-tema">Blockchain</a>
+                        <a href="#" class="btn-tema">Robótica</a>
+                        <a href="#" class="btn-tema">UX/UI</a>
+                        <a href="#" class="btn-tema">Cocina saludable</a>
+                    </div>
+                </div>
+            </div>
+            <div class="topics-wrapper">
+                <div class="topics-fade left-fade"></div>
+                <div class="topics-fade right-fade"></div>
+                <div class="topics-track">
+                    <div class="scroll-content">
+                        <a href="#" class="btn-tema">Desarrollo móvil</a>
+                        <a href="#" class="btn-tema">Fotografía digital</a>
+                        <a href="#" class="btn-tema">Ciberseguridad</a>
+                        <a href="#" class="btn-tema">Finanzas personales</a>
+                        <a href="#" class="btn-tema">Idiomas extranjeros</a>
+                        <a href="#" class="btn-tema">Cocina internacional</a>
+                        <a href="#" class="btn-tema">Gestión de proyectos</a>
+                        <a href="#" class="btn-tema">Inteligencia artificial</a>
+                        <a href="#" class="btn-tema">Desarrollo de videojuegos</a>
+                        <a href="#" class="btn-tema">Redes sociales</a>
+                        <a href="#" class="btn-tema">Animación 3D</a>
+                        <a href="#" class="btn-tema">Educación financiera</a>
+                        <a href="#" class="btn-tema">Psicología positiva</a>
+                        <a href="#" class="btn-tema">Energías renovables</a>
+                        <a href="#" class="btn-tema">Programación web</a>
+                        <a href="#" class="btn-tema">Diseño de interiores</a>
+                        <a href="#" class="btn-tema">Escritura creativa</a>
+                        <a href="#" class="btn-tema">Mecatrónica</a>
+                        <a href="#" class="btn-tema">Gestión ambiental</a>
+                        <a href="#" class="btn-tema">Blockchain</a>
+                        <a href="#" class="btn-tema">Robótica educativa</a>
+                        <a href="#" class="btn-tema">Nutrición deportiva</a>
+                        <!-- Duplicado para scroll infinito -->
+                        <a href="#" class="btn-tema">Desarrollo móvil</a>
+                        <a href="#" class="btn-tema">Fotografía digital</a>
+                        <a href="#" class="btn-tema">Ciberseguridad</a>
+                        <a href="#" class="btn-tema">Finanzas personales</a>
+                        <a href="#" class="btn-tema">Idiomas extranjeros</a>
+                        <a href="#" class="btn-tema">Cocina internacional</a>
+                        <a href="#" class="btn-tema">Gestión de proyectos</a>
+                        <a href="#" class="btn-tema">Inteligencia artificial</a>
+                        <a href="#" class="btn-tema">Desarrollo de videojuegos</a>
+                        <a href="#" class="btn-tema">Redes sociales</a>
+                        <a href="#" class="btn-tema">Animación 3D</a>
+                        <a href="#" class="btn-tema">Educación financiera</a>
+                        <a href="#" class="btn-tema">Psicología positiva</a>
+                        <a href="#" class="btn-tema">Energías renovables</a>
+                        <a href="#" class="btn-tema">Programación web</a>
+                        <a href="#" class="btn-tema">Diseño de interiores</a>
+                        <a href="#" class="btn-tema">Escritura creativa</a>
+                        <a href="#" class="btn-tema">Mecatrónica</a>
+                        <a href="#" class="btn-tema">Gestión ambiental</a>
+                        <a href="#" class="btn-tema">Blockchain</a>
+                        <a href="#" class="btn-tema">Robótica educativa</a>
+                        <a href="#" class="btn-tema">Nutrición deportiva</a>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="topics-wrapper">
+                <div class="topics-fade left-fade"></div>
+                <div class="topics-fade right-fade"></div>
+                <div class="topics-track">
+                    <div class="scroll-content">
+                        <a href="#" class="btn-tema">Desarrollo de apps móviles</a>
+                        <a href="#" class="btn-tema">Edición fotográfica</a>
+                        <a href="#" class="btn-tema">Seguridad informática</a>
+                        <a href="#" class="btn-tema">Ahorro e inversión</a>
+                        <a href="#" class="btn-tema">Aprendizaje de idiomas</a>
+                        <a href="#" class="btn-tema">Cocina gourmet</a>
+                        <a href="#" class="btn-tema">Gestión de equipos</a>
+                        <a href="#" class="btn-tema">Machine Learning</a>
+                        <a href="#" class="btn-tema">Creación de videojuegos</a>
+                        <a href="#" class="btn-tema">Community management</a>
+                        <a href="#" class="btn-tema">Modelado 3D</a>
+                        <a href="#" class="btn-tema">Finanzas para emprendedores</a>
+                        <a href="#" class="btn-tema">Psicología aplicada</a>
+                        <a href="#" class="btn-tema">Energía solar</a>
+                        <a href="#" class="btn-tema">Desarrollo web avanzado</a>
+                        <a href="#" class="btn-tema">Decoración de interiores</a>
+                        <a href="#" class="btn-tema">Narrativa creativa</a>
+                        <a href="#" class="btn-tema">Robótica básica</a>
+                        <a href="#" class="btn-tema">Sostenibilidad ambiental</a>
+                        <a href="#" class="btn-tema">Criptomonedas</a>
+                        <a href="#" class="btn-tema">Educación STEM</a>
+                        <a href="#" class="btn-tema">Nutrición y bienestar</a>
+                        <!-- Duplicado para scroll infinito -->
+                        <a href="#" class="btn-tema">Desarrollo de apps móviles</a>
+                        <a href="#" class="btn-tema">Edición fotográfica</a>
+                        <a href="#" class="btn-tema">Seguridad informática</a>
+                        <a href="#" class="btn-tema">Ahorro e inversión</a>
+                        <a href="#" class="btn-tema">Aprendizaje de idiomas</a>
+                        <a href="#" class="btn-tema">Cocina gourmet</a>
+                        <a href="#" class="btn-tema">Gestión de equipos</a>
+                        <a href="#" class="btn-tema">Machine Learning</a>
+                        <a href="#" class="btn-tema">Creación de videojuegos</a>
+                        <a href="#" class="btn-tema">Community management</a>
+                        <a href="#" class="btn-tema">Modelado 3D</a>
+                        <a href="#" class="btn-tema">Finanzas para emprendedores</a>
+                        <a href="#" class="btn-tema">Psicología aplicada</a>
+                        <a href="#" class="btn-tema">Energía solar</a>
+                        <a href="#" class="btn-tema">Desarrollo web avanzado</a>
+                        <a href="#" class="btn-tema">Decoración de interiores</a>
+                        <a href="#" class="btn-tema">Narrativa creativa</a>
+                        <a href="#" class="btn-tema">Robótica básica</a>
+                        <a href="#" class="btn-tema">Sostenibilidad ambiental</a>
+                        <a href="#" class="btn-tema">Criptomonedas</a>
+                        <a href="#" class="btn-tema">Educación STEM</a>
+                        <a href="#" class="btn-tema">Nutrición y bienestar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Inicio de Sesión -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content position-relative">
+
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+
+                <div class="modal-body p-5">
+                    <div class="text-center mb-4 image-login-user">
+                        <img class="image-user" src="../images/human-profile-purple.png"
+                            alt="Foto de perfil de ejemplo">
+                    </div>
+
+                    <div class="container-title-login-modal">
+                        <h5 id="loginModalLabel" class="text-center fw-bolder mb-2 title-login-modal">¡Bienvenido!
+                        </h5>
+                    </div>
+
+                    <form id="loginForm" novalidate>
+                        <div class="form-group mb-3 position-relative">
+                            <input type="email" id="email" name="email" class="form-control input-icon"
+                                placeholder="name@mail.com" required>
+                            <i class="bi bi-envelope icon-left"></i>
+                        </div>
+                        <div class="form-group mb-3 position-relative">
+                            <input type="password" id="password" name="password" class="form-control input-icon"
+                                placeholder="Contraseña" required>
+                            <i class="bi bi-lock icon-left"></i>
+                        </div>
+                        <button type="submit" class="btn btn-login w-100">Iniciar sesión</button>
+                        <div class="divider my-3 text-center text-muted">
+                            <span class="px-2">O</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary w-100 google-btn">
+                            <i class="bi bi-google me-2"></i> Iniciar con Google
+                        </button>
+
+                        <p class="text-center mt-3">¿Aún no tienes cuenta?
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal"
+                                data-bs-dismiss="modal">Registrarse</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content position-relative">
+
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+
+                <div class="modal-body p-5">
+
+                    <div class="text-center mb-4 image-login-user">
+                        <img class="image-user" src="../images/logo_skill.png" alt="Foto de perfil de ejemplo">
+                    </div>
+
+                    <div class="container-title-login-modal">
+                        <h5 id="registerModalLabel" class="text-center fw-bolder mb-2 title-login-modal">¡Crea tu
+                            cuenta!</h5>
+                    </div>
+
+                    <form id="registerForm" novalidate>
+                        <div class="form-group mb-3 position-relative">
+                            <input type="email" id="registerEmail" name="email" class="form-control input-icon"
+                                placeholder="name@mail.com" required>
+                            <i class="bi bi-envelope icon-left"></i>
+                        </div>
+                        <div class="form-group mb-3 position-relative">
+                            <input type="password" id="registerPassword" name="password" class="form-control input-icon"
+                                placeholder="Contraseña" required>
+                            <i class="bi bi-lock icon-left"></i>
+                        </div>
+                        <div class="form-group mb-3 position-relative">
+                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                class="form-control input-icon" placeholder="Confirmar contraseña" required>
+                            <i class="bi bi-shield-lock icon-left"></i>
+                        </div>
+
+                        <button type="submit" class="btn btn-login w-100">Registrarse</button>
+
+                        <div class="divider my-3 text-center text-muted">
+                            <span class="px-2">O</span>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary w-100 google-btn">
+                            <i class="bi bi-google me-2"></i> Registrarse con Google
+                        </button>
+
+                        <p class="text-center mt-3">¿Ya tienes cuenta?
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal"
+                                data-bs-dismiss="modal">Inicia sesión</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button onclick="scrollToTop()" id="btn-scroll-top" class="btn btn-primary position-fixed"
+        style="bottom: 80px; right: 20px; z-index: 9999; display: none;">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Modal del Carrito -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content position-relative">
+
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3" data-bs-dismiss="modal"
+                    aria-label="Cerrar"></button>
+
+                <div class="modal-body p-5">
+                    <div class="text-center mb-4 image-login-user">
+                        <img class="image-user" src="../images/logo_skill.png" alt="Carrito de compras">
+                    </div>
+
+                    <div class="container-title-login-modal">
+                        <h5 id="cartModalLabel" class="text-center fw-bolder mb-2 title-login-modal">Tu Carrito</h5>
+                    </div>
+
+                    <ul id="cart-items" class="list-group mb-3">
+                    </ul>
+                    <div class="d-flex justify-content-between fw-bold mb-4">
+                        <span>Total:</span>
+                        <span id="cart-total">COP 0</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">
+                            Seguir comprando
+                        </button>
+                        <button type="button" class="btn btn-primary flex-fill btn-cart">
+                            Proceder al pago
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+        <div id="addedToast" class="toast align-items-center text-bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true" data-bs-delay="1500">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ¡Producto agregado!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Cerrar"></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white text-center text-lg-start">
+        <div class="container p-4">
+            <div class="row mt-4">
+                <div class="col-lg-4 col-md-12 mb-4 mb-md-0">
+                    <h5 class="text-uppercase mb-4">SKILLTRADE</h5>
+                    <p>
+                        En skilltrade nos importan nuestros usuarios, nos importas tú.
+                        por eso hemos creado un lugar donde puedas compartir tus diversas habilidades
+                    </p>
+                    <p>
+                        sumérgete y aprende de lo que quieras, todo en un solo lugar
+                        precios asequibles, intercambia tus curosos, conoce gente. Expande tu mundo!
+                    </p>
+                    <div class="mt-4">
+                        <a href="#" class="btn btn-floating btn-light btn-lg">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="btn btn-floating btn-light btn-lg">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-floating btn-light btn-lg">
+                            <i class="bi bi-google"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase mb-4 pb-1">Contáctanos</h5>
+                    <ul class="fa-ul" style="margin-left: 1.65em;">
+                        <li class="mb-3">
+                            <span class="ms-2">contact@example.com</span>
+                        </li>
+                        <li class="mb-3">
+                            <span class="ms-2">+ 57 314 532 9465</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+            © 2025 Copyright: skilltrade skill to be better
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../scripts/index.js"></script>
+</body>
+
+</html>
