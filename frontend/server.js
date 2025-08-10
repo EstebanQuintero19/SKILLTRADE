@@ -10,6 +10,11 @@ const PORT = process.env.FRONTEND_PORT || 3000;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Configuración de express-ejs-layouts
+const expressLayouts = require('express-ejs-layouts');
+app.use(expressLayouts);
+app.set('layout', 'layout');
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,7 +35,7 @@ app.get('/', async (req, res) => {
         const usuarios = usuariosResponse.status === 'fulfilled' ? usuariosResponse.value.data : [];
 
         res.render('index', {
-            title: 'SKILLTRADE - Inicio',
+            pageTitle: 'SKILLTRADE',
             cursos: cursos.slice(0, 6),
             totalUsuarios: usuarios.length,
             totalCursos: cursos.length
@@ -38,7 +43,7 @@ app.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error al cargar la página principal:', error);
         res.render('index', {
-            title: 'SKILLTRADE - Inicio',
+            pageTitle: 'SKILLTRADE',
             cursos: [],
             totalUsuarios: 0,
             totalCursos: 0
@@ -67,7 +72,7 @@ app.get('/cursos', async (req, res) => {
         }
 
         res.render('cursos', {
-            title: 'SKILLTRADE - Cursos',
+            pageTitle: 'Courses',
             cursos: cursos,
             categoria: categoria || 'todos',
             search: search || ''
@@ -75,7 +80,7 @@ app.get('/cursos', async (req, res) => {
     } catch (error) {
         console.error('Error al cargar cursos:', error);
         res.render('cursos', {
-            title: 'SKILLTRADE - Cursos',
+            pageTitle: 'Courses',
             cursos: [],
             categoria: req.query.categoria || 'todos',
             search: req.query.search || ''
@@ -87,7 +92,7 @@ app.get('/curso/:id', async (req, res) => {
     try {
         const response = await axios.get(`${API_BASE_URL}/cursos/${req.params.id}`);
         res.render('curso', {
-            title: `SKILLTRADE - ${response.data.titulo}`,
+            pageTitle: 'Course',
             curso: response.data
         });
     } catch (error) {
@@ -103,13 +108,13 @@ app.get('/intercambios', async (req, res) => {
     try {
         const response = await axios.get(`${API_BASE_URL}/exchanges`);
         res.render('intercambios', {
-            title: 'SKILLTRADE - Intercambios',
+            pageTitle: 'Trade',
             exchanges: response.data
         });
     } catch (error) {
         console.error('Error al cargar intercambios:', error);
         res.render('intercambios', {
-            title: 'SKILLTRADE - Intercambios',
+            pageTitle: 'Trade',
             exchanges: []
         });
     }
@@ -128,7 +133,7 @@ app.get('/admin', async (req, res) => {
         const exchanges = exchangesResponse.status === 'fulfilled' ? exchangesResponse.value.data : [];
 
         res.render('admin', {
-            title: 'SKILLTRADE - Panel de Administración',
+            pageTitle: 'Admin Panel',
             usuarios,
             cursos,
             exchanges
@@ -136,7 +141,7 @@ app.get('/admin', async (req, res) => {
     } catch (error) {
         console.error('Error al cargar panel admin:', error);
         res.render('admin', {
-            title: 'SKILLTRADE - Panel de Administración',
+            pageTitle: 'Admin Panel',
             usuarios: [],
             cursos: [],
             exchanges: []
@@ -148,7 +153,7 @@ app.get('/comprar/:id', async (req, res) => {
     try {
         const response = await axios.get(`${API_BASE_URL}/cursos/${req.params.id}`);
         res.render('comprar', {
-            title: `SKILLTRADE - Comprar ${response.data.titulo}`,
+            pageTitle: 'Buy Course',
             curso: response.data
         });
     } catch (error) {
@@ -165,13 +170,13 @@ app.get('/mis-cursos', async (req, res) => {
         // Por ahora mostrar todos los cursos, después se filtrarán por usuario
         const response = await axios.get(`${API_BASE_URL}/cursos`);
         res.render('mis-cursos', {
-            title: 'SKILLTRADE - Mis Cursos',
+            pageTitle: 'My Courses',
             cursos: response.data
         });
     } catch (error) {
         console.error('Error al cargar mis cursos:', error);
         res.render('mis-cursos', {
-            title: 'SKILLTRADE - Mis Cursos',
+            pageTitle: 'My Courses',
             cursos: []
         });
     }

@@ -1,0 +1,209 @@
+<div class="container py-4">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="p-3 text-center mb-4">
+        <img src="/images/logo_skill.png" alt="Logo SkillTrade" width="80">
+        <h2 class="mt-2 fw-bold">SkillTrade</h2>
+    </aside>
+
+    <h2 class="mb-4">Propuestas de Intercambio</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario 1</th>
+                <th>Usuario 2</th>
+                <th>Curso Solicitado</th>
+                <th>Curso Ofrecido</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tablaIntercambios">
+            <% if (exchanges && exchanges.length > 0) { %>
+                <% exchanges.forEach((exchange, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= exchange.usuario1 || 'juanp' %></td>
+                        <td><%= exchange.usuario2 || 'anag' %></td>
+                        <td><%= exchange.cursoSolicitado || 'Curso de Diseño Básico' %></td>
+                        <td><%= exchange.cursoOfrecido || 'Curso de Python' %></td>
+                        <td>
+                            <% if (exchange.estado === 'Aceptado') { %>
+                                <span class="badge bg-success">Aceptado</span>
+                            <% } else if (exchange.estado === 'Rechazado') { %>
+                                <span class="badge bg-danger">Rechazado</span>
+                            <% } else { %>
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            <% } %>
+                        </td>
+                        <td class="btn-group">
+                            <button class="btn btn-sm btn-light ver" title="Ver" data-exchange-id="<%= exchange._id %>">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light editar" title="Editar" data-exchange-id="<%= exchange._id %>">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light eliminar" title="Eliminar" data-exchange-id="<%= exchange._id %>">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <!-- Ejemplo de intercambio -->
+                <tr>
+                    <td>1</td>
+                    <td>juanp</td>
+                    <td>anag</td>
+                    <td>Curso de Diseño Básico</td>
+                    <td>Curso de Python</td>
+                    <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                    <td class="btn-group">
+                        <button class="btn btn-sm btn-light ver" title="Ver">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light editar" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light eliminar" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
+    <div>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrear">Crear Propuesta</button>
+        <a href="/mis-cursos" class="btn btn-outline-secondary mt-3">← Volver a Mis Cursos</a>
+    </div>
+</div>
+
+<!-- Modal CREAR PROPUESTA -->
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Propuesta de Intercambio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrear">
+                    <div class="mb-2">
+                        <label for="crearUser1">Usuario 1</label>
+                        <input class="form-control" id="crearUser1" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="crearUser2">Usuario 2</label>
+                        <input class="form-control" id="crearUser2" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="crearCursoSolicitado">Curso Solicitado</label>
+                        <input class="form-control" id="crearCursoSolicitado" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="crearCursoOfrecido">Curso Ofrecido</label>
+                        <input class="form-control" id="crearCursoOfrecido" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="crearEstado">Estado</label>
+                        <select class="form-select" id="crearEstado" required>
+                            <option>Pendiente</option>
+                            <option>Aceptado</option>
+                            <option>Rechazado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Agregar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal VER -->
+<div class="modal fade" id="modalVer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">Ver Propuesta de Intercambio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Usuario 1</h6>
+                        <p id="verUser1">juanp</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Usuario 2</h6>
+                        <p id="verUser2">anag</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Curso Solicitado</h6>
+                        <p id="verCursoSolicitado">Curso de Diseño Básico</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Curso Ofrecido</h6>
+                        <p id="verCursoOfrecido">Curso de Python</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Estado</h6>
+                        <p id="verEstado">Pendiente</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Fecha</h6>
+                        <p id="verFecha">2025-01-03</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal EDITAR -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Propuesta de Intercambio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditar">
+                    <input type="hidden" id="editarId">
+                    <div class="mb-2">
+                        <label for="editarUser1">Usuario 1</label>
+                        <input class="form-control" id="editarUser1" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editarUser2">Usuario 2</label>
+                        <input class="form-control" id="editarUser2" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editarCursoSolicitado">Curso Solicitado</label>
+                        <input class="form-control" id="editarCursoSolicitado" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editarCursoOfrecido">Curso Ofrecido</label>
+                        <input class="form-control" id="editarCursoOfrecido" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="editarEstado">Estado</label>
+                        <select class="form-select" id="editarEstado" required>
+                            <option>Pendiente</option>
+                            <option>Aceptado</option>
+                            <option>Rechazado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> 
