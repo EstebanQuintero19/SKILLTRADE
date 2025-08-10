@@ -1,0 +1,148 @@
+<div class="container py-5">
+    <h1 class="mb-4 shop-header text-center">COMPRAR CURSO</h1>
+
+    <div class="row g-4">
+        <!-- Información del curso -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="row g-0 align-items-center">
+                    <div class="col-auto p-3">
+                        <img src="/images/<%= curso.imagen || 'java-develop.webp' %>"
+                             class="img-fluid rounded shadow-sm" alt="<%= curso.titulo %>" style="width:90px;height:90px;">
+                    </div>
+                    <div class="col">
+                        <div class="card-body d-flex flex-column h-100">
+                            <h5 class="card-title mb-2"><%= curso.titulo %></h5>
+                            <p class="text-muted mb-3"><%= curso.descripcion %></p>
+                            
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-success me-2">Lo más vendido</span>
+                                    <span class="text-warning">
+                                        <% for(let i = 0; i < 5; i++) { %>
+                                            <% if (i < Math.floor(curso.rating || 4.8)) { %>
+                                                <i class="bi bi-star-fill"></i>
+                                            <% } else if (i === Math.floor(curso.rating || 4.8) && (curso.rating || 4.8) % 1 > 0) { %>
+                                                <i class="bi bi-star-half"></i>
+                                            <% } else { %>
+                                                <i class="bi bi-star"></i>
+                                            <% } %>
+                                        <% } %>
+                                    </span>
+                                    <span class="text-muted ms-2">(<%= (curso.rating || 4.8).toFixed(1) %>)</span>
+                                </div>
+                                <span class="fs-5 fw-bold text-primary">COP <%= (curso.precio || 200000).toLocaleString() %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de pago -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Información de Pago</h5>
+                </div>
+                <div class="card-body">
+                    <form id="payment-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                            <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="expiryDate" class="form-label">Fecha de Vencimiento</label>
+                                <input type="text" class="form-control" id="expiryDate" placeholder="MM/AA" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="address" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" id="city" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="postalCode" class="form-label">Código Postal</label>
+                                <input type="text" class="form-control" id="postalCode" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                Acepto los <a href="#" class="text-primary">términos y condiciones</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-lock"></i> Pagar COP <%= (curso.precio || 200000).toLocaleString() %>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de compra -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumen de Compra</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>COP <%= (curso.precio || 200000).toLocaleString() %></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>IVA (19%):</span>
+                        <span>COP <%= Math.round((curso.precio || 200000) * 0.19).toLocaleString() %></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total:</span>
+                        <span class="text-primary">COP <%= Math.round((curso.precio || 200000) * 1.19).toLocaleString() %></span>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="alert alert-info">
+                            <i class="bi bi-shield-check"></i>
+                            <small>Pago seguro con encriptación SSL</small>
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            <small>Garantía de devolución de 30 días</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

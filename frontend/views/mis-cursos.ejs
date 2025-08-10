@@ -1,0 +1,208 @@
+<div class="d-flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="p-3">
+        <div class="text-center mb-4">
+            <img src="/images/logo_skill.png" alt="Logo SkillTrade" width="80">
+            <h2 class="mt-2 fw-bold">SkillTrade</h2>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="/"><i class="bi bi-house me-2"></i>INICIO</a>
+            <a class="nav-link" href="/intercambios"><i class="bi bi-arrow-left-right me-2"></i>INTERCAMBIO</a>
+            <a class="nav-link" href="/admin"><i class="bi bi-gear me-2"></i>PANEL PRINCIPAL</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-fill p-4">
+        <h4 class="fw-bold mb-3">Esta es tu biblioteca de cursos</h4>
+
+        <div class="d-flex align-items-center mb-3 gap-2">
+            <input type="text" class="form-control" placeholder="busca los cursos..." style="max-width: 300px;">
+            <button class="btn btn-secondary">categorías <i class="bi bi-arrow-right"></i></button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <label class="form-check-label">Ordenar A - Z</label>
+                <input type="checkbox" class="form-check-input">
+            </div>
+        </div>
+
+        <!-- Cursos -->
+        <div class="row g-4" id="cursosContainer">
+            <% if (cursos && cursos.length > 0) { %>
+                <% cursos.forEach(curso => { %>
+                    <div class="col-md-4">
+                        <div class="card text-dark">
+                            <img src="/images/<%= curso.imagen || 'default-course.jpg' %>" class="card-img-top" alt="<%= curso.titulo %>">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold"><%= curso.titulo %></h5>
+                                <p class="card-text text-muted"><%= curso.descripcion %></p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-warning">
+                                        <% for(let i = 0; i < 5; i++) { %>
+                                            <% if (i < Math.floor(curso.rating || 0)) { %>
+                                                <i class="bi bi-star-fill"></i>
+                                            <% } else { %>
+                                                <i class="bi bi-star"></i>
+                                            <% } %>
+                                        <% } %>
+                                    </span>
+                                    <span class="text-muted">(<%= (curso.rating || 0).toFixed(1) %>)</span>
+                                </div>
+                                <button class="btn btn-purple w-100 mt-2" data-bs-toggle="modal" data-bs-target="#agregarSesionModal" data-curso-id="<%= curso._id %>">
+                                    agregar sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <!-- Cursos de ejemplo -->
+                <div class="col-md-4">
+                    <div class="card text-dark">
+                        <img src="/images/partituras.jpg" class="card-img-top" alt="Curso de música">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">Aprende música en 50 horas</h5>
+                            <p class="card-text text-muted">Domina los fundamentos de la música y aprende a tocar instrumentos.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star"></i>
+                                </span>
+                                <span class="text-muted">(4.0)</span>
+                            </div>
+                            <button class="btn btn-purple w-100 mt-2" data-bs-toggle="modal" data-bs-target="#agregarSesionModal">
+                                agregar sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card text-dark">
+                        <img src="/images/java-develop.webp" class="card-img-top" alt="Curso de Java">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">Programación Java Avanzado</h5>
+                            <p class="card-text text-muted">Aprende Java desde cero hasta nivel senior con Spring Boot.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </span>
+                                <span class="text-muted">(5.0)</span>
+                            </div>
+                            <button class="btn btn-purple w-100 mt-2" data-bs-toggle="modal" data-bs-target="#agregarSesionModal">
+                                agregar sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Botón Crear Curso -->
+            <div class="col-md-4">
+                <div class="card crear-curso-btn text-center text-white bg-gradient-dark h-100 d-flex align-items-center justify-content-center"
+                     style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#crearCursoModal">
+                    <div class="d-flex flex-column align-items-center">
+                        <i class="bi bi-plus-circle fa-5x mb-3"></i>
+                        <h5 class="fw-bold">CREAR CURSO</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Crear Curso -->
+<div class="modal fade" id="crearCursoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear nuevo curso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrearCurso">
+                    <div class="mb-3">
+                        <label for="imagenCurso" class="form-label">Imagen del curso</label>
+                        <input type="file" class="form-control" id="imagenCurso" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tituloCurso" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="tituloCurso" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoriaCurso" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoriaCurso" required>
+                            <option value="" disabled selected>Selecciona una categoría</option>
+                            <option>Idiomas</option>
+                            <option>Programación</option>
+                            <option>Música</option>
+                            <option>Diseño gráfico</option>
+                            <option>Marketing</option>
+                            <option>Redes</option>
+                            <option>Ofimática</option>
+                            <option>Fotografía</option>
+                            <option>Videojuegos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcionCurso" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcionCurso" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precioCurso" class="form-label">Precio (COP)</label>
+                        <input type="number" class="form-control" id="precioCurso" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="crearCurso()">Crear Curso</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Agregar Sesión -->
+<div class="modal fade" id="agregarSesionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar sesión</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAgregarSesion">
+                    <div class="mb-3">
+                        <label for="tituloSesion" class="form-label">Título de la sesión</label>
+                        <input type="text" class="form-control" id="tituloSesion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcionSesion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcionSesion" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duracionSesion" class="form-label">Duración (minutos)</label>
+                        <input type="number" class="form-control" id="duracionSesion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="videoSesion" class="form-label">Video de la sesión</label>
+                        <input type="file" class="form-control" id="videoSesion" accept="video/*" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="agregarSesion()">Agregar Sesión</button>
+            </div>
+        </div>
+    </div>
+</div> 

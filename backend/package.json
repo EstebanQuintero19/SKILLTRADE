@@ -10,11 +10,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.10"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "nodemon": "^3.1.10",
+    "validator": "^13.11.0"
   }
 }
