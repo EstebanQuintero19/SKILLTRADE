@@ -1,5 +1,5 @@
-const Curso = require('../models/curso.model');
-const Owner = require('../models/owner.model');
+const Curso = require('../model/curso.model');
+const Owner = require('../model/owner.model');
 
 exports.crearCurso = async (req, res) => {
     try {

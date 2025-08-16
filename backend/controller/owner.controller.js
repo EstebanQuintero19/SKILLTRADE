@@ -1,4 +1,4 @@
-const Owner = require('../models/owner.model');
+const Owner = require('../model/owner.model');
 
 exports.crearOwner = async (req, res) => {
     try {

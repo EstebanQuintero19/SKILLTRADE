@@ -563,17 +563,48 @@ const subirFotoPerfil = async (req, res) => {
     }
 };
 
-module.exports = {
-    registrarUsuario,
-    loginUsuario,
-    editarPerfil,
-    obtenerPerfil,
-    eliminarCuenta,
-    obtenerHistorialSuscripciones,
-    obtenerHistorialIntercambios,
-    cambiarPassword,
-    cerrarSesion,
-    configurarVisibilidadPerfil,
-    obtenerEstadisticasPersonales,
-    subirFotoPerfil
+// Funciones adicionales que faltan en routes.js
+exports.obtenerUsuarios = async (req, res) => {
+    try {
+        const usuarios = await Usuario.find().select('-password');
+        res.json(usuarios);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
+
+exports.obtenerUsuarioPorId = async (req, res) => {
+    try {
+        const usuario = await Usuario.findById(req.params.id).select('-password');
+        if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.json(usuario);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.crearUsuario = async (req, res) => {
+    return registrarUsuario(req, res);
+};
+
+exports.actualizarUsuario = async (req, res) => {
+    return editarPerfil(req, res);
+};
+
+exports.eliminarUsuario = async (req, res) => {
+    return eliminarCuenta(req, res);
+};
+
+// Exportaciones principales
+exports.registrarUsuario = registrarUsuario;
+exports.loginUsuario = loginUsuario;
+exports.editarPerfil = editarPerfil;
+exports.obtenerPerfil = obtenerPerfil;
+exports.eliminarCuenta = eliminarCuenta;
+exports.obtenerHistorialSuscripciones = obtenerHistorialSuscripciones;
+exports.obtenerHistorialIntercambios = obtenerHistorialIntercambios;
+exports.cambiarPassword = cambiarPassword;
+exports.cerrarSesion = cerrarSesion;
+exports.configurarVisibilidadPerfil = configurarVisibilidadPerfil;
+exports.obtenerEstadisticasPersonales = obtenerEstadisticasPersonales;
+exports.subirFotoPerfil = subirFotoPerfil;
