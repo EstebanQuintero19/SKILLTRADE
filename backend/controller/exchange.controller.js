@@ -1,4 +1,4 @@
-const Exchange = require('../models/exchange.model');
+const Exchange = require('../model/exchange.model');
 
 exports.crearExchange = async (req, res) => {
     try {

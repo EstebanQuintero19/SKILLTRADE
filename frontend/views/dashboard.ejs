@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SKILLTRADE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .welcome-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+        }
+        .sidebar {
+            background: white;
+            min-height: calc(100vh - 76px);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: #6c757d;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 5px 10px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-exchange-alt me-2"></i>SKILLTRADE
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" id="userAvatar">
+                        <span id="userName">Usuario</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column py-3">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a class="nav-link" href="/cursos">
+                            <i class="fas fa-book me-2"></i>Explorar Cursos
+                        </a>
+                        <a class="nav-link" href="/mis-cursos">
+                            <i class="fas fa-graduation-cap me-2"></i>Mis Cursos
+                        </a>
+                        <a class="nav-link" href="/intercambios">
+                            <i class="fas fa-handshake me-2"></i>Intercambios
+                        </a>
+                        <a class="nav-link" href="/biblioteca">
+                            <i class="fas fa-bookmark me-2"></i>Mi Biblioteca
+                        </a>
+                        <a class="nav-link" href="/crear-curso">
+                            <i class="fas fa-plus me-2"></i>Crear Curso
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="container-fluid py-4">
+                    <!-- Welcome Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card welcome-card">
+                                <div class="card-body p-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h2 class="mb-2">¡Bienvenido de vuelta, <span id="welcomeName">Usuario</span>!</h2>
+                                            <p class="mb-0 opacity-75">Continúa aprendiendo y compartiendo conocimientos</p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <i class="fas fa-rocket fa-3x opacity-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-book fa-2x mb-2"></i>
+                                    <h4 id="totalCursos">0</h4>
+                                    <p class="mb-0">Cursos Disponibles</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                                    <h4 id="misCursos">0</h4>
+                                    <p class="mb-0">Mis Cursos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-handshake fa-2x mb-2"></i>
+                                    <h4 id="intercambiosActivos">0</h4>
+                                    <p class="mb-0">Intercambios Activos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stat-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <h4 id="totalUsuarios">0</h4>
+                                    <p class="mb-0">Usuarios Activos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="row">
+                        <div class="col-md-8 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Actividad Reciente</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recentActivity">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                            <p class="text-muted mt-2">Cargando actividad...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Cursos Populares</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="popularCourses">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                            <p class="text-muted mt-2">Cargando cursos...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-white">
+                                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <a href="/crear-curso" class="btn btn-primary w-100">
+                                                <i class="fas fa-plus me-2"></i>Crear Curso
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <a href="/cursos" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-search me-2"></i>Explorar Cursos
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <a href="/intercambios" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-handshake me-2"></i>Ver Intercambios
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <a href="/profile" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-user me-2"></i>Mi Perfil
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar autenticación al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Mostrar información del usuario
+            if (user.nombre) {
+                document.getElementById('userName').textContent = user.nombre;
+                document.getElementById('welcomeName').textContent = user.nombre;
+            }
+
+            // Cargar datos del dashboard
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                // Cargar estadísticas
+                const [cursosRes, usuariosRes] = await Promise.allSettled([
+                    fetch('/api/backend/cursos', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('/api/backend/usuarios', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (cursosRes.status === 'fulfilled' && cursosRes.value.ok) {
+                    const cursos = await cursosRes.value.json();
+                    document.getElementById('totalCursos').textContent = cursos.length || 0;
+                }
+
+                if (usuariosRes.status === 'fulfilled' && usuariosRes.value.ok) {
+                    const usuarios = await usuariosRes.value.json();
+                    document.getElementById('totalUsuarios').textContent = usuarios.length || 0;
+                }
+
+                // Simular datos para demo
+                document.getElementById('misCursos').textContent = '3';
+                document.getElementById('intercambiosActivos').textContent = '2';
+
+                // Cargar actividad reciente
+                loadRecentActivity();
+                loadPopularCourses();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function loadRecentActivity() {
+            const activities = [
+                { icon: 'fas fa-plus', text: 'Creaste el curso "JavaScript Avanzado"', time: '2 horas' },
+                { icon: 'fas fa-handshake', text: 'Nuevo intercambio propuesto', time: '1 día' },
+                { icon: 'fas fa-star', text: 'Recibiste una nueva calificación', time: '2 días' },
+                { icon: 'fas fa-book', text: 'Completaste "React Fundamentals"', time: '3 días' }
+            ];
+
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = activities.map(activity => `
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="${activity.icon} text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <p class="mb-0">${activity.text}</p>
+                        <small class="text-muted">Hace ${activity.time}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPopularCourses() {
+            const courses = [
+                { title: 'JavaScript Moderno', students: 150 },
+                { title: 'React & Redux', students: 120 },
+                { title: 'Node.js Backend', students: 95 },
+                { title: 'Python Data Science', students: 80 }
+            ];
+
+            const container = document.getElementById('popularCourses');
+            container.innerHTML = courses.map(course => `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-medium">${course.title}</span>
+                        <small class="text-muted">${course.students} estudiantes</small>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px;">
+                        <div class="progress-bar" style="width: ${(course.students/150)*100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

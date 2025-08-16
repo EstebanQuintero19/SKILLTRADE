@@ -7,12 +7,27 @@ const cursoController = require('./controller/curso.controller');
 const exchangeController = require('./controller/exchange.controller');
 const ownerController = require('./controller/owner.controller');
 
+// Import middleware
+const { verificarToken, verificarRol } = require('./middleware/auth');
+
+// ===== RUTAS DE AUTENTICACIÓN =====
+router.post('/auth/register', usuarioController.registrarUsuario);
+router.post('/auth/login', usuarioController.loginUsuario);
+router.post('/auth/logout', verificarToken, usuarioController.cerrarSesion);
+
 // ===== RUTAS DE USUARIOS =====
-router.get('/usuarios', usuarioController.obtenerUsuarios);
-router.get('/usuarios/:id', usuarioController.obtenerUsuarioPorId);
+router.get('/usuarios', verificarToken, usuarioController.obtenerUsuarios);
+router.get('/usuarios/:id', verificarToken, usuarioController.obtenerUsuarioPorId);
 router.post('/usuarios', usuarioController.crearUsuario);
-router.put('/usuarios/:id', usuarioController.actualizarUsuario);
-router.delete('/usuarios/:id', usuarioController.eliminarUsuario);
+router.put('/usuarios/:id', verificarToken, usuarioController.actualizarUsuario);
+router.delete('/usuarios/:id', verificarToken, usuarioController.eliminarUsuario);
+
+// ===== RUTAS DE PERFIL =====
+router.get('/perfil', verificarToken, usuarioController.obtenerPerfil);
+router.put('/perfil', verificarToken, usuarioController.editarPerfil);
+router.post('/perfil/foto', verificarToken, usuarioController.subirFotoPerfil);
+router.put('/perfil/password', verificarToken, usuarioController.cambiarPassword);
+router.get('/perfil/estadisticas', verificarToken, usuarioController.obtenerEstadisticasPersonales);
 
 // ===== RUTAS DE CURSOS =====
 router.get('/cursos', cursoController.obtenerCursos);
@@ -41,7 +56,7 @@ router.delete('/owners/:id', ownerController.eliminarOwner);
 router.get('/cursos/categoria/:categoria', async (req, res) => {
     try {
         const { categoria } = req.params;
-        const cursos = await require('./models/curso.model').find({
+        const cursos = await require('./model/curso.model').find({
             categoria: { $in: [categoria] }
         }).populate('owner');
         res.json(cursos);
@@ -54,7 +69,7 @@ router.get('/cursos/categoria/:categoria', async (req, res) => {
 router.get('/exchanges/usuario/:usuarioId', async (req, res) => {
     try {
         const { usuarioId } = req.params;
-        const exchanges = await require('./models/exchange.model').find({
+        const exchanges = await require('./model/exchange.model').find({
             $or: [
                 { emisor: usuarioId },
                 { receptor: usuarioId }
@@ -70,7 +85,7 @@ router.get('/exchanges/usuario/:usuarioId', async (req, res) => {
 router.get('/cursos/owner/:ownerId', async (req, res) => {
     try {
         const { ownerId } = req.params;
-        const cursos = await require('./models/curso.model').find({
+        const cursos = await require('./model/curso.model').find({
             owner: ownerId
         }).populate('owner');
         res.json(cursos);
@@ -85,10 +100,12 @@ router.get('/', (req, res) => {
         message: 'SKILLTRADE API v0',
         version: '1.0.0',
         endpoints: {
+            auth: '/api/v0/auth',
             usuarios: '/api/v0/usuarios',
             cursos: '/api/v0/cursos',
             exchanges: '/api/v0/exchanges',
-            owners: '/api/v0/owners'
+            owners: '/api/v0/owners',
+            perfil: '/api/v0/perfil'
         }
     });
 });

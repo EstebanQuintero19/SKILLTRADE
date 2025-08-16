@@ -23,6 +23,72 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configuración de la API
 const API_BASE_URL = process.env.API_URL || 'http://localhost:9090/api/v0';
 
+// Middleware para verificar autenticación en rutas protegidas
+const requireAuth = (req, res, next) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.token;
+    if (!token) {
+        return res.redirect('/login');
+    }
+    next();
+};
+
+// ===== RUTAS DE AUTENTICACIÓN =====
+app.get('/login', (req, res) => {
+    res.render('login', { layout: false });
+});
+
+app.get('/register', (req, res) => {
+    res.render('register', { layout: false });
+});
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard', { layout: false });
+});
+
+// API Routes para autenticación
+app.post('/api/login', async (req, res) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/auth/login`, req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(
+            error.response?.data || { error: 'Error de conexión' }
+        );
+    }
+});
+
+app.post('/api/register', async (req, res) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/auth/register`, req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(
+            error.response?.data || { error: 'Error de conexión' }
+        );
+    }
+});
+
+// Proxy routes para el backend
+app.get('/api/backend/cursos', async (req, res) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/cursos`);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener cursos' });
+    }
+});
+
+app.get('/api/backend/usuarios', async (req, res) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/usuarios`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener usuarios' });
+    }
+});
+
 // Rutas principales
 app.get('/', async (req, res) => {
     try {
