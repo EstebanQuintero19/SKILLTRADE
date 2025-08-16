@@ -5,183 +5,50 @@ const ventaSchema = new Schema({
     comprador: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: [true, 'El comprador es obligatorio'],
-        index: true
+        required: true
     },
     vendedor: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: [true, 'El vendedor es obligatorio'],
-        index: true
+        required: true
     },
     items: [{
         curso: {
             type: Schema.Types.ObjectId,
             ref: 'Curso',
-            required: [true, 'El curso es obligatorio'],
-            index: true
+            required: true
         },
         precio: {
             type: Number,
-            required: [true, 'El precio es obligatorio'],
-            min: [0, 'El precio no puede ser negativo']
-        },
-        descuento: {
-            codigo: {
-                type: String,
-                maxlength: [20, 'El código de descuento no puede exceder 20 caracteres']
-            },
-            porcentaje: { 
-                type: Number, 
-                min: [0, 'El porcentaje no puede ser negativo'], 
-                max: [100, 'El porcentaje no puede exceder 100%'], 
-                default: 0 
-            },
-            monto: { 
-                type: Number, 
-                min: [0, 'El monto no puede ser negativo'], 
-                default: 0 
-            }
-        },
-        precioFinal: {
-            type: Number,
-            required: [true, 'El precio final es obligatorio'],
-            min: [0, 'El precio final no puede ser negativo']
+            required: true,
+            min: 0
         },
         cantidad: {
             type: Number,
             default: 1,
-            min: [1, 'La cantidad mínima es 1'],
-            max: [10, 'La cantidad máxima es 10']
+            min: 1
         }
     }],
-    cupones: [{
-        codigo: {
-            type: String,
-            required: true,
-            uppercase: true,
-            maxlength: [20, 'El código no puede exceder 20 caracteres']
-        },
-        descuento: {
-            type: Number,
-            required: true,
-            min: [0, 'El descuento no puede ser negativo']
-        },
-        tipo: { 
-            type: String, 
-            enum: ['porcentaje', 'monto_fijo'],
-            required: true
-        },
-        aplicado: { 
-            type: Boolean, 
-            default: true 
-        }
-    }],
-    subtotal: {
-        type: Number,
-        required: [true, 'El subtotal es obligatorio'],
-        min: [0, 'El subtotal no puede ser negativo']
-    },
-    descuentoTotal: {
-        type: Number,
-        default: 0,
-        min: [0, 'El descuento total no puede ser negativo']
-    },
-    impuestos: {
-        porcentaje: {
-            type: Number,
-            default: 0,
-            min: [0, 'El porcentaje de impuestos no puede ser negativo'],
-            max: [100, 'El porcentaje de impuestos no puede exceder 100%']
-        },
-        monto: {
-            type: Number,
-            default: 0,
-            min: [0, 'El monto de impuestos no puede ser negativo']
-        }
-    },
     total: {
         type: Number,
-        required: [true, 'El total es obligatorio'],
-        min: [0, 'El total no puede ser negativo']
+        required: true,
+        min: 0
     },
     estado: {
         type: String,
-        enum: {
-            values: ['pendiente', 'procesando', 'completada', 'cancelada', 'reembolsada', 'fallida'],
-            message: 'Estado inválido'
-        },
-        default: 'pendiente',
-        index: true
+        enum: ['pendiente', 'completada', 'cancelada'],
+        default: 'pendiente'
     },
     metodoPago: {
         tipo: {
             type: String,
-            enum: ['tarjeta', 'paypal', 'transferencia', 'efectivo'],
-            required: [true, 'El método de pago es obligatorio']
-        },
-        ultimos4: {
-            type: String,
-            match: [/^\d{4}$/, 'Los últimos 4 dígitos deben ser números']
-        },
-        marca: {
-            type: String,
-            enum: ['visa', 'mastercard', 'amex', 'discover', 'otro']
-        },
-        token: {
-            type: String,
-            select: false // No incluir en consultas por defecto
-        },
-        referencia: {
-            type: String,
-            maxlength: [100, 'La referencia no puede exceder 100 caracteres']
+            enum: ['tarjeta', 'paypal', 'transferencia'],
+            required: true
         }
     },
     fechaCompra: {
         type: Date,
-        default: Date.now,
-        immutable: true
-    },
-    fechaPago: {
-        type: Date,
-        validate: {
-            validator: function(v) {
-                if (!v) return true; // Permitir null
-                return v >= this.fechaCompra;
-            },
-            message: 'La fecha de pago no puede ser anterior a la compra'
-        }
-    },
-    fechaEntrega: {
-        type: Date,
-        validate: {
-            validator: function(v) {
-                if (!v) return true; // Permitir null
-                if (this.fechaPago) {
-                    return v >= this.fechaPago;
-                }
-                return true;
-            },
-            message: 'La fecha de entrega no puede ser anterior al pago'
-        }
-    },
-    fechaCancelacion: {
-        type: Date,
-        validate: {
-            validator: function(v) {
-                if (!v) return true; // Permitir null
-                return v >= this.fechaCompra;
-            },
-            message: 'La fecha de cancelación no puede ser anterior a la compra'
-        }
-    },
-    motivoCancelacion: {
-        type: String,
-        maxlength: [500, 'El motivo no puede exceder 500 caracteres']
-    },
-    usuarioCancelacion: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'Usuario' 
+        default: Date.now
     },
     direccionEnvio: {
         nombre: {
@@ -336,122 +203,31 @@ const ventaSchema = new Schema({
     }
 }, {
     collection: 'ventas',
-    timestamps: true,
-    toJSON: { 
-        virtuals: true,
-        transform: function(doc, ret) {
-            // Calcular totales en tiempo real
-            ret.subtotal = doc.calcularSubtotal();
-            ret.descuentoTotal = doc.calcularDescuentoTotal();
-            ret.total = doc.calcularTotal();
-            return ret;
-        }
-    }
+    timestamps: true
 });
 
-// Índices para mejorar consultas
-ventaSchema.index({ comprador: 1, fechaCompra: -1 });
-ventaSchema.index({ vendedor: 1, fechaCompra: -1 });
-ventaSchema.index({ estado: 1, fechaCompra: -1 });
-ventaSchema.index({ 'items.curso': 1 });
-ventaSchema.index({ fechaCompra: -1 });
-ventaSchema.index({ metodoPago: 1 });
+ventaSchema.index({ comprador: 1 });
+ventaSchema.index({ vendedor: 1 });
+ventaSchema.index({ estado: 1 });
 
-// Índices compuestos para consultas frecuentes
-ventaSchema.index({ comprador: 1, estado: 1 });
-ventaSchema.index({ vendedor: 1, estado: 1 });
-ventaSchema.index({ estado: 1, fechaCompra: 1 });
-
-// Virtual para cantidad total de items
-ventaSchema.virtual('totalItems').get(function() {
-    return this.items.reduce((total, item) => total + item.cantidad, 0);
-});
-
-// Virtual para verificar si la venta está completada
-ventaSchema.virtual('estaCompletada').get(function() {
-    return this.estado === 'completada';
-});
-
-// Virtual para verificar si se puede cancelar
 ventaSchema.virtual('sePuedeCancelar').get(function() {
     return ['pendiente', 'procesando'].includes(this.estado);
 });
 
-// Virtual para verificar si se puede reembolsar
 ventaSchema.virtual('sePuedeReembolsar').get(function() {
     return this.estado === 'completada' && !this.reembolso.solicitado;
 });
 
-// Método para procesar pago
-ventaSchema.methods.procesarPago = function() {
-    if (this.estado !== 'pendiente') {
-        throw new Error('Solo se pueden procesar pagos pendientes');
-    }
-    
-    this.estado = 'procesando';
-    this.fechaPago = new Date();
-    
-    return this.save();
-};
-
-// Método para completar venta
 ventaSchema.methods.completar = function() {
-    if (this.estado !== 'procesando') {
-        throw new Error('Solo se pueden completar ventas en procesamiento');
-    }
-    
     this.estado = 'completada';
-    this.fechaEntrega = new Date();
-    
     return this.save();
 };
 
-// Método para cancelar venta
-ventaSchema.methods.cancelar = function(usuarioId, motivo = '') {
-    if (!this.sePuedeCancelar) {
-        throw new Error('No se puede cancelar esta venta');
-    }
-    
+ventaSchema.methods.cancelar = function() {
     this.estado = 'cancelada';
-    this.motivoCancelacion = motivo;
-    this.fechaCancelacion = new Date();
-    this.usuarioCancelacion = usuarioId;
-    
     return this.save();
 };
 
-// Método para solicitar reembolso
-ventaSchema.methods.solicitarReembolso = function(motivo) {
-    if (!this.sePuedeReembolsar) {
-        throw new Error('No se puede solicitar reembolso para esta venta');
-    }
-    
-    this.reembolso.solicitado = true;
-    this.reembolso.fechaSolicitud = new Date();
-    this.reembolso.motivo = motivo;
-    this.reembolso.monto = this.total;
-    
-    return this.save();
-};
-
-// Método para procesar reembolso
-ventaSchema.methods.procesarReembolso = function(estado, metodoReembolso = 'original') {
-    if (this.reembolso.estado !== 'pendiente') {
-        throw new Error('El reembolso ya fue procesado');
-    }
-    
-    this.reembolso.estado = estado;
-    this.reembolso.metodoReembolso = metodoReembolso;
-    this.reembolso.fechaProcesamiento = new Date();
-    
-    if (estado === 'procesado') {
-        this.estado = 'reembolsada';
-    }
-    
-    return this.save();
-};
-
-// Método para agregar tracking
 ventaSchema.methods.agregarTracking = function(numero, empresa) {
     this.tracking.numero = numero;
     this.tracking.empresa = empresa;
@@ -459,142 +235,5 @@ ventaSchema.methods.agregarTracking = function(numero, empresa) {
     
     return this.save();
 };
-
-// Método para actualizar estado tracking
-ventaSchema.methods.actualizarTracking = function(estado, ubicacion, descripcion) {
-    this.tracking.estado = estado;
-    
-    if (estado === 'entregado') {
-        this.tracking.fechaEntrega = new Date();
-    }
-    
-    this.tracking.historial.push({
-        fecha: new Date(),
-        estado,
-        ubicacion,
-        descripcion
-    });
-    
-    return this.save();
-};
-
-// Método para calificar venta
-ventaSchema.methods.calificar = function(puntuacion, comentario = '') {
-    if (puntuacion < 1 || puntuacion > 5) {
-        throw new Error('La puntuación debe estar entre 1 y 5');
-    }
-    
-    if (this.estado !== 'completada') {
-        throw new Error('Solo se pueden calificar ventas completadas');
-    }
-    
-    this.calificacion = {
-        puntuacion,
-        comentario,
-        fecha: new Date()
-    };
-    
-    return this.save();
-};
-
-// Método para calcular subtotal
-ventaSchema.methods.calcularSubtotal = function() {
-    return this.items.reduce((total, item) => {
-        return total + (item.precio * item.cantidad);
-    }, 0);
-};
-
-// Método para calcular descuento total
-ventaSchema.methods.calcularDescuentoTotal = function() {
-    let descuentoTotal = 0;
-    
-    // Descuentos por item
-    this.items.forEach(item => {
-        if (item.descuento.porcentaje > 0) {
-            descuentoTotal += (item.precio * item.cantidad * item.descuento.porcentaje) / 100;
-        } else if (item.descuento.monto > 0) {
-            descuentoTotal += item.descuento.monto * item.cantidad;
-        }
-    });
-    
-    // Descuentos por cupones aplicados
-    this.cupones.forEach(cupon => {
-        if (cupon.aplicado) {
-            if (cupon.tipo === 'porcentaje') {
-                descuentoTotal += (this.subtotal * cupon.descuento) / 100;
-            } else {
-                descuentoTotal += cupon.descuento;
-            }
-        }
-    });
-    
-    return descuentoTotal;
-};
-
-// Método para calcular total
-ventaSchema.methods.calcularTotal = function() {
-    const subtotal = this.calcularSubtotal();
-    const descuentoTotal = this.calcularDescuentoTotal();
-    const impuestos = (subtotal - descuentoTotal) * (this.impuestos.porcentaje / 100);
-    
-    this.impuestos.monto = impuestos;
-    
-    return Math.max(0, subtotal - descuentoTotal + impuestos);
-};
-
-// Método para generar factura
-ventaSchema.methods.generarFactura = function() {
-    if (!this.facturacion.nombre || !this.facturacion.rfc) {
-        throw new Error('Datos de facturación incompletos');
-    }
-    
-    // Aquí se generaría la factura
-    return {
-        numero: `FAC-${this._id.toString().slice(-8).toUpperCase()}`,
-        fecha: this.fechaCompra,
-        cliente: this.facturacion,
-        items: this.items,
-        subtotal: this.subtotal,
-        descuento: this.descuentoTotal,
-        impuestos: this.impuestos,
-        total: this.total
-    };
-};
-
-// Middleware pre-save para validaciones
-ventaSchema.pre('save', function(next) {
-    try {
-        // Validar que comprador y vendedor sean diferentes
-        if (this.comprador.toString() === this.vendedor.toString()) {
-            throw new Error('El comprador y vendedor no pueden ser el mismo usuario');
-        }
-        
-        // Validar que los items tengan datos válidos
-        this.items.forEach(item => {
-            if (!item.curso || item.precio < 0 || item.cantidad < 1) {
-                throw new Error('Datos de item inválidos');
-            }
-        });
-        
-        // Validar fechas
-        if (this.fechaPago && this.fechaCompra > this.fechaPago) {
-            throw new Error('La fecha de pago no puede ser anterior a la compra');
-        }
-        
-        // Validar que el total no sea negativo
-        if (this.total < 0) {
-            this.total = 0;
-        }
-        
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Middleware post-save para logging
-ventaSchema.post('save', function(doc) {
-    console.log(`Venta ${doc._id} ${doc.isNew ? 'creada' : 'actualizada'} - Estado: ${doc.estado} - Total: $${doc.total}`);
-});
 
 module.exports = mongoose.model('Venta', ventaSchema);
