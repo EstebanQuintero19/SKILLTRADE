@@ -87,7 +87,7 @@ usuarioSchema.methods.generarToken = function() {
     const jwt = require('jsonwebtoken');
     return jwt.sign(
         { _id: this._id, email: this.email, rol: this.rol }, 
-        process.env.JWT_SECRET || 'secret_key', 
+        process.env.JWT_SECRET || 'skilltrade_secret_key_2024', 
         { expiresIn: '7d' }
     );
 };
