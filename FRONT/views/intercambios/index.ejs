@@ -1,0 +1,194 @@
+
+<!-- Header Section -->
+<section class="bg-gray-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                Intercambios de Habilidades
+            </h1>
+            <p class="text-xl text-gray-300 mb-8">
+                Intercambia tus conocimientos con otros miembros de la comunidad
+            </p>
+            
+            <!-- Search and Filter -->
+            <div class="max-w-2xl mx-auto">
+                <form method="GET" class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="search" name="buscar" value="<%= buscar %>" 
+                               placeholder="Buscar intercambios..." 
+                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <select name="estado" class="px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Todos los estados</option>
+                            <option value="activo" <%= estado === 'activo' ? 'selected' : '' %>>Activos</option>
+                            <option value="pendiente" <%= estado === 'pendiente' ? 'selected' : '' %>>Pendientes</option>
+                            <option value="completado" <%= estado === 'completado' ? 'selected' : '' %>>Completados</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        <i class="bi bi-search mr-2"></i>Buscar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Exchanges Grid -->
+<section class="bg-gray-900 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <% if (intercambios && intercambios.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% intercambios.forEach(intercambio => { %>
+                    <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors">
+                        <!-- Status Badge -->
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-<%= intercambio.estado === 'activo' ? 'green' : intercambio.estado === 'pendiente' ? 'yellow' : 'gray' %>-600 text-white text-sm rounded-full">
+                                <%= intercambio.estado.charAt(0).toUpperCase() + intercambio.estado.slice(1) %>
+                            </span>
+                            <span class="text-gray-400 text-sm">
+                                <%= new Date(intercambio.fechaCreacion).toLocaleDateString() %>
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-white mb-3">
+                            <%= intercambio.titulo %>
+                        </h3>
+                        
+                        <p class="text-gray-400 mb-4 line-clamp-2">
+                            <%= intercambio.descripcion %>
+                        </p>
+                        
+                        <!-- Skills Exchange -->
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-500 mb-1">Ofrece:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        <% if (intercambio.habilidadOfrecida && intercambio.habilidadOfrecida.length > 0) { %>
+                                            <% intercambio.habilidadOfrecida.forEach(habilidad => { %>
+                                                <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded">
+                                                    <%= habilidad %>
+                                                </span>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <span class="text-gray-400 text-sm">No especificado</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="mx-3">
+                                    <i class="bi bi-arrow-left-right text-purple-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-500 mb-1">Busca:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        <% if (intercambio.habilidadBuscada && intercambio.habilidadBuscada.length > 0) { %>
+                                            <% intercambio.habilidadBuscada.forEach(habilidad => { %>
+                                                <span class="px-2 py-1 bg-purple-600 text-white text-xs rounded">
+                                                    <%= habilidad %>
+                                                </span>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <span class="text-gray-400 text-sm">No especificado</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- User Info -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm font-semibold">
+                                        <%= intercambio.propietario ? intercambio.propietario.nombre.charAt(0).toUpperCase() : 'U' %>
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm font-medium">
+                                        <%= intercambio.propietario ? intercambio.propietario.nombre : 'Usuario' %>
+                                    </p>
+                                    <p class="text-gray-400 text-xs">
+                                        <%= intercambio.modalidad || 'Virtual' %>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <% if (intercambio.duracionEstimada) { %>
+                                <div class="text-right">
+                                    <p class="text-gray-400 text-xs">Duración</p>
+                                    <p class="text-white text-sm"><%= intercambio.duracionEstimada %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <div class="flex space-x-2">
+                            <a href="/intercambios/<%= intercambio._id %>" 
+                               class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-center py-2 rounded-lg transition-colors">
+                                Ver Detalles
+                            </a>
+                            <% if (isAuthenticated && intercambio.propietario && intercambio.propietario._id !== user._id) { %>
+                                <button onclick="contactarIntercambio('<%= intercambio._id %>')" 
+                                        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="bi bi-chat-dots"></i>
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="mx-auto h-24 w-24 bg-gray-700 rounded-full flex items-center justify-center mb-6">
+                    <i class="bi bi-arrow-left-right text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-2">No se encontraron intercambios</h3>
+                <p class="text-gray-400 mb-6">
+                    <% if (buscar || estado) { %>
+                        No hay intercambios que coincidan con tu búsqueda. Intenta con otros términos.
+                    <% } else { %>
+                        Aún no hay intercambios disponibles. ¡Sé el primero en proponer uno!
+                    <% } %>
+                </p>
+                <% if (isAuthenticated) { %>
+                    <a href="/dashboard/intercambios/crear" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        Proponer Intercambio
+                    </a>
+                <% } else { %>
+                    <a href="/auth/register" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        Únete y propón intercambios
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<% if (isAuthenticated) { %>
+    <section class="bg-gray-800 py-16">
+        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-white mb-4">
+                ¿Tienes una habilidad que compartir?
+            </h2>
+            <p class="text-xl text-gray-300 mb-8">
+                Propón un intercambio y conecta con otros miembros de la comunidad
+            </p>
+            <a href="/dashboard/intercambios/crear" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                <i class="bi bi-plus-circle mr-2"></i>
+                Proponer Intercambio
+            </a>
+        </div>
+    </section>
+<% } %>
+
+<script>
+function contactarIntercambio(intercambioId) {
+    if (window.SkillTrade) {
+        window.SkillTrade.showNotification('Funcionalidad de contacto próximamente disponible', 'info');
+    }
+}
+</script>

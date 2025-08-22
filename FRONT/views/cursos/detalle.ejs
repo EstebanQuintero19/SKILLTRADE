@@ -1,0 +1,329 @@
+
+<div class="bg-gray-900 min-h-screen">
+    <!-- Course Header -->
+    <section class="bg-gray-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Course Info -->
+                <div class="lg:col-span-2">
+                    <div class="mb-4">
+                        <a href="/cursos" class="text-blue-400 hover:text-blue-300 transition-colors">
+                            <i class="bi bi-arrow-left mr-2"></i>Volver a cursos
+                        </a>
+                    </div>
+                    
+                    <% if (curso.categoria && curso.categoria.length > 0) { %>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <% curso.categoria.forEach(cat => { %>
+                                <span class="px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                                    <%= cat %>
+                                </span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                    
+                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                        <%= curso.titulo %>
+                    </h1>
+                    
+                    <p class="text-xl text-gray-300 mb-6">
+                        <%= curso.descripcion %>
+                    </p>
+                    
+                    <!-- Course Stats -->
+                    <div class="flex flex-wrap items-center gap-6 mb-8">
+                        <div class="flex items-center">
+                            <i class="bi bi-person text-gray-400 mr-2"></i>
+                            <span class="text-gray-300">
+                                <%= curso.propietario ? curso.propietario.nombre : 'Instructor' %>
+                            </span>
+                        </div>
+                        
+                        <% if (curso.estadisticas && curso.estadisticas.calificacionPromedio > 0) { %>
+                            <div class="flex items-center">
+                                <div class="flex text-yellow-400 mr-2">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <i class="bi bi-star<%= i <= curso.estadisticas.calificacionPromedio ? '-fill' : '' %>"></i>
+                                    <% } %>
+                                </div>
+                                <span class="text-gray-300">
+                                    <%= curso.estadisticas.calificacionPromedio.toFixed(1) %> 
+                                    (<%= curso.estadisticas.totalCalificaciones %> reseñas)
+                                </span>
+                            </div>
+                        <% } %>
+                        
+                        <div class="flex items-center">
+                            <i class="bi bi-clock text-gray-400 mr-2"></i>
+                            <span class="text-gray-300">
+                                <%= curso.duracion || 'Duración variable' %>
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <i class="bi bi-bar-chart text-gray-400 mr-2"></i>
+                            <span class="text-gray-300">
+                                <%= curso.nivel || 'Básico' %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course Card -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-800 rounded-lg p-6 sticky top-4">
+                        <% if (curso.imagen) { %>
+                            <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-48 object-cover rounded-lg mb-6">
+                        <% } else { %>
+                            <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-6">
+                                <i class="bi bi-book text-white text-4xl"></i>
+                            </div>
+                        <% } %>
+                        
+                        <div class="text-center mb-6">
+                            <% if (curso.precio > 0) { %>
+                                <div class="text-3xl font-bold text-green-400 mb-2">
+                                    $<%= curso.precio.toLocaleString() %>
+                                </div>
+                            <% } else { %>
+                                <div class="text-3xl font-bold text-blue-400 mb-2">
+                                    Gratis
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <% if (isAuthenticated) { %>
+                            <% if (isOwner) { %>
+                                <div class="space-y-3">
+                                    <div class="bg-green-900 text-green-100 px-4 py-2 rounded-lg text-center">
+                                        <i class="bi bi-check-circle mr-2"></i>
+                                        Este es tu curso
+                                    </div>
+                                    <a href="/dashboard/cursos/<%= curso._id %>/editar" 
+                                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg transition-colors">
+                                        <i class="bi bi-pencil mr-2"></i>
+                                        Editar Curso
+                                    </a>
+                                </div>
+                            <% } else { %>
+                                <button onclick="enrollCourse('<%= curso._id %>')" 
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                                    <i class="bi bi-play-circle mr-2"></i>
+                                    Inscribirse al Curso
+                                </button>
+                            <% } %>
+                        <% } else { %>
+                            <a href="/auth/login" 
+                               class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-semibold transition-colors">
+                                Inicia sesión para inscribirte
+                            </a>
+                        <% } %>
+                        
+                        <div class="mt-6 pt-6 border-t border-gray-700">
+                            <h4 class="font-semibold text-white mb-3">Incluye:</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li class="flex items-center">
+                                    <i class="bi bi-check text-green-400 mr-2"></i>
+                                    Acceso de por vida
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="bi bi-check text-green-400 mr-2"></i>
+                                    Certificado de finalización
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="bi bi-check text-green-400 mr-2"></i>
+                                    Soporte del instructor
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="bi bi-check text-green-400 mr-2"></i>
+                                    Acceso móvil y desktop
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Course Content -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <!-- What you'll learn -->
+                    <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                        <h3 class="text-2xl font-bold text-white mb-4">Lo que aprenderás</h3>
+                        <% if (curso.objetivos && curso.objetivos.length > 0) { %>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <% curso.objetivos.forEach(objetivo => { %>
+                                    <div class="flex items-start">
+                                        <i class="bi bi-check-circle text-green-400 mr-3 mt-1"></i>
+                                        <span class="text-gray-300"><%= objetivo %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-gray-300">
+                                Adquirirás conocimientos prácticos y habilidades aplicables en <%= curso.titulo.toLowerCase() %>.
+                            </p>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Course Content/Curriculum -->
+                    <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                        <h3 class="text-2xl font-bold text-white mb-4">Contenido del curso</h3>
+                        <% if (curso.contenido && curso.contenido.length > 0) { %>
+                            <div class="space-y-3">
+                                <% curso.contenido.forEach((seccion, index) => { %>
+                                    <div class="border border-gray-700 rounded-lg">
+                                        <div class="p-4 cursor-pointer hover:bg-gray-700 transition-colors" 
+                                             onclick="toggleSection(<%= index %>)">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="font-semibold text-white">
+                                                    <%= seccion.titulo || `Sección ${index + 1}` %>
+                                                </h4>
+                                                <i class="bi bi-chevron-down text-gray-400" id="chevron-<%= index %>"></i>
+                                            </div>
+                                        </div>
+                                        <div class="hidden px-4 pb-4" id="section-<%= index %>">
+                                            <p class="text-gray-300 mb-3">
+                                                <%= seccion.descripcion || 'Contenido de la sección' %>
+                                            </p>
+                                            <% if (seccion.lecciones && seccion.lecciones.length > 0) { %>
+                                                <ul class="space-y-2">
+                                                    <% seccion.lecciones.forEach(leccion => { %>
+                                                        <li class="flex items-center text-gray-400">
+                                                            <i class="bi bi-play-circle mr-2"></i>
+                                                            <%= leccion.titulo %>
+                                                            <% if (leccion.duracion) { %>
+                                                                <span class="ml-auto text-sm">(<%= leccion.duracion %>)</span>
+                                                            <% } %>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-gray-300">
+                                El contenido detallado del curso se revelará una vez que te inscribas.
+                            </p>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Requirements -->
+                    <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                        <h3 class="text-2xl font-bold text-white mb-4">Requisitos</h3>
+                        <% if (curso.requisitos && curso.requisitos.length > 0) { %>
+                            <ul class="space-y-2">
+                                <% curso.requisitos.forEach(requisito => { %>
+                                    <li class="flex items-start text-gray-300">
+                                        <i class="bi bi-dot text-blue-400 mr-2 mt-2"></i>
+                                        <%= requisito %>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        <% } else { %>
+                            <p class="text-gray-300">
+                                No se requieren conocimientos previos específicos. ¡Perfecto para principiantes!
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <!-- Instructor Info -->
+                    <% if (curso.propietario) { %>
+                        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                            <h4 class="font-semibold text-white mb-4">Instructor</h4>
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-white font-semibold">
+                                        <%= curso.propietario.nombre.charAt(0).toUpperCase() %>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-white"><%= curso.propietario.nombre %></h5>
+                                    <p class="text-gray-400 text-sm"><%= curso.propietario.email %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Related Courses -->
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <h4 class="font-semibold text-white mb-4">Cursos relacionados</h4>
+                        <div class="space-y-4">
+                            <% if (cursosRelacionados && cursosRelacionados.length > 0) { %>
+                                <% cursosRelacionados.forEach(cursoRel => { %>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-16 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex-shrink-0 flex items-center justify-center">
+                                            <i class="bi bi-book text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h6 class="text-white text-sm font-medium mb-1">
+                                                <a href="/cursos/<%= cursoRel._id %>" class="hover:text-blue-400 transition-colors">
+                                                    <%= cursoRel.titulo %>
+                                                </a>
+                                            </h6>
+                                            <p class="text-gray-400 text-xs">
+                                                <% if (cursoRel.precio > 0) { %>
+                                                    $<%= cursoRel.precio.toLocaleString() %>
+                                                <% } else { %>
+                                                    Gratis
+                                                <% } %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <p class="text-gray-400 text-sm">No hay cursos relacionados disponibles.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+function toggleSection(index) {
+    const section = document.getElementById(`section-${index}`);
+    const chevron = document.getElementById(`chevron-${index}`);
+    
+    if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        chevron.classList.remove('bi-chevron-down');
+        chevron.classList.add('bi-chevron-up');
+    } else {
+        section.classList.add('hidden');
+        chevron.classList.remove('bi-chevron-up');
+        chevron.classList.add('bi-chevron-down');
+    }
+}
+
+function enrollCourse(cursoId) {
+    if (window.SkillTrade) {
+        const hideLoading = window.SkillTrade.showLoading(event.target);
+        
+        window.SkillTrade.API.post(`/cursos/${cursoId}/inscribir`)
+            .then(response => {
+                window.SkillTrade.showNotification('¡Te has inscrito exitosamente al curso!', 'success');
+                setTimeout(() => {
+                    window.location.href = `/dashboard/cursos/${cursoId}`;
+                }, 1500);
+            })
+            .catch(error => {
+                window.SkillTrade.showNotification(error.message || 'Error al inscribirse al curso', 'error');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    }
+}
+</script>

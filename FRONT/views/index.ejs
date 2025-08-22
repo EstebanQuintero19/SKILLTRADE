@@ -1,0 +1,289 @@
+
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background with animated gradient -->
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+        <div class="absolute inset-0 bg-black/30"></div>
+        <!-- Animated background elements -->
+        <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+    </div>
+    
+    <!-- Floating elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
+        </div>
+        <div class="absolute top-3/4 right-1/4 transform translate-x-1/2 translate-y-1/2">
+            <div class="w-3 h-3 bg-purple-400 rounded-full animate-ping delay-300"></div>
+        </div>
+        <div class="absolute top-1/2 right-1/3">
+            <div class="w-1 h-1 bg-pink-400 rounded-full animate-ping delay-700"></div>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Main heading with enhanced typography -->
+        <div class="mb-8">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 leading-tight">
+                SkillTrade
+            </h1>
+            <div class="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-relaxed">
+                Intercambia <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Conocimientos</span>
+                <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Transforma</span> tu Futuro
+            </div>
+        </div>
+        
+        <!-- Enhanced description -->
+        <p class="text-xl md:text-2xl text-gray-200 mb-12 max-w-4xl mx-auto leading-relaxed">
+            🎆 Conecta con una <span class="text-blue-300 font-semibold">comunidad global</span> de aprendices y expertos.
+            <br class="hidden md:block">
+            🚀 Aprende nuevas habilidades y <span class="text-purple-300 font-semibold">comparte tu experiencia</span> de forma innovadora.
+        </p>
+        
+        <!-- Enhanced CTA buttons -->
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+            <button type="button" class="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" data-bs-toggle="modal" data-bs-target="#registerModal">
+                <span class="relative z-10 flex items-center">
+                    <i class="bi bi-rocket-takeoff mr-3 text-xl"></i>
+                    Comenzar Ahora
+                </span>
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+            </button>
+            
+            <a href="/cursos" class="group relative border-2 border-white/30 hover:border-white text-white hover:bg-white/10 px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm">
+                <span class="flex items-center">
+                    <i class="bi bi-compass mr-3 text-xl"></i>
+                    Explorar Cursos
+                </span>
+            </a>
+        </div>
+        
+        <!-- Trust indicators -->
+        <div class="flex flex-wrap justify-center items-center gap-8 text-gray-300">
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-people-fill text-blue-400 text-xl"></i>
+                <span class="font-semibold">+<%= totalUsuarios %> Usuarios</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-book-fill text-purple-400 text-xl"></i>
+                <span class="font-semibold">+<%= totalCursos %> Cursos</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-star-fill text-yellow-400 text-xl"></i>
+                <span class="font-semibold">98% Satisfacción</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <i class="bi bi-chevron-down text-white text-2xl opacity-70"></i>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="bg-gray-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                ¿Por qué elegir <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">SkillTrade</span>?
+            </h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                Descubre las ventajas que nos hacen la plataforma líder en intercambio de conocimientos
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 hover:from-blue-900/20 hover:to-purple-900/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/10">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="bi bi-people text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Comunidad Global</h3>
+                    <p class="text-gray-400 mb-6">Conecta con expertos y aprendices de todo el mundo. Intercambia conocimientos en tiempo real.</p>
+                    <div class="text-3xl font-bold text-blue-400"><%= totalUsuarios %>+ <span class="text-sm font-normal text-gray-400">usuarios activos</span></div>
+                </div>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 hover:from-purple-900/20 hover:to-pink-900/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/10">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="bi bi-book text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Cursos Diversos</h3>
+                    <p class="text-gray-400 mb-6">Accede a una amplia variedad de cursos en diferentes áreas del conocimiento y habilidades.</p>
+                    <div class="text-3xl font-bold text-purple-400"><%= totalCursos %>+ <span class="text-sm font-normal text-gray-400">cursos disponibles</span></div>
+                </div>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 hover:from-green-900/20 hover:to-emerald-900/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/10">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="bi bi-star text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Alta Calidad</h3>
+                    <p class="text-gray-400 mb-6">Contenido verificado y evaluado por la comunidad. Garantizamos experiencias de aprendizaje excepcionales.</p>
+                    <div class="text-3xl font-bold text-green-400">98% <span class="text-sm font-normal text-gray-400">satisfacción</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="bg-gray-900 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                Cursos Destacados
+            </h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                Descubre los cursos más populares de nuestra comunidad
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <% if (cursos && cursos.length > 0) { %>
+                <% cursos.forEach(curso => { %>
+                    <div class="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+                        <% if (curso.imagen) { %>
+                            <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-48 object-cover">
+                        <% } else { %>
+                            <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <i class="bi bi-book text-white text-4xl"></i>
+                            </div>
+                        <% } %>
+                        
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-white mb-2">
+                                <a href="/cursos/<%= curso._id %>" class="hover:text-blue-400 transition-colors">
+                                    <%= curso.titulo %>
+                                </a>
+                            </h3>
+                            <p class="text-gray-400 mb-4 line-clamp-2">
+                                <%= curso.descripcion %>
+                            </p>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <% if (curso.estadisticas && curso.estadisticas.calificacionPromedio > 0) { %>
+                                        <div class="flex text-yellow-400">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="bi bi-star<%= i <= curso.estadisticas.calificacionPromedio ? '-fill' : '' %> text-sm"></i>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-gray-400 text-sm">(<%= curso.estadisticas.calificacionPromedio.toFixed(1) %>)</span>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-sm">Sin calificaciones</span>
+                                    <% } %>
+                                </div>
+                                
+                                <% if (curso.precio > 0) { %>
+                                    <span class="text-green-400 font-semibold">$<%= curso.precio.toLocaleString() %></span>
+                                <% } else { %>
+                                    <span class="text-blue-400 font-semibold">Gratis</span>
+                                <% } %>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <a href="/cursos/<%= curso._id %>" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors inline-block text-center">
+                                    Ver Curso
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-span-full text-center py-12">
+                    <i class="bi bi-book text-gray-600 text-6xl mb-4"></i>
+                    <p class="text-gray-400 text-xl">No hay cursos disponibles en este momento</p>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="/cursos" class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                Ver Todos los Cursos
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced CTA Section -->
+<section class="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-24 overflow-hidden">
+    <!-- Background effects -->
+    <div class="absolute inset-0">
+        <div class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+        <div class="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-10 -right-10 w-60 h-60 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="mb-8">
+            <h2 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+                ¿Listo para <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">transformar</span>
+                <br class="hidden md:block">
+                tu futuro?
+            </h2>
+            <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+                Únete a <span class="font-bold text-yellow-300">miles de usuarios</span> que ya están intercambiando conocimientos
+                <br class="hidden md:block">
+                y construyendo el futuro que desean.
+            </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <button type="button" class="group relative overflow-hidden px-12 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105" 
+                    style="background: linear-gradient(135deg, #ffffff, #f8fafc); color: #6366f1; box-shadow: 0 10px 30px rgba(255,255,255,0.3);" 
+                    data-bs-toggle="modal" data-bs-target="#registerModal"
+                    onmouseover="this.style.boxShadow='0 15px 40px rgba(255,255,255,0.4)'; this.style.transform='scale(1.05) translateY(-2px)'"
+                    onmouseout="this.style.boxShadow='0 10px 30px rgba(255,255,255,0.3)'; this.style.transform='scale(1)'">
+                <span class="flex items-center relative z-10">
+                    <i class="bi bi-lightning-charge-fill mr-3 text-xl"></i>
+                    Crear Cuenta Gratis
+                </span>
+                <!-- Hover effect overlay -->
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </button>
+            
+            <button type="button" class="group relative overflow-hidden px-12 py-4 rounded-2xl font-bold text-lg text-white transition-all duration-300 transform hover:scale-105" 
+                    style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 8px 25px rgba(0,0,0,0.1);" 
+                    data-bs-toggle="modal" data-bs-target="#loginModal"
+                    onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.borderColor='rgba(255,255,255,0.5)'; this.style.transform='scale(1.05) translateY(-2px)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.transform='scale(1)'">
+                <span class="flex items-center relative z-10">
+                    <i class="bi bi-box-arrow-in-right mr-3 text-xl"></i>
+                    Ya tengo cuenta
+                </span>
+                <!-- Shimmer effect -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            </button>
+        </div>
+        
+        <!-- Trust badges -->
+        <div class="mt-16 flex flex-wrap justify-center items-center gap-8 text-white/80">
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-shield-check text-green-300 text-xl"></i>
+                <span class="font-semibold">100% Seguro</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-gift text-yellow-300 text-xl"></i>
+                <span class="font-semibold">Siempre Gratis</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="bi bi-clock text-blue-300 text-xl"></i>
+                <span class="font-semibold">Acceso Inmediato</span>
+            </div>
+        </div>
+    </div>
+</section>
