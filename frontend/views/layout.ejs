@@ -205,25 +205,22 @@
     <!-- JavaScript específico por página -->
     <% if (typeof pageTitle !== 'undefined') { %>
         <% if (pageTitle === 'Admin Panel') { %>
-            <script src="/js/adminpanel.js"></script>
+            <script src="/js/scripts/adminpanel.js"></script>
         <% } else if (pageTitle === 'My Courses') { %>
-            <script src="/js/miscursos.js"></script>
+            <script src="/js/scripts/miscursos.js"></script>
         <% } else if (pageTitle === 'Trade') { %>
-            <script src="/js/intercambio.js"></script>
+            <script src="/js/scripts/intercambio.js"></script>
         <% } else if (pageTitle === 'User Trade') { %>
-            <script src="/js/usertrade.js"></script>
+            <script src="/js/scripts/usertrade.js"></script>
         <% } else { %>
-            <script src="/js/index.js"></script>
+            <script src="/js/scripts/index.js"></script>
         <% } %>
     <% } else { %>
-        <script src="/js/index.js"></script>
+        <script src="/js/scripts/index.js"></script>
     <% } %>
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Script principal -->
-    <script src="/js/main.js"></script>
     
     <!-- Dark mode functionality -->
     <script>

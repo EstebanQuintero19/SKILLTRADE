@@ -48,22 +48,103 @@ app.get('/dashboard', (req, res) => {
 // API Routes para autenticación
 app.post('/api/login', async (req, res) => {
     try {
+        console.log('Frontend recibió petición de login:', req.body);
+        console.log('Enviando petición al backend:', `${API_BASE_URL}/auth/login`);
+        
         const response = await axios.post(`${API_BASE_URL}/auth/login`, req.body);
+        
+        console.log('Respuesta exitosa del backend:', response.data);
         res.json(response.data);
     } catch (error) {
+        console.error('Error completo en login frontend:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+        console.error('Error message:', error.message);
+        
         res.status(error.response?.status || 500).json(
-            error.response?.data || { error: 'Error de conexión' }
+            error.response?.data || { error: 'Error interno del servidor' }
         );
     }
 });
 
 app.post('/api/register', async (req, res) => {
     try {
+        console.log('Frontend recibió petición de registro:', req.body);
         const response = await axios.post(`${API_BASE_URL}/auth/register`, req.body);
+        console.log('Backend respondió exitosamente:', response.data);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error en registro:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json(
+            error.response?.data || { error: 'Error de conexión' }
+        );
+    }
+});
+
+// Proxy routes para cursos
+app.get('/api/cursos', async (req, res) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/cursos`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener cursos' });
+    }
+});
+
+app.get('/api/cursos/owner/:ownerId', async (req, res) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/cursos/owner/${req.params.ownerId}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener cursos del owner' });
+    }
+});
+
+app.post('/api/cursos', async (req, res) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/cursos`, req.body, {
+            headers: { 
+                Authorization: req.headers.authorization,
+                'Content-Type': 'application/json'
+            }
+        });
         res.json(response.data);
     } catch (error) {
         res.status(error.response?.status || 500).json(
-            error.response?.data || { error: 'Error de conexión' }
+            error.response?.data || { error: 'Error al crear curso' }
+        );
+    }
+});
+
+app.put('/api/cursos/:id', async (req, res) => {
+    try {
+        const response = await axios.put(`${API_BASE_URL}/cursos/${req.params.id}`, req.body, {
+            headers: { 
+                Authorization: req.headers.authorization,
+                'Content-Type': 'application/json'
+            }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(
+            error.response?.data || { error: 'Error al actualizar curso' }
+        );
+    }
+});
+
+app.delete('/api/cursos/:id', async (req, res) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/cursos/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(
+            error.response?.data || { error: 'Error al eliminar curso' }
         );
     }
 });

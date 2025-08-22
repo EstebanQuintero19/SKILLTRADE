@@ -5,15 +5,19 @@ const { crearNotificacion } = require('../model/notificacion.model');
 // RF-USU-01: Registrar usuario en la plataforma
 const registrarUsuario = async (req, res) => {
     try {
+        console.log('Backend recibió petición de registro:', req.body);
         const { email, nombre, password } = req.body;
 
         // Verificar si el usuario ya existe
         const usuarioExistente = await Usuario.findOne({ email });
         if (usuarioExistente) {
+            console.log('Usuario ya existe:', email);
             return res.status(400).json({
                 error: 'El email ya está registrado'
             });
         }
+
+        console.log('Usuario no existe, creando nuevo usuario...');
 
         // Crear nuevo usuario
         const usuario = new Usuario({
@@ -22,18 +26,29 @@ const registrarUsuario = async (req, res) => {
             password
         });
 
+        console.log('Guardando usuario en la base de datos...');
         await usuario.save();
+        console.log('Usuario guardado exitosamente');
 
-        // Crear biblioteca para el usuario
-        const biblioteca = new Biblioteca({
-            usuario: usuario._id
-        });
-        await biblioteca.save();
+        // Crear biblioteca para el usuario (OPCIONAL - comentado temporalmente)
+        try {
+            console.log('Creando biblioteca para el usuario...');
+            const biblioteca = new Biblioteca({
+                usuario: usuario._id
+            });
+            await biblioteca.save();
+            console.log('Biblioteca creada exitosamente');
+        } catch (bibliotecaError) {
+            console.warn('Error al crear biblioteca (continuando sin ella):', bibliotecaError.message);
+        }
 
         // Generar token JWT
+        console.log('Generando token JWT...');
         const token = usuario.generarToken();
+        console.log('Token generado exitosamente');
 
         // Respuesta exitosa
+        console.log('Registro completado exitosamente');
         res.status(201).json({
             mensaje: 'Usuario registrado exitosamente',
             usuario: {
@@ -47,9 +62,11 @@ const registrarUsuario = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error al registrar usuario:', error);
+        console.error('Error completo al registrar usuario:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
-            error: 'Error interno del servidor al registrar usuario'
+            error: 'Error interno del servidor al registrar usuario',
+            detalles: error.message
         });
     }
 };
@@ -469,48 +486,84 @@ const obtenerEstadisticasPersonales = async (req, res) => {
 // Función auxiliar para login
 const loginUsuario = async (req, res) => {
     try {
+        console.log('Backend recibió petición de login:', req.body);
         const { email, password, dispositivo } = req.body;
 
         // Buscar usuario por email
+        console.log('Buscando usuario con email:', email);
         const usuario = await Usuario.findOne({ email });
         if (!usuario) {
+            console.log('Usuario no encontrado:', email);
             return res.status(401).json({
                 error: 'Credenciales inválidas'
             });
         }
-
-        // Verificar contraseña
+        console.log('Usuario encontrado:', usuario.nombre);
+        
+        if (!password) {
+            console.log('Password no proporcionado');
+            return res.status(401).json({
+                error: 'Credenciales inválidas'
+            });
+        }
+        
+        if (!usuario.password) {
+            console.log('Usuario no tiene password hasheado en BD');
+            return res.status(500).json({
+                error: 'Error en datos del usuario'
+            });
+        }
+        
         const passwordValida = await usuario.verificarPassword(password);
         if (!passwordValida) {
+            console.log('Contraseña inválida para usuario:', email);
             return res.status(401).json({
                 error: 'Credenciales inválidas'
             });
         }
+        console.log('Contraseña válida');
 
         // Verificar si el usuario está activo
         if (!usuario.activo) {
+            console.log('Usuario inactivo:', email);
             return res.status(401).json({
                 error: 'Usuario inactivo. Contacte al administrador.'
             });
         }
+        console.log('Usuario activo');
 
         // Generar token JWT
+        console.log('Generando token JWT...');
         const token = usuario.generarToken();
+        console.log('Token generado exitosamente');
 
-        // Agregar token al usuario si se especifica dispositivo
-        if (dispositivo) {
-            usuario.tokens.push({
-                token,
-                dispositivo,
-                fechaCreacion: new Date()
-            });
-            await usuario.save();
+        // Agregar token al usuario si se especifica dispositivo (OPCIONAL)
+        try {
+            if (dispositivo) {
+                console.log('Agregando token al dispositivo:', dispositivo);
+                usuario.tokens.push({
+                    token,
+                    dispositivo,
+                    fechaCreacion: new Date()
+                });
+                await usuario.save();
+                console.log('Token agregado al dispositivo');
+            }
+        } catch (tokenError) {
+            console.warn('Error al agregar token al dispositivo (continuando):', tokenError.message);
         }
 
-        // Actualizar último acceso
-        usuario.ultimoAcceso = new Date();
-        await usuario.save();
+        // Actualizar último acceso (OPCIONAL)
+        try {
+            console.log('Actualizando último acceso...');
+            usuario.ultimoAcceso = new Date();
+            await usuario.save();
+            console.log('Último acceso actualizado');
+        } catch (accessError) {
+            console.warn('Error al actualizar último acceso (continuando):', accessError.message);
+        }
 
+        console.log('Login completado exitosamente');
         res.json({
             mensaje: 'Login exitoso',
             usuario: {
@@ -525,9 +578,11 @@ const loginUsuario = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error en login:', error);
+        console.error('Error completo en login:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
-            error: 'Error interno del servidor en login'
+            error: 'Error interno del servidor en login',
+            detalles: error.message
         });
     }
 };

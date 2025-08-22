@@ -171,6 +171,59 @@
     </div>
 </div>
 
+<!-- Modal Editar Curso -->
+<div class="modal fade" id="editarCursoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar curso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarCurso">
+                    <input type="hidden" id="editarCursoId">
+                    <div class="mb-3">
+                        <label for="editarImagenCurso" class="form-label">Imagen del curso</label>
+                        <input type="file" class="form-control" id="editarImagenCurso" accept="image/*">
+                        <small class="text-muted">Deja vacío para mantener la imagen actual</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarTituloCurso" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="editarTituloCurso" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarCategoriaCurso" class="form-label">Categoría</label>
+                        <select class="form-select" id="editarCategoriaCurso" required>
+                            <option value="" disabled>Selecciona una categoría</option>
+                            <option>Idiomas</option>
+                            <option>Programación</option>
+                            <option>Música</option>
+                            <option>Diseño gráfico</option>
+                            <option>Marketing</option>
+                            <option>Redes</option>
+                            <option>Ofimática</option>
+                            <option>Fotografía</option>
+                            <option>Videojuegos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarDescripcionCurso" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="editarDescripcionCurso" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarPrecioCurso" class="form-label">Precio (COP)</label>
+                        <input type="number" class="form-control" id="editarPrecioCurso" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="actualizarCurso()">Actualizar Curso</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Agregar Sesión -->
 <div class="modal fade" id="agregarSesionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -205,4 +258,4 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
