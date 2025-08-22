@@ -3,15 +3,51 @@ const Owner = require('../model/owner.model');
 
 exports.crearCurso = async (req, res) => {
     try {
-        const curso = new Curso(req.body);
-        await curso.save();
+        console.log('Datos recibidos en backend:', req.body);
+        
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).json({ error: 'Token de autorización requerido' });
+        }
 
-        await Owner.findByIdAndUpdate(req.body.owner, {
-            $addToSet: { cursosCreados: curso._id }
-        });
+        const jwt = require('jsonwebtoken');
+        const JWT_SECRET = process.env.JWT_SECRET || 'skilltrade_secret_key_2024';
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const { titulo, descripcion, categoria, precio, nivel, visibilidad } = req.body;
+        
+        if (!titulo || !descripcion || !categoria || !precio) {
+            return res.status(400).json({ 
+                error: 'Faltan campos obligatorios: titulo, descripcion, categoria, precio' 
+            });
+        }
+        
+        const precioNumerico = parseFloat(precio);
+        if (isNaN(precioNumerico)) {
+            return res.status(400).json({ 
+                error: 'El precio debe ser un número válido' 
+            });
+        }
+        
+        const cursoData = {
+            titulo: titulo.trim(),
+            descripcion: descripcion.trim(),
+            categoria: Array.isArray(categoria) ? categoria : [categoria],
+            precio: precioNumerico,
+            nivel: nivel || 'basico',
+            visibilidad: visibilidad || 'publico',
+            owner: decoded._id,
+            imagen: req.body.imagen || 'default-course.jpg'
+        };
+
+        console.log('Datos procesados para crear curso:', cursoData);
+
+        const curso = new Curso(cursoData);
+        await curso.save();
 
         res.status(201).json(curso);
     } catch (error) {
+        console.error('Error creando curso:', error);
         res.status(400).json({ error: error.message });
     }
 };
