@@ -12,7 +12,7 @@ const ventaController = require('./controller/venta.controller');
 const notificacionController = require('./controller/notificacion.controller');
 
 // Import middleware
-const { autenticarApiKey, requerirRol } = require('./middleware/auth');
+const { autenticarApiKey, requerirRol, verificarPropietario } = require('./middleware/auth');
 
 // ===== RUTAS DE AUTENTICACIÓN =====
 router.post('/usuarios', usuarioController.registrarUsuario);
@@ -28,9 +28,9 @@ router.delete('/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuar
 
 // ===== RUTAS DE PERFIL =====
 router.get('/usuarios/perfil', autenticarApiKey, usuarioController.obtenerPerfil);
-router.put('/usuarios/:id', autenticarApiKey, usuarioController.editarPerfil);
-router.post('/usuarios/:id/password', autenticarApiKey, usuarioController.cambiarPassword);
-router.get('/usuarios/:id/stats', autenticarApiKey, usuarioController.obtenerEstadisticas);
+router.put('/usuarios/:id', autenticarApiKey, verificarPropietario, usuarioController.editarPerfil);
+router.post('/usuarios/:id/password', autenticarApiKey, verificarPropietario, usuarioController.cambiarPassword);
+router.get('/usuarios/:id/stats', autenticarApiKey, verificarPropietario, usuarioController.obtenerEstadisticas);
 
 // ===== RUTAS DE SUSCRIPCIONES =====
 router.get('/usuarios/:id/suscripciones', autenticarApiKey, usuarioController.obtenerSuscripciones);
