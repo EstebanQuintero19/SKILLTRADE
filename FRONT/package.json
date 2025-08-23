@@ -1,0 +1,30 @@
+{
+  "name": "skilltrade-front",
+  "version": "1.0.0",
+  "description": "Frontend para SkillTrade - Plataforma de intercambio de cursos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "skilltrade",
+    "cursos",
+    "intercambio",
+    "educacion"
+  ],
+  "author": "SkillTrade Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

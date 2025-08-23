@@ -1,665 +1,692 @@
 const Usuario = require('../model/usuario.model');
 const Biblioteca = require('../model/biblioteca.model');
-const { crearNotificacion } = require('../model/notificacion.model');
+const Suscripcion = require('../model/suscripcion.model');
+const Exchange = require('../model/exchange.model');
+const Venta = require('../model/venta.model');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
-// RF-USU-01: Registrar usuario en la plataforma
+// Generar API Key única
+const generarApiKey = () => {
+    return crypto.randomBytes(32).toString('hex');
+};
+
+// RF-USU-01: Registrar usuario (email, nombre, password hash)
 const registrarUsuario = async (req, res) => {
     try {
-        console.log('Backend recibió petición de registro:', req.body);
-        const { email, nombre, password } = req.body;
+        const { email, nombre, password, biografia, telefono } = req.body;
+
+        // Validar campos requeridos
+        if (!email || !nombre || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email, nombre y password son requeridos'
+            });
+        }
 
         // Verificar si el usuario ya existe
         const usuarioExistente = await Usuario.findOne({ email });
         if (usuarioExistente) {
-            console.log('Usuario ya existe:', email);
             return res.status(400).json({
-                error: 'El email ya está registrado'
+                success: false,
+                message: 'El email ya está registrado'
             });
         }
 
-        console.log('Usuario no existe, creando nuevo usuario...');
+        // Hash de la contraseña
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
 
-        // Crear nuevo usuario
-        const usuario = new Usuario({
+        // Generar API Key única
+        const apiKey = generarApiKey();
+
+        // Crear usuario
+        const nuevoUsuario = new Usuario({
             email,
             nombre,
-            password
+            password: passwordHash,
+            biografia: biografia || '',
+            telefono: telefono || '',
+            apiKey,
+            fechaCreacion: new Date()
         });
 
-        console.log('Guardando usuario en la base de datos...');
-        await usuario.save();
-        console.log('Usuario guardado exitosamente');
+        await nuevoUsuario.save();
 
-        // Crear biblioteca para el usuario (OPCIONAL - comentado temporalmente)
-        try {
-            console.log('Creando biblioteca para el usuario...');
-            const biblioteca = new Biblioteca({
-                usuario: usuario._id
-            });
-            await biblioteca.save();
-            console.log('Biblioteca creada exitosamente');
-        } catch (bibliotecaError) {
-            console.warn('Error al crear biblioteca (continuando sin ella):', bibliotecaError.message);
-        }
+        // Crear biblioteca para el usuario
+        const nuevaBiblioteca = new Biblioteca({
+            usuario: nuevoUsuario._id,
+            cursos: [],
+            favoritos: [],
+            logros: [],
+            ultimaActividad: new Date()
+        });
+        await nuevaBiblioteca.save();
 
-        // Generar token JWT
-        console.log('Generando token JWT...');
-        const token = usuario.generarToken();
-        console.log('Token generado exitosamente');
-
-        // Respuesta exitosa
-        console.log('Registro completado exitosamente');
         res.status(201).json({
-            mensaje: 'Usuario registrado exitosamente',
-            usuario: {
-                _id: usuario._id,
-                nombre: usuario.nombre,
-                email: usuario.email,
-                rol: usuario.rol,
-                fechaRegistro: usuario.fechaRegistro
-            },
-            token
+            success: true,
+            message: 'Usuario registrado exitosamente',
+            data: {
+                usuario: {
+                    id: nuevoUsuario._id,
+                    email: nuevoUsuario.email,
+                    nombre: nuevoUsuario.nombre,
+                    apiKey: nuevoUsuario.apiKey
+                }
+            }
         });
 
     } catch (error) {
-        console.error('Error completo al registrar usuario:', error);
-        console.error('Stack trace:', error.stack);
+        console.error('Error al registrar usuario:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al registrar usuario',
-            detalles: error.message
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-02: Editar perfil usuario
-const editarPerfil = async (req, res) => {
+// RF-USU-02: Login de usuario con API Key
+const loginUsuario = async (req, res) => {
     try {
-        const { nombre, biografia, datosContacto, visibilidadPerfil } = req.body;
-        const usuarioId = req.usuario._id;
+        const { email, password } = req.body;
 
-        // Actualizar campos del perfil
-        const camposActualizados = {};
-        if (nombre) camposActualizados.nombre = nombre;
-        if (biografia !== undefined) camposActualizados.biografia = biografia;
-        if (datosContacto) camposActualizados.datosContacto = datosContacto;
-        if (visibilidadPerfil) camposActualizados.visibilidadPerfil = visibilidadPerfil;
-
-        const usuario = await Usuario.findByIdAndUpdate(
-            usuarioId,
-            camposActualizados,
-            { new: true, runValidators: true }
-        ).select('-password');
-
-        if (!usuario) {
-            return res.status(404).json({
-                error: 'Usuario no encontrado'
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email y password son requeridos'
             });
+        }
+
+        // Buscar usuario por email
+        const usuario = await Usuario.findOne({ email }).select('+password');
+        if (!usuario) {
+            return res.status(401).json({
+                success: false,
+                message: 'Credenciales inválidas'
+            });
+        }
+
+        // Verificar contraseña
+        const passwordValida = await bcrypt.compare(password, usuario.password);
+        if (!passwordValida) {
+            return res.status(401).json({
+                success: false,
+                message: 'Credenciales inválidas'
+            });
+        }
+
+        // Generar nueva API Key si no tiene una
+        if (!usuario.apiKey) {
+            usuario.apiKey = generarApiKey();
+            await usuario.save();
         }
 
         res.json({
-            mensaje: 'Perfil actualizado exitosamente',
-            usuario
+            success: true,
+            message: 'Login exitoso',
+            data: {
+                apiKey: usuario.apiKey,
+                usuario: {
+                    id: usuario._id,
+                    email: usuario.email,
+                    nombre: usuario.nombre
+                }
+            }
         });
 
     } catch (error) {
-        console.error('Error al editar perfil:', error);
+        console.error('Error en login:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al editar perfil'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-03: Ver perfil propio y de otros usuarios
+// RF-USU-03: Ver perfil propio
 const obtenerPerfil = async (req, res) => {
     try {
-        const { id } = req.params;
-        const usuarioAutenticado = req.usuario;
-
-        let usuarioId = id;
+        const usuario = await Usuario.findById(req.usuario.id).select('-password');
         
-        // Si no se proporciona ID, mostrar perfil propio
-        if (!usuarioId) {
-            usuarioId = usuarioAutenticado._id;
-        }
-
-        const usuario = await Usuario.findById(usuarioId)
-            .select('-password -tokens')
-            .populate('estadisticas');
-
         if (!usuario) {
             return res.status(404).json({
-                error: 'Usuario no encontrado'
+                success: false,
+                message: 'Usuario no encontrado'
             });
         }
-
-        // Si es perfil propio, mostrar toda la información
-        if (usuarioId.toString() === usuarioAutenticado._id.toString()) {
-            return res.json({
-                usuario,
-                esPropio: true
-            });
-        }
-
-        // Si es perfil de otro usuario, verificar visibilidad
-        if (usuario.visibilidadPerfil === 'privado') {
-            return res.status(403).json({
-                error: 'Este perfil es privado'
-            });
-        }
-
-        // Mostrar información pública del perfil
-        const perfilPublico = {
-            _id: usuario._id,
-            nombre: usuario.nombre,
-            biografia: usuario.biografia,
-            fechaRegistro: usuario.fechaRegistro,
-            estadisticas: {
-                cursosCreados: usuario.estadisticas.cursosCreados,
-                cursosCompartidos: usuario.estadisticas.cursosCompartidos
-            }
-        };
 
         res.json({
-            usuario: perfilPublico,
-            esPropio: false
+            success: true,
+            data: {
+                usuario: {
+                    id: usuario._id,
+                    email: usuario.email,
+                    nombre: usuario.nombre,
+                    biografia: usuario.biografia,
+                    telefono: usuario.telefono,
+                    fechaCreacion: usuario.fechaCreacion,
+                    estadisticas: usuario.estadisticas
+                }
+            }
         });
 
     } catch (error) {
         console.error('Error al obtener perfil:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener perfil'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-04: Eliminar cuenta del sistema
-const eliminarCuenta = async (req, res) => {
+// RF-USU-03: Ver perfil de otro usuario
+const obtenerUsuarioPorId = async (req, res) => {
     try {
-        const usuarioId = req.usuario._id;
-        const { confirmacion } = req.body;
-
-        if (!confirmacion) {
-            return res.status(400).json({
-                error: 'Debe confirmar la eliminación de la cuenta'
-            });
-        }
-
-        // Verificar que no tenga intercambios activos
-        const Exchange = require('../model/exchange.model');
-        const intercambiosActivos = await Exchange.find({
-            $or: [{ emisor: usuarioId }, { receptor: usuarioId }],
-            estado: { $in: ['pendiente', 'aceptado', 'activo'] }
-        });
-
-        if (intercambiosActivos.length > 0) {
-            return res.status(400).json({
-                error: 'No puede eliminar la cuenta mientras tenga intercambios activos'
-            });
-        }
-
-        // Verificar que no tenga suscripciones activas
-        const Suscripcion = require('../model/suscripcion.model');
-        const suscripcionesActivas = await Suscripcion.find({
-            suscriptor: usuarioId,
-            estado: 'activa'
-        });
-
-        if (suscripcionesActivas.length > 0) {
-            return res.status(400).json({
-                error: 'No puede eliminar la cuenta mientras tenga suscripciones activas'
-            });
-        }
-
-        // Eliminar usuario (soft delete)
-        const usuario = await Usuario.findByIdAndUpdate(
-            usuarioId,
-            { activo: false },
-            { new: true }
-        );
-
-        res.json({
-            mensaje: 'Cuenta eliminada exitosamente'
-        });
-
-    } catch (error) {
-        console.error('Error al eliminar cuenta:', error);
-        res.status(500).json({
-            error: 'Error interno del servidor al eliminar cuenta'
-        });
-    }
-};
-
-// RF-USU-05: Ver historial de suscripciones
-const obtenerHistorialSuscripciones = async (req, res) => {
-    try {
-        const usuarioId = req.usuario._id;
-        const { pagina = 1, limite = 10 } = req.query;
-
-        const Suscripcion = require('../model/suscripcion.model');
+        const { id } = req.params;
+        const usuario = await Usuario.findById(id).select('-password -apiKey');
         
-        const opciones = {
-            page: parseInt(pagina),
-            limit: parseInt(limite),
-            sort: { fechaInicio: -1 }
-        };
-
-        const suscripciones = await Suscripcion.paginate(
-            { suscriptor: usuarioId },
-            {
-                ...opciones,
-                populate: [
-                    { path: 'creador', select: 'nombre email' }
-                ]
-            }
-        );
-
-        res.json({
-            suscripciones: suscripciones.docs,
-            paginacion: {
-                pagina: suscripciones.page,
-                totalPaginas: suscripciones.totalPages,
-                totalElementos: suscripciones.totalDocs,
-                elementosPorPagina: suscripciones.limit
-            }
-        });
-
-    } catch (error) {
-        console.error('Error al obtener historial de suscripciones:', error);
-        res.status(500).json({
-            error: 'Error interno del servidor al obtener suscripciones'
-        });
-    }
-};
-
-// RF-USU-06: Ver el historial de intercambios
-const obtenerHistorialIntercambios = async (req, res) => {
-    try {
-        const usuarioId = req.usuario._id;
-        const { pagina = 1, limite = 10, estado } = req.query;
-
-        const Exchange = require('../model/exchange.model');
-        
-        const filtro = {
-            $or: [{ emisor: usuarioId }, { receptor: usuarioId }]
-        };
-
-        if (estado) {
-            filtro.estado = estado;
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
         }
 
-        const opciones = {
-            page: parseInt(pagina),
-            limit: parseInt(limite),
-            sort: { fechaSolicitud: -1 }
-        };
-
-        const intercambios = await Exchange.paginate(
-            filtro,
-            {
-                ...opciones,
-                populate: [
-                    { path: 'emisor', select: 'nombre email' },
-                    { path: 'receptor', select: 'nombre email' },
-                    { path: 'cursoEmisor', select: 'titulo imagen categoria' },
-                    { path: 'cursoReceptor', select: 'titulo imagen categoria' }
-                ]
-            }
-        );
+        // Solo mostrar información pública si el perfil es privado
+        if (usuario.visibilidad === 'privado' && req.usuario.id !== id) {
+            return res.status(403).json({
+                success: false,
+                message: 'Perfil privado'
+            });
+        }
 
         res.json({
-            intercambios: intercambios.docs,
-            paginacion: {
-                pagina: intercambios.page,
-                totalPaginas: intercambios.totalPages,
-                totalElementos: intercambios.totalDocs,
-                elementosPorPagina: intercambios.limit
+            success: true,
+            data: {
+                usuario: {
+                    id: usuario._id,
+                    nombre: usuario.nombre,
+                    biografia: usuario.biografia,
+                    fechaCreacion: usuario.fechaCreacion,
+                    estadisticas: {
+                        cursosCreados: usuario.estadisticas.cursosCreados,
+                        cursosCompartidos: usuario.estadisticas.cursosCompartidos,
+                        intercambiosRealizados: usuario.estadisticas.intercambiosRealizados
+                    }
+                }
             }
         });
 
     } catch (error) {
-        console.error('Error al obtener historial de intercambios:', error);
+        console.error('Error al obtener usuario:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener intercambios'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-07: Cambiar la contraseña
-const cambiarPassword = async (req, res) => {
+// RF-USU-02: Editar perfil (foto, bio, contacto)
+const editarPerfil = async (req, res) => {
     try {
-        const { passwordActual, passwordNueva } = req.body;
-        const usuarioId = req.usuario._id;
+        const { nombre, biografia, telefono } = req.body;
+        const usuarioId = req.usuario.id;
 
         const usuario = await Usuario.findById(usuarioId);
         if (!usuario) {
             return res.status(404).json({
-                error: 'Usuario no encontrado'
+                success: false,
+                message: 'Usuario no encontrado'
             });
         }
 
-        // Verificar contraseña actual
-        const passwordValida = await usuario.verificarPassword(passwordActual);
-        if (!passwordValida) {
-            return res.status(400).json({
-                error: 'La contraseña actual es incorrecta'
-            });
-        }
+        // Actualizar campos
+        if (nombre) usuario.nombre = nombre;
+        if (biografia !== undefined) usuario.biografia = biografia;
+        if (telefono !== undefined) usuario.telefono = telefono;
 
-        // Actualizar contraseña
-        usuario.password = passwordNueva;
         await usuario.save();
 
         res.json({
-            mensaje: 'Contraseña cambiada exitosamente'
+            success: true,
+            message: 'Perfil actualizado exitosamente',
+            data: {
+                usuario: {
+                    id: usuario._id,
+                    nombre: usuario.nombre,
+                    biografia: usuario.biografia,
+                    telefono: usuario.telefono
+                }
+            }
         });
 
     } catch (error) {
-        console.error('Error al cambiar contraseña:', error);
+        console.error('Error al editar perfil:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al cambiar contraseña'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-08: Cerrar sesión desde cualquier dispositivo
-const cerrarSesion = async (req, res) => {
+// RF-USU-07: Cambiar contraseña autenticado
+const cambiarPassword = async (req, res) => {
     try {
-        const usuarioId = req.usuario._id;
-        const { dispositivo } = req.body;
+        const { passwordActual, passwordNuevo } = req.body;
+        const usuarioId = req.usuario.id;
 
-        if (dispositivo) {
-            // Cerrar sesión de un dispositivo específico
-            await Usuario.findByIdAndUpdate(
-                usuarioId,
-                { $pull: { tokens: { dispositivo } } }
-            );
-        } else {
-            // Cerrar todas las sesiones
-            await Usuario.findByIdAndUpdate(
-                usuarioId,
-                { $set: { tokens: [] } }
-            );
+        if (!passwordActual || !passwordNuevo) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password actual y nuevo son requeridos'
+            });
+        }
+
+        const usuario = await Usuario.findById(usuarioId).select('+password');
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Verificar password actual
+        const passwordValida = await bcrypt.compare(passwordActual, usuario.password);
+        if (!passwordValida) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password actual incorrecto'
+            });
+        }
+
+        // Hash del nuevo password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(passwordNuevo, saltRounds);
+        usuario.password = passwordHash;
+
+        await usuario.save();
+
+        res.json({
+            success: true,
+            message: 'Password actualizado exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error al cambiar password:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// RF-USU-05: Historial de suscripciones
+const obtenerSuscripciones = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const suscripciones = await Suscripcion.find({ usuario: usuarioId })
+            .populate('owner', 'nombre categoria')
+            .sort({ fechaCreacion: -1 });
+
+        res.json({
+            success: true,
+            data: {
+                suscripciones,
+                total: suscripciones.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al obtener suscripciones:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// RF-USU-06: Historial de intercambios
+const obtenerIntercambios = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const intercambios = await Exchange.find({
+            $or: [
+                { emisor: usuarioId },
+                { receptor: usuarioId }
+            ]
+        })
+        .populate('cursoEmisor', 'titulo categoria')
+        .populate('cursoReceptor', 'titulo categoria')
+        .populate('emisor', 'nombre')
+        .populate('receptor', 'nombre')
+        .sort({ fechaSolicitud: -1 });
+
+        res.json({
+            success: true,
+            data: {
+                intercambios,
+                total: intercambios.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al obtener intercambios:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// RF-USU-10: Estadísticas personales
+const obtenerEstadisticas = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const usuario = await Usuario.findById(usuarioId);
+
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
         }
 
         res.json({
-            mensaje: 'Sesión cerrada exitosamente'
+            success: true,
+            data: {
+                estadisticas: usuario.estadisticas
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al obtener estadísticas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// RF-USU-04: Eliminar cuenta con confirmación
+const eliminarUsuario = async (req, res) => {
+    try {
+        const { confirmacion } = req.body;
+        const usuarioId = req.usuario.id;
+
+        if (confirmacion !== 'ELIMINAR_CUENTA') {
+            return res.status(400).json({
+                success: false,
+                message: 'Confirmación requerida: ELIMINAR_CUENTA'
+            });
+        }
+
+        const usuario = await Usuario.findById(usuarioId);
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Verificar que no tenga intercambios o suscripciones activas
+        const intercambiosActivos = await Exchange.findOne({
+            $or: [{ emisor: usuarioId }, { receptor: usuarioId }],
+            estado: { $in: ['pendiente', 'activo'] }
+        });
+
+        if (intercambiosActivos) {
+            return res.status(400).json({
+                success: false,
+                message: 'No puedes eliminar tu cuenta mientras tengas intercambios activos'
+            });
+        }
+
+        const suscripcionesActivas = await Suscripcion.findOne({
+            usuario: usuarioId,
+            estado: 'activa'
+        });
+
+        if (suscripcionesActivas) {
+            return res.status(400).json({
+                success: false,
+                message: 'No puedes eliminar tu cuenta mientras tengas suscripciones activas'
+            });
+        }
+
+        // Eliminar usuario y biblioteca
+        await Usuario.findByIdAndDelete(usuarioId);
+        await Biblioteca.findOneAndDelete({ usuario: usuarioId });
+
+        res.json({
+            success: true,
+            message: 'Cuenta eliminada exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// RF-USU-08: Cerrar sesión (regenerar API Key)
+const cerrarSesion = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const usuario = await Usuario.findById(usuarioId);
+
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Regenerar API Key para invalidar la sesión actual
+        const nuevaApiKey = generarApiKey();
+        usuario.apiKey = nuevaApiKey;
+        await usuario.save();
+
+        res.json({
+            success: true,
+            message: 'Sesión cerrada exitosamente. Nueva API Key generada.',
+            data: {
+                nuevaApiKey: usuario.apiKey
+            }
         });
 
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al cerrar sesión'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-09: Configurar visibilidad del perfil
-const configurarVisibilidadPerfil = async (req, res) => {
+// Obtener todos los usuarios (solo admin)
+const obtenerUsuarios = async (req, res) => {
     try {
-        const { visibilidadPerfil } = req.body;
-        const usuarioId = req.usuario._id;
-
-        if (!['publico', 'privado'].includes(visibilidadPerfil)) {
-            return res.status(400).json({
-                error: 'La visibilidad debe ser público o privado'
+        // Verificar si es admin (puedes implementar tu lógica de roles aquí)
+        if (req.usuario.rol !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acceso denegado. Solo administradores.'
             });
         }
 
-        const usuario = await Usuario.findByIdAndUpdate(
-            usuarioId,
-            { visibilidadPerfil },
-            { new: true, runValidators: true }
-        ).select('-password');
-
+        const usuarios = await Usuario.find().select('-password -apiKey');
+        
         res.json({
-            mensaje: 'Visibilidad del perfil configurada exitosamente',
-            usuario
+            success: true,
+            data: {
+                usuarios,
+                total: usuarios.length
+            }
         });
 
     } catch (error) {
-        console.error('Error al configurar visibilidad del perfil:', error);
+        console.error('Error al obtener usuarios:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al configurar visibilidad'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// RF-USU-10: Ver estadísticas personales
-const obtenerEstadisticasPersonales = async (req, res) => {
+// Crear usuario (solo admin)
+const crearUsuario = async (req, res) => {
     try {
-        const usuarioId = req.usuario._id;
+        // Verificar si es admin
+        if (req.usuario.rol !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acceso denegado. Solo administradores.'
+            });
+        }
 
-        // Obtener estadísticas del usuario
-        const usuario = await Usuario.findById(usuarioId)
-            .select('estadisticas')
-            .populate('estadisticas');
+        const { email, nombre, password, rol } = req.body;
 
+        if (!email || !nombre || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email, nombre y password son requeridos'
+            });
+        }
+
+        // Verificar si el usuario ya existe
+        const usuarioExistente = await Usuario.findOne({ email });
+        if (usuarioExistente) {
+            return res.status(400).json({
+                success: false,
+                message: 'El email ya está registrado'
+            });
+        }
+
+        // Hash de la contraseña
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        // Generar API Key
+        const apiKey = generarApiKey();
+
+        // Crear usuario
+        const nuevoUsuario = new Usuario({
+            email,
+            nombre,
+            password: passwordHash,
+            rol: rol || 'usuario',
+            apiKey,
+            fechaCreacion: new Date()
+        });
+
+        await nuevoUsuario.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Usuario creado exitosamente',
+            data: {
+                usuario: {
+                    id: nuevoUsuario._id,
+                    email: nuevoUsuario.email,
+                    nombre: nuevoUsuario.nombre,
+                    rol: nuevoUsuario.rol,
+                    apiKey: nuevoUsuario.apiKey
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al crear usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
+// Actualizar usuario (solo admin)
+const actualizarUsuario = async (req, res) => {
+    try {
+        // Verificar si es admin
+        if (req.usuario.rol !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acceso denegado. Solo administradores.'
+            });
+        }
+
+        const { id } = req.params;
+        const { nombre, email, rol, activo } = req.body;
+
+        const usuario = await Usuario.findById(id);
         if (!usuario) {
             return res.status(404).json({
-                error: 'Usuario no encontrado'
+                success: false,
+                message: 'Usuario no encontrado'
             });
         }
 
-        // Obtener estadísticas adicionales
-        const Exchange = require('../model/exchange.model');
-        const Suscripcion = require('../model/suscripcion.model');
-        const Venta = require('../model/venta.model');
+        // Actualizar campos
+        if (nombre) usuario.nombre = nombre;
+        if (email) usuario.email = email;
+        if (rol) usuario.rol = rol;
+        if (activo !== undefined) usuario.activo = activo;
 
-        const [
-            intercambiosActivos,
-            suscripcionesActivas,
-            ventasRealizadas
-        ] = await Promise.all([
-            Exchange.countDocuments({
-                $or: [{ emisor: usuarioId }, { receptor: usuarioId }],
-                estado: 'activo'
-            }),
-            Suscripcion.countDocuments({
-                suscriptor: usuarioId,
-                estado: 'activa'
-            }),
-            Venta.countDocuments({
-                vendedor: usuarioId,
-                estado: 'completada'
-            })
-        ]);
-
-        const estadisticas = {
-            ...usuario.estadisticas.toObject(),
-            intercambiosActivos,
-            suscripcionesActivas,
-            ventasRealizadas
-        };
+        await usuario.save();
 
         res.json({
-            estadisticas
-        });
-
-    } catch (error) {
-        console.error('Error al obtener estadísticas personales:', error);
-        res.status(500).json({
-            error: 'Error interno del servidor al obtener estadísticas'
-        });
-    }
-};
-
-// Función auxiliar para login
-const loginUsuario = async (req, res) => {
-    try {
-        console.log('Backend recibió petición de login:', req.body);
-        const { email, password, dispositivo } = req.body;
-
-        // Buscar usuario por email
-        console.log('Buscando usuario con email:', email);
-        const usuario = await Usuario.findOne({ email });
-        if (!usuario) {
-            console.log('Usuario no encontrado:', email);
-            return res.status(401).json({
-                error: 'Credenciales inválidas'
-            });
-        }
-        console.log('Usuario encontrado:', usuario.nombre);
-        
-        if (!password) {
-            console.log('Password no proporcionado');
-            return res.status(401).json({
-                error: 'Credenciales inválidas'
-            });
-        }
-        
-        if (!usuario.password) {
-            console.log('Usuario no tiene password hasheado en BD');
-            return res.status(500).json({
-                error: 'Error en datos del usuario'
-            });
-        }
-        
-        const passwordValida = await usuario.verificarPassword(password);
-        if (!passwordValida) {
-            console.log('Contraseña inválida para usuario:', email);
-            return res.status(401).json({
-                error: 'Credenciales inválidas'
-            });
-        }
-        console.log('Contraseña válida');
-
-        // Verificar si el usuario está activo
-        if (!usuario.activo) {
-            console.log('Usuario inactivo:', email);
-            return res.status(401).json({
-                error: 'Usuario inactivo. Contacte al administrador.'
-            });
-        }
-        console.log('Usuario activo');
-
-        // Generar token JWT
-        console.log('Generando token JWT...');
-        const token = usuario.generarToken();
-        console.log('Token generado exitosamente');
-
-        // Agregar token al usuario si se especifica dispositivo (OPCIONAL)
-        try {
-            if (dispositivo) {
-                console.log('Agregando token al dispositivo:', dispositivo);
-                usuario.tokens.push({
-                    token,
-                    dispositivo,
-                    fechaCreacion: new Date()
-                });
-                await usuario.save();
-                console.log('Token agregado al dispositivo');
+            success: true,
+            message: 'Usuario actualizado exitosamente',
+            data: {
+                usuario: {
+                    id: usuario._id,
+                    nombre: usuario.nombre,
+                    email: usuario.email,
+                    rol: usuario.rol,
+                    activo: usuario.activo
+                }
             }
-        } catch (tokenError) {
-            console.warn('Error al agregar token al dispositivo (continuando):', tokenError.message);
-        }
-
-        // Actualizar último acceso (OPCIONAL)
-        try {
-            console.log('Actualizando último acceso...');
-            usuario.ultimoAcceso = new Date();
-            await usuario.save();
-            console.log('Último acceso actualizado');
-        } catch (accessError) {
-            console.warn('Error al actualizar último acceso (continuando):', accessError.message);
-        }
-
-        console.log('Login completado exitosamente');
-        res.json({
-            mensaje: 'Login exitoso',
-            usuario: {
-                _id: usuario._id,
-                nombre: usuario.nombre,
-                email: usuario.email,
-                rol: usuario.rol,
-                foto: usuario.foto,
-                ultimoAcceso: usuario.ultimoAcceso
-            },
-            token
         });
 
     } catch (error) {
-        console.error('Error completo en login:', error);
-        console.error('Stack trace:', error.stack);
+        console.error('Error al actualizar usuario:', error);
         res.status(500).json({
-            error: 'Error interno del servidor en login',
-            detalles: error.message
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
-// Función auxiliar para subir foto de perfil
-const subirFotoPerfil = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                error: 'No se ha subido ninguna imagen'
-            });
-        }
-
-        const usuarioId = req.usuario._id;
-        const rutaImagen = req.file.path;
-
-        const usuario = await Usuario.findByIdAndUpdate(
-            usuarioId,
-            { foto: rutaImagen },
-            { new: true }
-        ).select('-password');
-
-        res.json({
-            mensaje: 'Foto de perfil actualizada exitosamente',
-            usuario
-        });
-
-    } catch (error) {
-        console.error('Error al subir foto de perfil:', error);
-        res.status(500).json({
-            error: 'Error interno del servidor al subir foto'
-        });
-    }
+module.exports = {
+    registrarUsuario,
+    loginUsuario,
+    obtenerPerfil,
+    obtenerUsuarioPorId,
+    editarPerfil,
+    cambiarPassword,
+    obtenerSuscripciones,
+    obtenerIntercambios,
+    obtenerEstadisticas,
+    eliminarUsuario,
+    cerrarSesion,
+    obtenerUsuarios,
+    crearUsuario,
+    actualizarUsuario
 };
-
-// Funciones adicionales que faltan en routes.js
-exports.obtenerUsuarios = async (req, res) => {
-    try {
-        const usuarios = await Usuario.find().select('-password');
-        res.json(usuarios);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-exports.obtenerUsuarioPorId = async (req, res) => {
-    try {
-        const usuario = await Usuario.findById(req.params.id).select('-password');
-        if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-        res.json(usuario);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-exports.crearUsuario = async (req, res) => {
-    return registrarUsuario(req, res);
-};
-
-exports.actualizarUsuario = async (req, res) => {
-    return editarPerfil(req, res);
-};
-
-exports.eliminarUsuario = async (req, res) => {
-    return eliminarCuenta(req, res);
-};
-
-// Exportaciones principales
-exports.registrarUsuario = registrarUsuario;
-exports.loginUsuario = loginUsuario;
-exports.editarPerfil = editarPerfil;
-exports.obtenerPerfil = obtenerPerfil;
-exports.eliminarCuenta = eliminarCuenta;
-exports.obtenerHistorialSuscripciones = obtenerHistorialSuscripciones;
-exports.obtenerHistorialIntercambios = obtenerHistorialIntercambios;
-exports.cambiarPassword = cambiarPassword;
-exports.cerrarSesion = cerrarSesion;
-exports.configurarVisibilidadPerfil = configurarVisibilidadPerfil;
-exports.obtenerEstadisticasPersonales = obtenerEstadisticasPersonales;
-exports.subirFotoPerfil = subirFotoPerfil;

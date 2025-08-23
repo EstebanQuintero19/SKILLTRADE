@@ -1,0 +1,410 @@
+
+    <div class="bg-gray-900 min-h-screen">
+        <!-- Admin Header -->
+        <section class="bg-gray-800 py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">
+                            Panel de Administración
+                        </h1>
+                        <p class="text-gray-300 mt-2">
+                            Gestiona usuarios, cursos e intercambios de la plataforma
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-3 py-1 bg-red-600 text-white text-sm rounded-full">
+                            <i class="bi bi-shield-check mr-1"></i>
+                            Administrador
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Overview -->
+        <section class="py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-600 rounded-full">
+                                <i class="bi bi-people text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-400 text-sm">Total Usuarios</p>
+                                <p class="text-2xl font-bold text-white">
+                                    <%= usuarios ? usuarios.length : 0 %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-600 rounded-full">
+                                <i class="bi bi-book text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-400 text-sm">Total Cursos</p>
+                                <p class="text-2xl font-bold text-white">
+                                    <%= cursos ? cursos.length : 0 %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-purple-600 rounded-full">
+                                <i class="bi bi-arrow-left-right text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-400 text-sm">Intercambios</p>
+                                <p class="text-2xl font-bold text-white">
+                                    <%= intercambios ? intercambios.length : 0 %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-600 rounded-full">
+                                <i class="bi bi-exclamation-triangle text-white text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-400 text-sm">Reportes</p>
+                                <p class="text-2xl font-bold text-white">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Tabs -->
+        <section class="pb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Tab Navigation -->
+                <div class="bg-gray-800 rounded-t-lg">
+                    <nav class="flex space-x-8 px-6 py-4" aria-label="Tabs">
+                        <button onclick="showTab('usuarios')" id="tab-usuarios" class="admin-tab active">
+                            <i class="bi bi-people mr-2"></i>Usuarios
+                        </button>
+                        <button onclick="showTab('cursos')" id="tab-cursos" class="admin-tab">
+                            <i class="bi bi-book mr-2"></i>Cursos
+                        </button>
+                        <button onclick="showTab('intercambios')" id="tab-intercambios" class="admin-tab">
+                            <i class="bi bi-arrow-left-right mr-2"></i>Intercambios
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="bg-gray-800 rounded-b-lg p-6">
+                    <!-- Users Tab -->
+                    <div id="content-usuarios" class="tab-content">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Gestión de Usuarios</h2>
+                            <div class="flex space-x-4">
+                                <input type="search" placeholder="Buscar usuarios..."
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Todos los roles</option>
+                                    <option value="usuario">Usuario</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-300">
+                                <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                                    <tr>
+                                        <th class="px-6 py-3">Usuario</th>
+                                        <th class="px-6 py-3">Email</th>
+                                        <th class="px-6 py-3">Rol</th>
+                                        <th class="px-6 py-3">Fecha Registro</th>
+                                        <th class="px-6 py-3">Estado</th>
+                                        <th class="px-6 py-3">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (usuarios && usuarios.length> 0) { %>
+                                        <% usuarios.forEach(usuario=> { %>
+                                            <tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-750">
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center">
+                                                        <div
+                                                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
+                                                            <span class="text-white font-semibold">
+                                                                <%= usuario.nombre.charAt(0).toUpperCase() %>
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-white font-medium">
+                                                                <%= usuario.nombre %>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <%= usuario.email %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span
+                                                        class="px-2 py-1 bg-<%= usuario.rol === 'admin' ? 'red' : 'blue' %>-600 text-white text-xs rounded-full">
+                                                        <%= usuario.rol || 'usuario' %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <%= new Date(usuario.fechaRegistro).toLocaleDateString() %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span
+                                                        class="px-2 py-1 bg-<%= usuario.activo ? 'green' : 'red' %>-600 text-white text-xs rounded-full">
+                                                        <%= usuario.activo ? 'Activo' : 'Inactivo' %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex space-x-2">
+                                                        <button onclick="editUser('<%= usuario._id %>')"
+                                                            class="text-blue-400 hover:text-blue-300">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            onclick="toggleUserStatus('<%= usuario._id %>', <%= !usuario.activo %>)"
+                                                            class="text-<%= usuario.activo ? 'red' : 'green' %>-400 hover:text-<%= usuario.activo ? 'red' : 'green' %>-300">
+                                                            <i
+                                                                class="bi bi-<%= usuario.activo ? 'x-circle' : 'check-circle' %>"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                                                            No hay usuarios registrados
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Courses Tab -->
+                    <div id="content-cursos" class="tab-content hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Gestión de Cursos</h2>
+                            <div class="flex space-x-4">
+                                <input type="search" placeholder="Buscar cursos..."
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Todas las categorías</option>
+                                    <option value="programacion">Programación</option>
+                                    <option value="diseno">Diseño</option>
+                                    <option value="marketing">Marketing</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <% if (cursos && cursos.length> 0) { %>
+                                <% cursos.forEach(curso=> { %>
+                                    <div class="bg-gray-700 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span
+                                                class="px-2 py-1 bg-<%= curso.activo ? 'green' : 'red' %>-600 text-white text-xs rounded-full">
+                                                <%= curso.activo ? 'Activo' : 'Inactivo' %>
+                                            </span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="editCourse('<%= curso._id %>')"
+                                                    class="text-blue-400 hover:text-blue-300">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button
+                                                    onclick="toggleCourseStatus('<%= curso._id %>', <%= !curso.activo %>)"
+                                                    class="text-<%= curso.activo ? 'red' : 'green' %>-400 hover:text-<%= curso.activo ? 'red' : 'green' %>-300">
+                                                    <i
+                                                        class="bi bi-<%= curso.activo ? 'x-circle' : 'check-circle' %>"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <h3 class="text-white font-semibold mb-2">
+                                            <%= curso.titulo %>
+                                        </h3>
+                                        <p class="text-gray-400 text-sm mb-3 line-clamp-2">
+                                            <%= curso.descripcion %>
+                                        </p>
+
+                                        <div class="flex items-center justify-between text-xs text-gray-500">
+                                            <span>
+                                                <i class="bi bi-person mr-1"></i>
+                                                <%= curso.propietario ? curso.propietario.nombre : 'Sin propietario' %>
+                                            </span>
+                                            <span>
+                                                <i class="bi bi-calendar mr-1"></i>
+                                                <%= new Date(curso.fechaCreacion).toLocaleDateString() %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div class="col-span-full text-center py-8 text-gray-400">
+                                                No hay cursos disponibles
+                                            </div>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Exchanges Tab -->
+                    <div id="content-intercambios" class="tab-content hidden">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Gestión de Intercambios</h2>
+                            <div class="flex space-x-4">
+                                <input type="search" placeholder="Buscar intercambios..."
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select
+                                    class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Todos los estados</option>
+                                    <option value="activo">Activos</option>
+                                    <option value="pendiente">Pendientes</option>
+                                    <option value="completado">Completados</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <% if (intercambios && intercambios.length> 0) { %>
+                                <% intercambios.forEach(intercambio=> { %>
+                                    <div class="bg-gray-700 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center space-x-3">
+                                                <span
+                                                    class="px-2 py-1 bg-<%= intercambio.estado === 'activo' ? 'green' : intercambio.estado === 'pendiente' ? 'yellow' : 'gray' %>-600 text-white text-xs rounded-full">
+                                                    <%= intercambio.estado %>
+                                                </span>
+                                                <h3 class="text-white font-semibold">
+                                                    <%= intercambio.titulo %>
+                                                </h3>
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <button onclick="editExchange('<%= intercambio._id %>')"
+                                                    class="text-blue-400 hover:text-blue-300">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button onclick="deleteExchange('<%= intercambio._id %>')"
+                                                    class="text-red-400 hover:text-red-300">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-gray-400 text-sm mb-3">
+                                            <%= intercambio.descripcion %>
+                                        </p>
+
+                                        <div class="flex items-center justify-between text-xs text-gray-500">
+                                            <span>
+                                                <i class="bi bi-person mr-1"></i>
+                                                <%= intercambio.propietario ? intercambio.propietario.nombre
+                                                    : 'Sin propietario' %>
+                                            </span>
+                                            <span>
+                                                <i class="bi bi-calendar mr-1"></i>
+                                                <%= new Date(intercambio.fechaCreacion).toLocaleDateString() %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div class="text-center py-8 text-gray-400">
+                                                No hay intercambios disponibles
+                                            </div>
+                                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <style>
+        .admin-tab {
+            @apply px-4 py-2 text-gray-400 hover:text-white transition-colors border-b-2 border-transparent;
+        }
+
+        .admin-tab.active {
+            @apply text-white border-blue-500;
+        }
+
+        .tab-content {
+            @apply block;
+        }
+
+        .tab-content.hidden {
+            @apply hidden;
+        }
+    </style>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.admin-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+
+            // Add active class to selected tab
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function editUser(userId) {
+            if (window.SkillTrade) {
+                window.SkillTrade.showNotification('Funcionalidad de edición próximamente disponible', 'info');
+            }
+        }
+
+        function toggleUserStatus(userId, newStatus) {
+            if (window.SkillTrade) {
+                window.SkillTrade.showNotification(`Usuario ${newStatus ? 'activado' : 'desactivado'} exitosamente`, 'success');
+            }
+        }
+
+        function editCourse(courseId) {
+            if (window.SkillTrade) {
+                window.SkillTrade.showNotification('Funcionalidad de edición próximamente disponible', 'info');
+            }
+        }
+
+        function toggleCourseStatus(courseId, newStatus) {
+            if (window.SkillTrade) {
+                window.SkillTrade.showNotification(`Curso ${newStatus ? 'activado' : 'desactivado'} exitosamente`, 'success');
+            }
+        }
+
+        function editExchange(exchangeId) {
+            if (window.SkillTrade) {
+                window.SkillTrade.showNotification('Funcionalidad de edición próximamente disponible', 'info');
+            }
+        }
+
+        function deleteExchange(exchangeId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este intercambio?')) {
+                if (window.SkillTrade) {
+                    window.SkillTrade.showNotification('Intercambio eliminado exitosamente', 'success');
+                }
+            }
+        }
+    </script>

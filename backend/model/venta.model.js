@@ -21,18 +21,36 @@ const ventaSchema = new Schema({
         precio: {
             type: Number,
             required: true,
-            min: 0
+            min: [0, 'El precio no puede ser negativo'],
+            validate: {
+                validator: function(v) {
+                    return Number.isFinite(v) && v >= 0;
+                },
+                message: 'El precio debe ser un número válido no negativo'
+            }
         },
         cantidad: {
             type: Number,
             default: 1,
-            min: 1
+            min: [1, 'La cantidad mínima es 1'],
+            validate: {
+                validator: function(v) {
+                    return Number.isInteger(v) && v >= 1;
+                },
+                message: 'La cantidad debe ser un número entero mayor a 0'
+            }
         }
     }],
     total: {
         type: Number,
         required: true,
-        min: 0
+        min: [0, 'El total no puede ser negativo'],
+        validate: {
+            validator: function(v) {
+                return Number.isFinite(v) && v >= 0;
+            },
+            message: 'El total debe ser un número válido no negativo'
+        }
     },
     estado: {
         type: String,
@@ -147,11 +165,25 @@ const ventaSchema = new Schema({
         puntuacion: { 
             type: Number, 
             min: [1, 'La puntuación mínima es 1'], 
-            max: [5, 'La puntuación máxima es 5'] 
+            max: [5, 'La puntuación máxima es 5'],
+            validate: {
+                validator: function(v) {
+                    if (!v) return true; // Opcional
+                    return Number.isInteger(v) && v >= 1 && v <= 5;
+                },
+                message: 'La puntuación debe ser un número entero entre 1 y 5'
+            }
         },
         comentario: {
             type: String,
-            maxlength: [500, 'El comentario no puede exceder 500 caracteres']
+            maxlength: [500, 'El comentario no puede exceder 500 caracteres'],
+            validate: {
+                validator: function(v) {
+                    if (!v) return true; // Opcional
+                    return v.length > 0;
+                },
+                message: 'El comentario no puede estar vacío si se proporciona'
+            }
         },
         fecha: Date
     },
@@ -172,7 +204,14 @@ const ventaSchema = new Schema({
         },
         monto: {
             type: Number,
-            min: [0, 'El monto no puede ser negativo']
+            min: [0, 'El monto no puede ser negativo'],
+            validate: {
+                validator: function(v) {
+                    if (!v) return true; // Opcional
+                    return Number.isFinite(v) && v >= 0;
+                },
+                message: 'El monto debe ser un número válido no negativo'
+            }
         },
         fechaProcesamiento: Date,
         metodoReembolso: {
@@ -211,7 +250,8 @@ ventaSchema.index({ vendedor: 1 });
 ventaSchema.index({ estado: 1 });
 
 ventaSchema.virtual('sePuedeCancelar').get(function() {
-    return ['pendiente', 'procesando'].includes(this.estado);
+    // El enum de estado es ['pendiente','completada','cancelada']
+    return this.estado === 'pendiente';
 });
 
 ventaSchema.virtual('sePuedeReembolsar').get(function() {
@@ -235,5 +275,13 @@ ventaSchema.methods.agregarTracking = function(numero, empresa) {
     
     return this.save();
 };
+
+// Recalcular total antes de guardar para garantizar integridad
+ventaSchema.pre('save', function(next) {
+    if (Array.isArray(this.items)) {
+        this.total = this.items.reduce((acc, item) => acc + (Number(item.precio) * Number(item.cantidad || 1)), 0);
+    }
+    next();
+});
 
 module.exports = mongoose.model('Venta', ventaSchema);
