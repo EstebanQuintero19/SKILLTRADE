@@ -93,15 +93,12 @@ const cursoSchema = new Schema({
         },
         required: [true, 'El nivel del curso es obligatorio']
     },
-    etiquetas: {
-        type: [String],
-        validate: {
-            validator: function(v) {
-                return v.length <= 10;
-            },
-            message: 'No puede tener más de 10 etiquetas'
-        }
-    },
+    etiquetas: [{
+        type: String,
+        trim: true,
+        minlength: [1, 'Cada etiqueta debe tener al menos 1 carácter'],
+        maxlength: [30, 'Cada etiqueta no puede exceder 30 caracteres']
+    }],
     precio: {
         type: Number,
         default: 0,
@@ -179,7 +176,13 @@ const cursoSchema = new Schema({
             type: Number, 
             min: [1, 'La puntuación mínima es 1'], 
             max: [5, 'La puntuación máxima es 5'],
-            required: [true, 'La puntuación es obligatoria']
+            required: [true, 'La puntuación es obligatoria'],
+            validate: {
+                validator: function(v) {
+                    return Number.isInteger(v);
+                },
+                message: 'La puntuación debe ser un número entero'
+            }
         },
         comentario: {
             type: String,
@@ -323,6 +326,11 @@ cursoSchema.path('lecciones').validate(function(lecciones) {
     const ordenesUnicos = [...new Set(ordenes)];
     return ordenes.length === ordenesUnicos.length;
 }, 'No puede haber lecciones con el mismo orden');
+
+// Límite máximo de etiquetas
+cursoSchema.path('etiquetas').validate(function(etiquetas) {
+    return !Array.isArray(etiquetas) || etiquetas.length <= 10;
+}, 'No puede tener más de 10 etiquetas');
 
 // Método para agregar calificación
 cursoSchema.methods.agregarCalificacion = function(usuarioId, puntuacion, comentario = '') {

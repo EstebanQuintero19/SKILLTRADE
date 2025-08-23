@@ -250,7 +250,8 @@ ventaSchema.index({ vendedor: 1 });
 ventaSchema.index({ estado: 1 });
 
 ventaSchema.virtual('sePuedeCancelar').get(function() {
-    return ['pendiente', 'procesando'].includes(this.estado);
+    // El enum de estado es ['pendiente','completada','cancelada']
+    return this.estado === 'pendiente';
 });
 
 ventaSchema.virtual('sePuedeReembolsar').get(function() {
@@ -274,5 +275,13 @@ ventaSchema.methods.agregarTracking = function(numero, empresa) {
     
     return this.save();
 };
+
+// Recalcular total antes de guardar para garantizar integridad
+ventaSchema.pre('save', function(next) {
+    if (Array.isArray(this.items)) {
+        this.total = this.items.reduce((acc, item) => acc + (Number(item.precio) * Number(item.cantidad || 1)), 0);
+    }
+    next();
+});
 
 module.exports = mongoose.model('Venta', ventaSchema);

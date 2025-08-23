@@ -197,4 +197,12 @@ carritoSchema.methods.convertirEnOrden = function() {
     return this.save();
 };
 
+// Hook para garantizar consistencia del total antes de guardar
+carritoSchema.pre('save', function(next) {
+    if (Array.isArray(this.items)) {
+        this.total = this.items.reduce((acc, item) => acc + (Number(item.precio) * Number(item.cantidad || 1)), 0);
+    }
+    next();
+});
+
 module.exports = mongoose.model('Carrito', carritoSchema);
