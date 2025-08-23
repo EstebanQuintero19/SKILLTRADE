@@ -622,6 +622,7 @@ const subirFotoPerfil = async (req, res) => {
 exports.obtenerUsuarios = async (req, res) => {
     try {
         const usuarios = await Usuario.find().select('-password');
+        console.log('Usuarios obtenidos:', usuarios);
         res.json(usuarios);
     } catch (error) {
         res.status(500).json({ error: error.message });

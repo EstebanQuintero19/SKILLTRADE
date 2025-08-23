@@ -13,7 +13,7 @@ const cursoSchema = new Schema({
         trim: true
     },
     categoria: {
-        type: [String],
+        type: String,
         required: [true, 'Debe ingresar al menos una categoría']
     },
     imagen: {
@@ -35,6 +35,7 @@ const cursoSchema = new Schema({
         required: [true, 'El nivel del curso es obligatorio']
     },
     etiquetas: [String],
+
     precio: {
         type: Number,
         default: 0,
@@ -108,7 +109,7 @@ const cursoSchema = new Schema({
         },
         contenido: {
             url: String,
-            texto: String
+            type: String   ////ojo
         },
         orden: {
             type: Number,

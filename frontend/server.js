@@ -32,6 +32,10 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
+
+
+//app.use('/api/cursos', validateApiKey);    
+
 // ===== RUTAS DE AUTENTICACIÓN =====
 app.get('/login', (req, res) => {
     res.render('login', { layout: false });
@@ -328,6 +332,8 @@ app.get('/mis-cursos', async (req, res) => {
         });
     }
 });
+
+
 
 // Ruta de prueba para verificar estilos
 app.get('/test', (req, res) => {

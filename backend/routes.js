@@ -1,6 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
+const validateApiKey = (req, res, next) => {
+    const apiKey = req.headers['rh-api-key'];
+    console.log('API Key recibida:', apiKey);
+    const validApiKey = 'skilltrade-api-key-2025';
+    
+
+    if (!apiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    if (apiKey !== validApiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    next();
+}
+
 // Import controllers
 const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
@@ -16,7 +39,7 @@ router.post('/auth/login', usuarioController.loginUsuario);
 router.post('/auth/logout', verificarToken, usuarioController.cerrarSesion);
 
 // ===== RUTAS DE USUARIOS =====
-router.get('/usuarios', verificarToken, usuarioController.obtenerUsuarios);
+router.get('/usuarios', validateApiKey, usuarioController.obtenerUsuarios);
 router.get('/usuarios/:id', verificarToken, usuarioController.obtenerUsuarioPorId);
 router.post('/usuarios', usuarioController.crearUsuario);
 router.put('/usuarios/:id', verificarToken, usuarioController.actualizarUsuario);
@@ -30,7 +53,7 @@ router.put('/perfil/password', verificarToken, usuarioController.cambiarPassword
 router.get('/perfil/estadisticas', verificarToken, usuarioController.obtenerEstadisticasPersonales);
 
 // ===== RUTAS DE CURSOS =====
-router.get('/cursos', cursoController.obtenerCursos);
+router.get('/cursos', validateApiKey, cursoController.obtenerCursos);
 router.get('/cursos/:id', cursoController.obtenerCursoPorId);
 router.post('/cursos', cursoController.crearCurso);
 router.put('/cursos/:id', cursoController.actualizarCurso);
@@ -50,7 +73,15 @@ router.post('/owners', ownerController.crearOwner);
 router.put('/owners/:id', ownerController.actualizarOwner);
 router.delete('/owners/:id', ownerController.eliminarOwner);
 
-// ===== RUTAS ESPECIALES =====
+// ===== RUTAS DE BIBLIOTECAS =====
+router.get('/bibliotecas', bibliotecaController.obtenerBibliotecas);
+router.get('/bibliotecas/:id', bibliotecaController.obtenerBibliotecaPorId);
+
+// ===== RUTAS DE CARRITOS =====
+router.get('/carritos', carritoController.obtenerCarritos);
+router.get('/carritos/:id', carritoController.obtenerCarritoPorId);
+
+
 
 // Obtener cursos por categoría
 router.get('/cursos/categoria/:categoria', async (req, res) => {

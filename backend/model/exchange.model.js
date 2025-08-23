@@ -31,8 +31,8 @@ const exchangeSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    fechaInicio: Date,
-    fechaFin: Date,
+    fechaInicio: Date,  //falta validaciones
+    fechaFin: Date,     //falta validaciones
     duracion: {
         type: Number,
         required: true,

@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Registrando...';
 
-      console.log('🔄 INICIANDO PETICIÓN DE REGISTRO...');
+      console.log('INICIANDO PETICIÓN DE REGISTRO...');
       console.log('Email:', email);
       console.log('Nombre:', email.split('@')[0]);
       
@@ -156,12 +156,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log('Response data:', data);
         
         if (response.ok) {
-          console.log('✅ REGISTRO EXITOSO - INICIANDO REDIRECCIÓN');
+          console.log('REGISTRO EXITOSO - INICIANDO REDIRECCIÓN');
           
           // Guardar token en localStorage
           localStorage.setItem('token', data.token);
           localStorage.setItem('usuario', JSON.stringify(data.usuario));
-          console.log('✅ Token guardado en localStorage');
+          console.log('Token guardado en localStorage');
           
           showAlert("¡Registro exitoso! Redirigiendo...", "success");
           
@@ -169,11 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
           if (modal) {
             modal.hide();
-            console.log('✅ Modal cerrado');
+            console.log('Modal cerrado');
           }
           
           // REDIRECCIÓN INMEDIATA SIN TIMEOUT
-          console.log('🚀 EJECUTANDO REDIRECCIÓN INMEDIATA A /mis-cursos');
+          console.log('EJECUTANDO REDIRECCIÓN INMEDIATA A /mis-cursos');
           
           // Método 1: window.location.href
           try {
