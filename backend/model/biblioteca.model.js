@@ -5,8 +5,7 @@ const bibliotecaSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: true,
-        unique: true
+        required: true
     },
     cursos: [{
         curso: {
@@ -195,7 +194,8 @@ const bibliotecaSchema = new Schema({
     timestamps: true
 });
 
-// Índices básicos (usuario ya tiene índice único en schema)
+// Índices básicos
+bibliotecaSchema.index({ usuario: 1 }, { unique: true });
 bibliotecaSchema.index({ 'cursos.curso': 1 });
 
 // Virtual para verificar si la biblioteca está vacía
