@@ -1,0 +1,243 @@
+
+<div class="bg-gray-900 min-h-screen">
+    <!-- Dashboard Header -->
+    <section class="bg-gray-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">
+                        ¡Hola, <%= user.nombre %>!
+                    </h1>
+                    <p class="text-gray-300 mt-2">
+                        Bienvenido a tu panel de control
+                    </p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/dashboard/cursos/crear" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="bi bi-plus-circle mr-2"></i>Crear Curso
+                    </a>
+                    <a href="/dashboard/intercambios/crear" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="bi bi-arrow-left-right mr-2"></i>Proponer Intercambio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-600 rounded-full">
+                            <i class="bi bi-book text-white text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-400 text-sm">Mis Cursos</p>
+                            <p class="text-2xl font-bold text-white"><%= misCursos.length %></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-600 rounded-full">
+                            <i class="bi bi-people text-white text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-400 text-sm">Estudiantes</p>
+                            <p class="text-2xl font-bold text-white"><%= totalEstudiantes || 0 %></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-600 rounded-full">
+                            <i class="bi bi-arrow-left-right text-white text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-400 text-sm">Intercambios</p>
+                            <p class="text-2xl font-bold text-white"><%= misIntercambios.length %></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-600 rounded-full">
+                            <i class="bi bi-star text-white text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-400 text-sm">Calificación</p>
+                            <p class="text-2xl font-bold text-white">
+                                <%= promedioCalificacion ? promedioCalificacion.toFixed(1) : '0.0' %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- My Courses -->
+                <div class="lg:col-span-2">
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Mis Cursos</h2>
+                            <a href="/dashboard/cursos" class="text-blue-400 hover:text-blue-300 text-sm">
+                                Ver todos <i class="bi bi-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                        
+                        <% if (misCursos && misCursos.length > 0) { %>
+                            <div class="space-y-4">
+                                <% misCursos.slice(0, 3).forEach(curso => { %>
+                                    <div class="flex items-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-4">
+                                            <i class="bi bi-book text-white text-xl"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="font-semibold text-white mb-1">
+                                                <a href="/cursos/<%= curso._id %>" class="hover:text-blue-400 transition-colors">
+                                                    <%= curso.titulo %>
+                                                </a>
+                                            </h3>
+                                            <p class="text-gray-400 text-sm mb-2 line-clamp-1">
+                                                <%= curso.descripcion %>
+                                            </p>
+                                            <div class="flex items-center text-xs text-gray-500">
+                                                <span class="mr-4">
+                                                    <i class="bi bi-people mr-1"></i>
+                                                    <%= curso.estudiantes ? curso.estudiantes.length : 0 %> estudiantes
+                                                </span>
+                                                <span class="mr-4">
+                                                    <i class="bi bi-calendar mr-1"></i>
+                                                    <%= new Date(curso.fechaCreacion).toLocaleDateString() %>
+                                                </span>
+                                                <span class="px-2 py-1 bg-<%= curso.activo ? 'green' : 'red' %>-900 text-<%= curso.activo ? 'green' : 'red' %>-100 rounded">
+                                                    <%= curso.activo ? 'Activo' : 'Inactivo' %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <a href="/dashboard/cursos/<%= curso._id %>/editar" 
+                                               class="p-2 text-gray-400 hover:text-blue-400 transition-colors">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="/cursos/<%= curso._id %>" 
+                                               class="p-2 text-gray-400 hover:text-green-400 transition-colors">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="bi bi-book text-gray-400 text-2xl"></i>
+                                </div>
+                                <p class="text-gray-400 mb-4">Aún no has creado ningún curso</p>
+                                <a href="/dashboard/cursos/crear" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    Crear mi primer curso
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Recent Activity -->
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4">Actividad Reciente</h3>
+                        <div class="space-y-3">
+                            <% if (actividadReciente && actividadReciente.length > 0) { %>
+                                <% actividadReciente.forEach(actividad => { %>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-300 text-sm">
+                                                <%= actividad.descripcion %>
+                                            </p>
+                                            <p class="text-gray-500 text-xs mt-1">
+                                                <%= new Date(actividad.fecha).toLocaleDateString() %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <p class="text-gray-400 text-sm">No hay actividad reciente</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4">Acciones Rápidas</h3>
+                        <div class="space-y-3">
+                            <a href="/dashboard/cursos/crear" 
+                               class="flex items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                <i class="bi bi-plus-circle text-blue-400 mr-3"></i>
+                                <span class="text-white">Crear Curso</span>
+                            </a>
+                            <a href="/dashboard/intercambios/crear" 
+                               class="flex items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                <i class="bi bi-arrow-left-right text-purple-400 mr-3"></i>
+                                <span class="text-white">Proponer Intercambio</span>
+                            </a>
+                            <a href="/dashboard/perfil" 
+                               class="flex items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                <i class="bi bi-person text-green-400 mr-3"></i>
+                                <span class="text-white">Editar Perfil</span>
+                            </a>
+                            <a href="/dashboard/estadisticas" 
+                               class="flex items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                <i class="bi bi-bar-chart text-yellow-400 mr-3"></i>
+                                <span class="text-white">Ver Estadísticas</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- My Exchanges -->
+                    <div class="bg-gray-800 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white">Mis Intercambios</h3>
+                            <a href="/dashboard/intercambios" class="text-blue-400 hover:text-blue-300 text-sm">
+                                Ver todos
+                            </a>
+                        </div>
+                        
+                        <% if (misIntercambios && misIntercambios.length > 0) { %>
+                            <div class="space-y-3">
+                                <% misIntercambios.slice(0, 3).forEach(intercambio => { %>
+                                    <div class="p-3 bg-gray-700 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h4 class="text-white text-sm font-medium">
+                                                <%= intercambio.titulo %>
+                                            </h4>
+                                            <span class="px-2 py-1 bg-<%= intercambio.estado === 'activo' ? 'green' : intercambio.estado === 'pendiente' ? 'yellow' : 'gray' %>-900 text-<%= intercambio.estado === 'activo' ? 'green' : intercambio.estado === 'pendiente' ? 'yellow' : 'gray' %>-100 text-xs rounded">
+                                                <%= intercambio.estado %>
+                                            </span>
+                                        </div>
+                                        <p class="text-gray-400 text-xs">
+                                            <%= intercambio.descripcion %>
+                                        </p>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-gray-400 text-sm">No tienes intercambios activos</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

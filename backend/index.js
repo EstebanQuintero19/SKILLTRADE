@@ -24,7 +24,7 @@ mongoose.connection.on('error', (err) => {
 });
 
 // API routes
-app.use('/api/v0', routes);
+app.use('/api', routes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -34,17 +34,24 @@ app.get('/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
+    res.status(500).json({ 
+        success: false,
+        message: 'Error interno del servidor',
+        error: err.message 
+    });
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+    res.status(404).json({ 
+        success: false,
+        message: 'Ruta no encontrada' 
+    });
 });
 
 // Server
-const PORT = process.env.PORT || 9090;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`API REST corriendo en el puerto: ${PORT}`);
-    console.log(`Endpoint base: http://localhost:${PORT}/api/v0`);
+    console.log(`Endpoint base: http://localhost:${PORT}/api`);
 });

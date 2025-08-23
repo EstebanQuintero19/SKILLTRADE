@@ -1,0 +1,141 @@
+
+<!-- Header Section -->
+<section class="bg-gray-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                Explorar Cursos
+            </h1>
+            <p class="text-xl text-gray-300 mb-8">
+                Descubre conocimientos increíbles de nuestra comunidad
+            </p>
+            
+            <!-- Search and Filter -->
+            <div class="max-w-2xl mx-auto">
+                <form method="GET" class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="search" name="buscar" value="<%= buscar %>" 
+                               placeholder="Buscar cursos..." 
+                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <select name="categoria" class="px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Todas las categorías</option>
+                            <option value="programacion" <%= categoria === 'programacion' ? 'selected' : '' %>>Programación</option>
+                            <option value="diseno" <%= categoria === 'diseno' ? 'selected' : '' %>>Diseño</option>
+                            <option value="marketing" <%= categoria === 'marketing' ? 'selected' : '' %>>Marketing</option>
+                            <option value="musica" <%= categoria === 'musica' ? 'selected' : '' %>>Música</option>
+                            <option value="fotografia" <%= categoria === 'fotografia' ? 'selected' : '' %>>Fotografía</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        <i class="bi bi-search mr-2"></i>Buscar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Grid -->
+<section class="bg-gray-900 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <% if (cursos && cursos.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% cursos.forEach(curso => { %>
+                    <div class="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
+                        <% if (curso.imagen) { %>
+                            <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-48 object-cover">
+                        <% } else { %>
+                            <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <i class="bi bi-book text-white text-4xl"></i>
+                            </div>
+                        <% } %>
+                        
+                        <div class="p-6">
+                            <!-- Categories -->
+                            <% if (curso.categoria && curso.categoria.length > 0) { %>
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    <% curso.categoria.forEach(cat => { %>
+                                        <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                                            <%= cat %>
+                                        </span>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                            
+                            <h3 class="text-xl font-semibold text-white mb-2">
+                                <a href="/cursos/<%= curso._id %>" class="hover:text-blue-400 transition-colors">
+                                    <%= curso.titulo %>
+                                </a>
+                            </h3>
+                            
+                            <p class="text-gray-400 mb-4 line-clamp-2">
+                                <%= curso.descripcion %>
+                            </p>
+                            
+                            <!-- Course Info -->
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <% if (curso.estadisticas && curso.estadisticas.calificacionPromedio > 0) { %>
+                                        <div class="flex text-yellow-400">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <i class="bi bi-star<%= i <= curso.estadisticas.calificacionPromedio ? '-fill' : '' %> text-sm"></i>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-gray-400 text-sm">(<%= curso.estadisticas.calificacionPromedio.toFixed(1) %>)</span>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-sm">Sin calificaciones</span>
+                                    <% } %>
+                                </div>
+                                
+                                <span class="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded">
+                                    <%= curso.nivel || 'Básico' %>
+                                </span>
+                            </div>
+                            
+                            <!-- Price and Action -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <% if (curso.precio > 0) { %>
+                                        <span class="text-green-400 font-semibold text-lg">$<%= curso.precio.toLocaleString() %></span>
+                                    <% } else { %>
+                                        <span class="text-blue-400 font-semibold text-lg">Gratis</span>
+                                    <% } %>
+                                </div>
+                                
+                                <a href="/cursos/<%= curso._id %>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    Ver Curso
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="mx-auto h-24 w-24 bg-gray-700 rounded-full flex items-center justify-center mb-6">
+                    <i class="bi bi-search text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-2">No se encontraron cursos</h3>
+                <p class="text-gray-400 mb-6">
+                    <% if (buscar || categoria) { %>
+                        No hay cursos que coincidan con tu búsqueda. Intenta con otros términos.
+                    <% } else { %>
+                        Aún no hay cursos disponibles. ¡Sé el primero en crear uno!
+                    <% } %>
+                </p>
+                <% if (isAuthenticated) { %>
+                    <a href="/dashboard" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        Crear mi primer curso
+                    </a>
+                <% } else { %>
+                    <a href="/auth/register" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        Únete y crea cursos
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</section>

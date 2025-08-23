@@ -5,8 +5,7 @@ const bibliotecaSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: true,
-        unique: true
+        required: true
     },
     cursos: [{
         curso: {
@@ -27,12 +26,25 @@ const bibliotecaSchema = new Schema({
             porcentajeCompletado: {
                 type: Number,
                 default: 0,
-                min: 0,
-                max: 100
+                min: [0, 'El porcentaje no puede ser negativo'],
+                max: [100, 'El porcentaje no puede exceder 100'],
+                validate: {
+                    validator: function(v) {
+                        return Number.isInteger(v) && v >= 0 && v <= 100;
+                    },
+                    message: 'El porcentaje debe ser un número entero entre 0 y 100'
+                }
             },
             ultimaActividad: {
                 type: Date,
-                default: Date.now
+                default: Date.now,
+                validate: {
+                    validator: function(v) {
+                        if (!v) return true; // Permitir null
+                        return v <= new Date();
+                    },
+                    message: 'La última actividad no puede ser futura'
+                }
             }
         },
         recordatorios: [{
@@ -168,7 +180,13 @@ const bibliotecaSchema = new Schema({
         puntos: {
             type: Number,
             default: 0,
-            min: [0, 'Los puntos no pueden ser negativos']
+            min: [0, 'Los puntos no pueden ser negativos'],
+            validate: {
+                validator: function(v) {
+                    return Number.isInteger(v) && v >= 0;
+                },
+                message: 'Los puntos deben ser un número entero no negativo'
+            }
         }
     }],
 }, {

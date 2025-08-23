@@ -1,0 +1,104 @@
+<header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="bi bi-mortarboard text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-white">SkillTrade</span>
+                </a>
+            </div>
+
+            <!-- Navigation Links (Desktop) -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="/" class="text-gray-300 hover:text-white transition-colors">Inicio</a>
+                <a href="/cursos" class="text-gray-300 hover:text-white transition-colors">Cursos</a>
+                <% if (isAuthenticated) { %>
+                    <a href="/intercambios" class="text-gray-300 hover:text-white transition-colors">Intercambios</a>
+                    <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                    <% if (user && user.rol === 'admin') { %>
+                        <a href="/admin" class="text-gray-300 hover:text-white transition-colors">Admin</a>
+                    <% } %>
+                <% } %>
+            </div>
+
+            <!-- User Actions -->
+            <div class="flex items-center space-x-4">
+                <% if (isAuthenticated) { %>
+                    <!-- User Menu -->
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
+                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                                <i class="bi bi-person text-sm"></i>
+                            </div>
+                            <span class="hidden sm:block"><%= user.nombre %></span>
+                            <i class="bi bi-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="py-2">
+                                <a href="/perfil" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    <i class="bi bi-person-circle mr-2"></i>Mi Perfil
+                                </a>
+                                <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    <i class="bi bi-speedometer2 mr-2"></i>Dashboard
+                                </a>
+                                <div class="border-t border-gray-700 my-1"></div>
+                                <form action="/auth/logout" method="POST" class="inline">
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                                        <i class="bi bi-box-arrow-right mr-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <!-- Auth Buttons -->
+                    <button type="button" class="text-gray-300 hover:text-white transition-colors" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        Registrarse
+                    </button>
+                <% } %>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-gray-300 hover:text-white" id="mobile-menu-button">
+                    <i class="bi bi-list text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-gray-700">
+                <a href="/" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">Inicio</a>
+                <a href="/cursos" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">Cursos</a>
+                <% if (isAuthenticated) { %>
+                    <a href="/intercambios" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">Intercambios</a>
+                    <a href="/dashboard" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">Dashboard</a>
+                    <% if (user && user.rol === 'admin') { %>
+                        <a href="/admin" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">Admin</a>
+                    <% } %>
+                    <div class="border-t border-gray-700 pt-2">
+                        <form action="/auth/logout" method="POST">
+                            <button type="submit" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <button type="button" class="w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" class="w-full text-left px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        Registrarse
+                    </button>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+</header>

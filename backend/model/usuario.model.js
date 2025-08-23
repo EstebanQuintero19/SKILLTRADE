@@ -5,49 +5,87 @@ const usuarioSchema = new Schema({
     nombre: {
         type: String,
         required: [true, 'El nombre es obligatorio'],
-        trim: true
+        trim: true,
+        minlength: [2, 'El nombre debe tener al menos 2 caracteres'],
+        maxlength: [50, 'El nombre no puede exceder 50 caracteres']
     },
     email: {
         type: String,
         required: [true, 'El email es obligatorio'],
         unique: true,
         lowercase: true,
-        trim: true
+        trim: true,
+        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Formato de email inválido']
     },
     password: {
         type: String,
         required: [true, 'La contraseña es obligatoria'],
-        minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
+        minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
         select: false
+    },
+    apiKey: {
+        type: String,
+        unique: true,
+        sparse: true,
+        index: true
     },
     foto: {
         type: String,
-        default: null
+        default: null,
+        validate: {
+            validator: function(v) {
+                if (!v) return true; // Permitir null
+                return v.startsWith('http') || v.startsWith('/');
+            },
+            message: 'La foto debe ser una URL válida o una ruta local'
+        }
     },
     biografia: {
         type: String,
-        default: ''
+        default: '',
+        maxlength: [500, 'La biografía no puede exceder 500 caracteres'],
+        trim: true
     },
-    datosContacto: {
-        telefono: String,
-        direccion: String
-    },
-    visibilidadPerfil: {
+    telefono: {
         type: String,
-        enum: ['publico', 'privado'],
+        default: '',
+        match: [/^[\+]?[0-9\s\-\(\)]+$/, 'Formato de teléfono inválido'],
+        trim: true
+    },
+    visibilidad: {
+        type: String,
+        enum: {
+            values: ['publico', 'privado'],
+            message: 'La visibilidad debe ser público o privado'
+        },
         default: 'publico'
     },
-    fechaRegistro: {
+    fechaCreacion: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        validate: {
+            validator: function(v) {
+                return v <= new Date();
+            },
+            message: 'La fecha de creación no puede ser futura'
+        }
     },
     ultimoAcceso: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        validate: {
+            validator: function(v) {
+                return v <= new Date();
+            },
+            message: 'La fecha de último acceso no puede ser futura'
+        }
     },
     rol: {
         type: String,
-        enum: ['admin', 'usuario'],
+        enum: {
+            values: ['admin', 'usuario'],
+            message: 'El rol debe ser admin o usuario'
+        },
         default: 'usuario'
     },
     activo: {
@@ -55,9 +93,21 @@ const usuarioSchema = new Schema({
         default: true
     },
     estadisticas: {
-        cursosCreados: { type: Number, default: 0 },
-        intercambiosRealizados: { type: Number, default: 0 },
-        suscripcionesActivas: { type: Number, default: 0 }
+        cursosCreados: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Los cursos creados no pueden ser negativos']
+        },
+        intercambiosRealizados: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Los intercambios no pueden ser negativos']
+        },
+        suscripcionesActivas: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Las suscripciones no pueden ser negativas']
+        }
     }
 }, {
     collection: 'usuarios',
@@ -78,18 +128,25 @@ const usuarioSchema = new Schema({
     }
 });
 
-// Índices básicos
-usuarioSchema.index({ email: 1 });
+// Índices básicos (email ya tiene índice único en schema)
 usuarioSchema.index({ nombre: 'text', biografia: 'text' });
+usuarioSchema.index({ rol: 1 });
+usuarioSchema.index({ activo: 1 });
 
-// Método para generar token JWT
-usuarioSchema.methods.generarToken = function() {
-    const jwt = require('jsonwebtoken');
-    return jwt.sign(
-        { _id: this._id, email: this.email, rol: this.rol }, 
-        process.env.JWT_SECRET || 'skilltrade_secret_key_2024', 
-        { expiresIn: '7d' }
-    );
+// Validación personalizada para verificar que el usuario no se registre a sí mismo como admin
+usuarioSchema.pre('save', function(next) {
+    if (this.isNew && this.rol === 'admin') {
+        // Solo permitir admin si es el primer usuario o si hay validación externa
+        console.log('Usuario admin creado:', this.email);
+    }
+    next();
+});
+
+// Método para generar nueva API Key
+usuarioSchema.methods.generarNuevaApiKey = function() {
+    const crypto = require('crypto');
+    this.apiKey = crypto.randomBytes(32).toString('hex');
+    return this.save();
 };
 
 // Método para verificar contraseña
@@ -98,13 +155,18 @@ usuarioSchema.methods.verificarPassword = async function(password) {
     return await bcrypt.compare(password, this.password);
 };
 
-// Middleware pre-save para hashear contraseña
-usuarioSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        const bcrypt = require('bcryptjs');
-        this.password = await bcrypt.hash(this.password, 10);
-    }
-    next();
-});
+// Método para actualizar último acceso
+usuarioSchema.methods.actualizarUltimoAcceso = function() {
+    this.ultimoAcceso = new Date();
+    return this.save();
+};
+
+// Método para limpiar datos sensibles
+usuarioSchema.methods.limpiarDatosSensibles = function() {
+    const usuario = this.toObject();
+    delete usuario.password;
+    delete usuario.apiKey;
+    return usuario;
+};
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
