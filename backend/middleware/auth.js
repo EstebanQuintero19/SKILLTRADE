@@ -1,6 +1,6 @@
 const Usuario = require('../model/usuario.model');
 
-// Middleware de autenticación con API Key
+// Middleware de autenticación con API Key (TTL: 24 horas)
 const autenticarApiKey = async (req, res, next) => {
     try {
         // Obtener API Key del header
@@ -28,6 +28,16 @@ const autenticarApiKey = async (req, res, next) => {
             return res.status(403).json({
                 success: false,
                 message: 'Cuenta desactivada'
+            });
+        }
+        
+        const TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
+        const referencia = usuario.updatedAt || usuario.fechaCreacion || new Date(0);
+        const expiraEn = new Date(referencia.getTime() + TTL_MS);
+        if (Date.now() > expiraEn.getTime()) {
+            return res.status(401).json({
+                success: false,
+                message: 'API Key expirada'
             });
         }
 

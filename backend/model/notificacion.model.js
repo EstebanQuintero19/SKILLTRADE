@@ -47,7 +47,17 @@ const notificacionSchema = new Schema({
         },
         url: {
             type: String,
-            maxlength: [500, 'La URL no puede exceder 500 caracteres']
+            maxlength: [500, 'La URL no puede exceder 500 caracteres'],
+            validate: {
+                validator: function(v) {
+                    // this hace referencia al subdocumento accion
+                    if (this.tipo === 'navegar' || this.tipo === 'abrir') {
+                        return typeof v === 'string' && (v.startsWith('http') || v.startsWith('/'));
+                    }
+                    return true; // no requerida para 'dismiss'
+                },
+                message: 'La URL es obligatoria y debe ser válida cuando la acción es navegar o abrir'
+            }
         }
     }
 }, {

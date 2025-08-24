@@ -10,7 +10,13 @@ const suscripcionSchema = new Schema({
     creador: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: [true, 'El creador es obligatorio']
+        required: [true, 'El creador es obligatorio'],
+        validate: {
+            validator: function(v) {
+                return v && this.suscriptor && v.toString() !== this.suscriptor.toString();
+            },
+            message: 'El creador no puede ser el mismo que el suscriptor'
+        }
     },
     tipo: {
         type: String,
@@ -85,6 +91,12 @@ const suscripcionSchema = new Schema({
 suscripcionSchema.index({ suscriptor: 1, estado: 1 });
 suscripcionSchema.index({ creador: 1, estado: 1 });
 suscripcionSchema.index({ fechaFin: 1 });
+
+// Solo una suscripción activa por par suscriptor-creador
+suscripcionSchema.index(
+    { suscriptor: 1, creador: 1 },
+    { unique: true, partialFilterExpression: { estado: 'activa' } }
+);
 
 // Método para verificar si la suscripción está activa
 suscripcionSchema.methods.estaActiva = function() {

@@ -111,7 +111,8 @@ const exchangeSchema = new Schema({
             max: [5, 'La puntuación máxima es 5'],
             validate: {
                 validator: function(v) {
-                    if (this.comentario || this.fecha) {
+                    const c = this.calificacionEmisor || {};
+                    if (c.comentario || c.fecha) {
                         return Number.isInteger(v) && v >= 1 && v <= 5;
                     }
                     return true; // Si no hay comentario ni fecha, la puntuación es opcional
@@ -133,7 +134,8 @@ const exchangeSchema = new Schema({
             max: [5, 'La puntuación máxima es 5'],
             validate: {
                 validator: function(v) {
-                    if (this.comentario || this.fecha) {
+                    const c = this.calificacionReceptor || {};
+                    if (c.comentario || c.fecha) {
                         return Number.isInteger(v) && v >= 1 && v <= 5;
                     }
                     return true; // Si no hay comentario ni fecha, la puntuación es opcional
@@ -158,6 +160,12 @@ exchangeSchema.index({ emisor: 1 });
 exchangeSchema.index({ receptor: 1 });
 exchangeSchema.index({ estado: 1 });
 exchangeSchema.index({ fechaSolicitud: -1 });
+
+// Índice parcial único para evitar múltiples intercambios activos/pendientes entre el mismo par y cursos
+exchangeSchema.index(
+    { emisor: 1, receptor: 1, cursoEmisor: 1, cursoReceptor: 1, estado: 1 },
+    { unique: true, partialFilterExpression: { estado: { $in: ['pendiente', 'activo'] } } }
+);
 
 // Virtual para estado del intercambio
 exchangeSchema.virtual('estadoDetallado').get(function() {

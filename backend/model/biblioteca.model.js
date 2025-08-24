@@ -17,6 +17,11 @@ const bibliotecaSchema = new Schema({
             type: Date,
             default: Date.now
         },
+        metodoAdquisicion: {
+            type: String,
+            enum: ['compra', 'intercambio', 'admin', 'promocion'],
+            default: 'compra'
+        },
         estado: {
             type: String,
             enum: ['activo', 'completado', 'en_progreso'],
@@ -84,7 +89,18 @@ const bibliotecaSchema = new Schema({
             },
             url: {
                 type: String,
-                maxlength: [500, 'La URL no puede exceder 500 caracteres']
+                maxlength: [500, 'La URL no puede exceder 500 caracteres'],
+                validate: {
+                    validator: function(v) {
+                        // Requerido si tipo es enlace o archivo
+                        if (this.tipo === 'enlace' || this.tipo === 'archivo') {
+                            return typeof v === 'string' && (v.startsWith('http') || v.startsWith('/'));
+                        }
+                        // opcional en otros tipos
+                        return true;
+                    },
+                    message: 'La URL es obligatoria y debe ser válida cuando el tipo es enlace o archivo'
+                }
             },
             descripcion: {
                 type: String,
@@ -197,6 +213,13 @@ const bibliotecaSchema = new Schema({
 // Índices básicos
 bibliotecaSchema.index({ usuario: 1 }, { unique: true });
 bibliotecaSchema.index({ 'cursos.curso': 1 });
+
+// Validación: evitar cursos duplicados por biblioteca
+bibliotecaSchema.path('cursos').validate(function(cursos) {
+    const ids = cursos.map(c => c.curso && c.curso.toString());
+    const uniques = new Set(ids);
+    return ids.length === uniques.size;
+}, 'No se puede repetir el mismo curso en la biblioteca');
 
 // Virtual para verificar si la biblioteca está vacía
 bibliotecaSchema.virtual('estaVacia').get(function() {

@@ -1,6 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
+const validateApiKey = (req, res, next) => {
+    const apiKey = req.headers['rh-api-key'];
+    console.log('API Key recibida:', apiKey);
+    const validApiKey = 'skilltrade-api-key-2025';
+    
+
+    if (!apiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    if (apiKey !== validApiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    next();
+}
+
 // Import controllers
 const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
@@ -20,10 +43,10 @@ router.post('/usuarios/login', usuarioController.loginUsuario);
 router.post('/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
 
 // ===== RUTAS DE USUARIOS =====
-router.get('/usuarios', autenticarApiKey, requerirRol(['admin']), usuarioController.obtenerUsuarios);
+router.get('/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);
 router.get('/usuarios/:id', autenticarApiKey, usuarioController.obtenerUsuarioPorId);
-router.post('/usuarios/admin', autenticarApiKey, requerirRol(['admin']), usuarioController.crearUsuario);
-router.put('/usuarios/:id', autenticarApiKey, requerirRol(['admin']), usuarioController.actualizarUsuario);
+router.post('/usuarios/admin', autenticarApiKey, usuarioController.crearUsuario);
+router.put('/usuarios/:id', autenticarApiKey, usuarioController.actualizarUsuario);
 router.delete('/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuario);
 
 // ===== RUTAS DE PERFIL =====
@@ -60,11 +83,11 @@ router.get('/exchanges/historial', autenticarApiKey, exchangeController.obtenerH
 router.post('/exchanges/:id/comentario', autenticarApiKey, exchangeController.agregarComentario);
 
 // ===== RUTAS DE SUSCRIPCIONES =====
-router.get('/suscripciones', autenticarApiKey, requerirRol(['admin']), suscripcionController.obtenerSuscripciones);
-router.get('/suscripciones/:id', autenticarApiKey, requerirRol(['admin']), suscripcionController.obtenerSuscripcionPorId);
+router.get('/suscripciones', autenticarApiKey, suscripcionController.obtenerSuscripciones);
+router.get('/suscripciones/:id', autenticarApiKey, suscripcionController.obtenerSuscripcionPorId);
 router.post('/suscripciones', autenticarApiKey, suscripcionController.crearSuscripcion);
-router.put('/suscripciones/:id', autenticarApiKey, requerirRol(['admin']), suscripcionController.actualizarSuscripcion);
-router.delete('/suscripciones/:id', autenticarApiKey, requerirRol(['admin']), suscripcionController.eliminarSuscripcion);
+router.put('/suscripciones/:id', autenticarApiKey, suscripcionController.actualizarSuscripcion);
+router.delete('/suscripciones/:id', autenticarApiKey, suscripcionController.eliminarSuscripcion);
 router.get('/suscripciones/:id/cursos', autenticarApiKey, suscripcionController.obtenerCursosPorSuscripcion);
 router.post('/suscripciones/:id/cancelar', autenticarApiKey, suscripcionController.cancelarSuscripcion);
 router.patch('/suscripciones/:id/renovacion', autenticarApiKey, suscripcionController.toggleRenovacionAutomatica);
@@ -93,8 +116,8 @@ router.delete('/biblioteca/favoritos/:cursoId', autenticarApiKey, bibliotecaCont
 router.get('/biblioteca/acceso/:cursoId', autenticarApiKey, bibliotecaController.verificarAccesoCurso);
 
 // ===== RUTAS DE VENTAS =====
-router.get('/ventas', autenticarApiKey, requerirRol(['admin']), ventaController.obtenerVentas);
-router.get('/ventas/:id', autenticarApiKey, requerirRol(['admin']), ventaController.obtenerVentaPorId);
+router.get('/ventas', autenticarApiKey, ventaController.obtenerVentas);
+router.get('/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
 router.post('/ventas', autenticarApiKey, ventaController.crearVenta);
 router.post('/ventas/:id/confirmar', autenticarApiKey, ventaController.confirmarVenta);
 router.get('/ventas/historial', autenticarApiKey, ventaController.obtenerHistorialCompras);
@@ -109,7 +132,7 @@ router.post('/ventas/:id/reembolso', autenticarApiKey, ventaController.solicitar
 // ===== RUTAS DE NOTIFICACIONES =====
 router.get('/notificaciones', autenticarApiKey, notificacionController.obtenerNotificaciones);
 router.get('/notificaciones/:id', autenticarApiKey, notificacionController.obtenerNotificacionPorId);
-router.get('/notificaciones/todas', autenticarApiKey, requerirRol(['admin']), notificacionController.obtenerTodasNotificaciones);
+router.get('/notificaciones/todas', autenticarApiKey, notificacionController.obtenerTodasNotificaciones);
 router.post('/notificaciones', autenticarApiKey, notificacionController.crearNotificacion);
 router.post('/notificaciones/curso', autenticarApiKey, notificacionController.crearNotificacionCurso);
 router.post('/notificaciones/vencimiento', autenticarApiKey, notificacionController.crearNotificacionVencimiento);
