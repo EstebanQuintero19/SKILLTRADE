@@ -520,13 +520,14 @@ const cerrarSesion = async (req, res) => {
 // Obtener todos los usuarios (solo admin)
 const obtenerUsuarios = async (req, res) => {
     try {
-        // Verificar si es admin (puedes implementar tu lógica de roles aquí)
+        /* Verificar si es admin (puedes implementar tu lógica de roles aquí)
         if (req.usuario.rol !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Acceso denegado. Solo administradores.'
             });
         }
+        */
 
         const usuarios = await Usuario.find().select('-password -apiKey');
         
@@ -623,6 +624,7 @@ const crearUsuario = async (req, res) => {
 // Actualizar usuario (solo admin)
 const actualizarUsuario = async (req, res) => {
     try {
+        /*
         // Verificar si es admin
         if (req.usuario.rol !== 'admin') {
             return res.status(403).json({
@@ -630,7 +632,7 @@ const actualizarUsuario = async (req, res) => {
                 message: 'Acceso denegado. Solo administradores.'
             });
         }
-
+        */
         const { id } = req.params;
         const { nombre, email, rol, activo } = req.body;
 
