@@ -6,81 +6,72 @@ const Notificacion = require('../model/notificacion.model');
 // RF-INT-01: Solicitar intercambio (curso propio vs ajeno)
 const crearExchange = async (req, res) => {
     try {
-        const { cursoEmisor, cursoReceptor, duracion, comentario } = req.body;
-        const emisorId = req.usuario._id;
+        const { cursoEmisor, cursoReceptor, duracion: durRaw, comentario } = req.body;
 
-        // Validaciones básicas
-        if (!cursoEmisor || !cursoReceptor || !duracion) {
-            return res.status(400).json({
-                error: 'cursoEmisor, cursoReceptor y duracion son obligatorios'
-            });
+        // 0) Auth presente
+        if (!req.usuario || !req.usuario.id) {
+            return res.status(401).json({ error: 'Falta autenticación (x-api-key)' });
         }
+        const emisorId = req.usuario.id;
 
-        // Validar duración
+        // 1) Validaciones básicas
+        if (!cursoEmisor || !cursoReceptor || durRaw === undefined) {
+            return res.status(400).json({ error: 'cursoEmisor, cursoReceptor y duracion son obligatorios' });
+        }
+        const duracion = Number(durRaw);
         if (!Number.isInteger(duracion) || duracion < 1 || duracion > 365) {
-            return res.status(400).json({
-                error: 'La duración debe ser un número entero entre 1 y 365 días'
-            });
+            return res.status(400).json({ error: 'La duración debe ser un número entero entre 1 y 365 días' });
+        }
+        if (String(cursoEmisor) === String(cursoReceptor)) {
+            return res.status(400).json({ error: 'No puedes intercambiar un curso consigo mismo' });
         }
 
-        // Verificar que los cursos existen
+        // 2) Cargar solo owner de ambos cursos
         const [cursoEmisorDoc, cursoReceptorDoc] = await Promise.all([
-            Curso.findById(cursoEmisor),
-            Curso.findById(cursoReceptor)
+            Curso.findById(cursoEmisor).select('owner'),
+            Curso.findById(cursoReceptor).select('owner'),
         ]);
 
-        if (!cursoEmisorDoc || !cursoReceptorDoc) {
-            return res.status(404).json({
-                error: 'Uno o ambos cursos no existen'
-            });
+        if (!cursoEmisorDoc) return res.status(404).json({ error: 'Curso emisor no existe' });
+        if (!cursoReceptorDoc) return res.status(404).json({ error: 'Curso receptor no existe' });
+
+        if (!cursoEmisorDoc.owner) {
+            return res.status(422).json({ error: 'El curso emisor no tiene owner asignado' });
+        }
+        if (!cursoReceptorDoc.owner) {
+            return res.status(422).json({ error: 'El curso receptor no tiene owner asignado' });
         }
 
-        // Verificar que el emisor es dueño del curso emisor
-        if (cursoEmisorDoc.owner.toString() !== emisorId.toString()) {
-            return res.status(403).json({
-                error: 'Solo puedes intercambiar cursos que te pertenezcan'
-            });
+        // 3) Verificaciones de propiedad
+        if (!cursoEmisorDoc.owner.equals(emisorId)) {
+            return res.status(403).json({ error: 'Solo puedes intercambiar cursos que te pertenezcan' });
+        }
+        if (cursoEmisorDoc.owner.equals(cursoReceptorDoc.owner)) {
+            return res.status(400).json({ error: 'No puedes intercambiar con tus propios cursos' });
         }
 
-        // Verificar que no es el mismo curso
-        if (cursoEmisor === cursoReceptor) {
-            return res.status(400).json({
-                error: 'No puedes intercambiar un curso consigo mismo'
-            });
-        }
-
-        // Verificar que no es el mismo propietario
-        if (cursoEmisorDoc.owner.toString() === cursoReceptorDoc.owner.toString()) {
-            return res.status(400).json({
-                error: 'No puedes intercambiar con tus propios cursos'
-            });
-        }
-
-        // Verificar que no hay intercambios activos con estos cursos
-        const intercambiosActivos = await Exchange.findOne({
+        // 4) Choques con intercambios activos (simétrico)
+        const conflicto = await Exchange.findOne({
+            estado: { $in: ['pendiente', 'aceptado', 'activo'] },
             $or: [
-                { cursoEmisor, estado: { $in: ['pendiente', 'aceptado', 'activo'] } },
-                { cursoReceptor, estado: { $in: ['pendiente', 'aceptado', 'activo'] } }
+                { cursoEmisor },
+                { cursoReceptor: cursoEmisor },
+                { cursoEmisor: cursoReceptor },
+                { cursoReceptor }
             ]
         });
-
-        if (intercambiosActivos) {
-            return res.status(400).json({
-                error: 'Uno de los cursos ya está en un intercambio activo'
-            });
+        if (conflicto) {
+            return res.status(400).json({ error: 'Uno de los cursos ya está en un intercambio activo' });
         }
 
-        // Crear el intercambio
+        // 5) Crear intercambio
         const exchange = new Exchange({
             emisor: emisorId,
             receptor: cursoReceptorDoc.owner,
             cursoEmisor,
             cursoReceptor,
             duracion,
-            comentarios: comentario ? [{
-                usuario: emisorId,
-                contenido: comentario
-            }] : []
+            comentarios: comentario ? [{ usuario: emisorId, contenido: comentario }] : []
         });
 
         await exchange.save();
@@ -91,10 +82,11 @@ const crearExchange = async (req, res) => {
                 usuario: cursoReceptorDoc.owner,
                 tipo: 'intercambio',
                 titulo: 'Nueva solicitud de intercambio',
-                mensaje: `${req.usuario.nombre} quiere intercambiar un curso contigo`,
-                accion: {
-                    tipo: 'navegar',
-                    url: `/exchanges/${exchange._id}`
+                mensaje: `Tienes una nueva solicitud de intercambio de curso`,
+                datos: {
+                    exchangeId: exchange._id,
+                    cursoEmisor: cursoEmisor,
+                    cursoReceptor: cursoReceptor
                 }
             });
             await notificacion.save();
@@ -102,60 +94,74 @@ const crearExchange = async (req, res) => {
             console.warn('Error al crear notificación:', notifError.message);
         }
 
-        res.status(201).json({
+        return res.status(201).json({
+            success: true,
             mensaje: 'Solicitud de intercambio creada exitosamente',
-            exchange
+            data: { exchange }
         });
 
     } catch (error) {
         console.error('Error al crear intercambio:', error);
-        res.status(500).json({
+        return res.status(500).json({
+            success: false,
             error: 'Error interno del servidor al crear intercambio'
         });
     }
 };
 
-// RF-INT-03: Aceptar/Rechazar intercambio
+// RF-INT-03: Aceptar intercambio
 const aceptarExchange = async (req, res) => {
     try {
         const { id } = req.params;
-        const receptorId = req.usuario._id;
+        const { fechaInicio } = req.body;
+        const receptorId = req.usuario.id;
+
+        if (!fechaInicio) {
+            return res.status(400).json({
+                success: false,
+                message: 'Fecha de inicio es requerida'
+            });
+        }
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Verificar que el usuario es el receptor
-        if (exchange.receptor.toString() !== receptorId.toString()) {
+        if (exchange.receptor.toString() !== receptorId) {
             return res.status(403).json({
-                error: 'Solo el receptor puede aceptar el intercambio'
+                success: false,
+                message: 'Solo el receptor puede aceptar el intercambio'
             });
         }
 
-        // Verificar que el estado es pendiente
         if (exchange.estado !== 'pendiente') {
             return res.status(400).json({
-                error: 'Solo se pueden aceptar intercambios pendientes'
+                success: false,
+                message: 'Solo se pueden aceptar intercambios pendientes'
             });
         }
 
-        // Aceptar el intercambio
-        await exchange.aceptar();
+        // Calcular fecha de fin basada en la duración
+        const fechaFin = new Date(fechaInicio);
+        fechaFin.setDate(fechaFin.getDate() + exchange.duracion);
 
-        // Crear notificación para el emisor
+        exchange.estado = 'activo';
+        exchange.fechaInicio = fechaInicio;
+        exchange.fechaFin = fechaFin;
+        await exchange.save();
+
+        // Notificar al emisor
         try {
             const notificacion = new Notificacion({
                 usuario: exchange.emisor,
                 tipo: 'intercambio',
                 titulo: 'Intercambio aceptado',
-                mensaje: `${req.usuario.nombre} ha aceptado tu intercambio`,
-                accion: {
-                    tipo: 'navegar',
-                    url: `/exchanges/${exchange._id}`
-                }
+                mensaje: 'Tu solicitud de intercambio ha sido aceptada',
+                datos: { exchangeId: exchange._id }
             });
             await notificacion.save();
         } catch (notifError) {
@@ -163,69 +169,67 @@ const aceptarExchange = async (req, res) => {
         }
 
         res.json({
-            mensaje: 'Intercambio aceptado exitosamente',
-            exchange
+            success: true,
+            message: 'Intercambio aceptado exitosamente',
+            data: { exchange }
         });
 
     } catch (error) {
         console.error('Error al aceptar intercambio:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al aceptar intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
 
+// RF-INT-03: Rechazar intercambio
 const rechazarExchange = async (req, res) => {
     try {
         const { id } = req.params;
         const { motivo } = req.body;
-        const receptorId = req.usuario._id;
+        const receptorId = req.usuario.id;
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Verificar que el usuario es el receptor
-        if (exchange.receptor.toString() !== receptorId.toString()) {
+        if (exchange.receptor.toString() !== receptorId) {
             return res.status(403).json({
-                error: 'Solo el receptor puede rechazar el intercambio'
+                success: false,
+                message: 'Solo el receptor puede rechazar el intercambio'
             });
         }
 
-        // Verificar que el estado es pendiente
         if (exchange.estado !== 'pendiente') {
             return res.status(400).json({
-                error: 'Solo se pueden rechazar intercambios pendientes'
+                success: false,
+                message: 'Solo se pueden rechazar intercambios pendientes'
             });
         }
 
-        // Rechazar el intercambio
-        await exchange.rechazar();
-
-        // Agregar comentario de rechazo si se proporciona motivo
+        exchange.estado = 'rechazado';
         if (motivo) {
             exchange.comentarios.push({
                 usuario: receptorId,
-                contenido: `Rechazado: ${motivo}`,
-                fecha: new Date()
+                contenido: `Rechazado: ${motivo}`
             });
-            await exchange.save();
         }
+        await exchange.save();
 
-        // Crear notificación para el emisor
+        // Notificar al emisor
         try {
             const notificacion = new Notificacion({
                 usuario: exchange.emisor,
                 tipo: 'intercambio',
                 titulo: 'Intercambio rechazado',
-                mensaje: `${req.usuario.nombre} ha rechazado tu intercambio`,
-                accion: {
-                    tipo: 'navegar',
-                    url: `/exchanges/${exchange._id}`
-                }
+                mensaje: 'Tu solicitud de intercambio ha sido rechazada',
+                datos: { exchangeId: exchange._id, motivo }
             });
             await notificacion.save();
         } catch (notifError) {
@@ -233,14 +237,17 @@ const rechazarExchange = async (req, res) => {
         }
 
         res.json({
-            mensaje: 'Intercambio rechazado exitosamente',
-            exchange
+            success: true,
+            message: 'Intercambio rechazado exitosamente',
+            data: { exchange }
         });
 
     } catch (error) {
         console.error('Error al rechazar intercambio:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al rechazar intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -249,43 +256,41 @@ const rechazarExchange = async (req, res) => {
 const cancelarExchange = async (req, res) => {
     try {
         const { id } = req.params;
-        const emisorId = req.usuario._id;
+        const emisorId = req.usuario.id;
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Verificar que el usuario es el emisor
-        if (exchange.emisor.toString() !== emisorId.toString()) {
+        if (exchange.emisor.toString() !== emisorId) {
             return res.status(403).json({
-                error: 'Solo el emisor puede cancelar el intercambio'
+                success: false,
+                message: 'Solo el emisor puede cancelar el intercambio'
             });
         }
 
-        // Verificar que el estado es pendiente
         if (exchange.estado !== 'pendiente') {
             return res.status(400).json({
-                error: 'Solo se pueden cancelar intercambios pendientes'
+                success: false,
+                message: 'Solo se pueden cancelar intercambios pendientes'
             });
         }
 
-        // Cancelar el intercambio
-        await exchange.cancelar();
+        exchange.estado = 'cancelado';
+        await exchange.save();
 
-        // Crear notificación para el receptor
+        // Notificar al receptor
         try {
             const notificacion = new Notificacion({
                 usuario: exchange.receptor,
                 tipo: 'intercambio',
                 titulo: 'Intercambio cancelado',
-                mensaje: `${req.usuario.nombre} ha cancelado el intercambio`,
-                accion: {
-                    tipo: 'navegar',
-                    url: `/exchanges/${exchange._id}`
-                }
+                mensaje: 'Una solicitud de intercambio ha sido cancelada',
+                datos: { exchangeId: exchange._id }
             });
             await notificacion.save();
         } catch (notifError) {
@@ -293,14 +298,17 @@ const cancelarExchange = async (req, res) => {
         }
 
         res.json({
-            mensaje: 'Intercambio cancelado exitosamente',
-            exchange
+            success: true,
+            message: 'Intercambio cancelado exitosamente',
+            data: { exchange }
         });
 
     } catch (error) {
         console.error('Error al cancelar intercambio:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al cancelar intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -308,53 +316,39 @@ const cancelarExchange = async (req, res) => {
 // RF-INT-04: Listar enviadas/recibidas
 const obtenerExchanges = async (req, res) => {
     try {
-        const { tipo, estado, page = 1, limit = 10 } = req.query;
-        const usuarioId = req.usuario._id;
+        const { tipo } = req.query;
+        const usuarioId = req.usuario.id;
 
-        // Construir filtros
-        let filtros = {};
-        
+        let filtro = {};
         if (tipo === 'enviadas') {
-            filtros.emisor = usuarioId;
+            filtro.emisor = usuarioId;
         } else if (tipo === 'recibidas') {
-            filtros.receptor = usuarioId;
+            filtro.receptor = usuarioId;
         } else {
-            // Si no se especifica tipo, mostrar todos los del usuario
-            filtros.$or = [{ emisor: usuarioId }, { receptor: usuarioId }];
+            filtro.$or = [{ emisor: usuarioId }, { receptor: usuarioId }];
         }
 
-        if (estado) {
-            filtros.estado = estado;
-        }
-
-        // Paginación
-        const skip = (parseInt(page) - 1) * parseInt(limit);
-
-        const exchanges = await Exchange.find(filtros)
-            .populate('emisor', 'nombre email')
-            .populate('receptor', 'nombre email')
-            .populate('cursoEmisor', 'titulo imagen categoria')
-            .populate('cursoReceptor', 'titulo imagen categoria')
-            .sort({ fechaSolicitud: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
-        const total = await Exchange.countDocuments(filtros);
+        const exchanges = await Exchange.find(filtro)
+            .populate('cursoEmisor', 'titulo categoria imagen')
+            .populate('cursoReceptor', 'titulo categoria imagen')
+            .populate('emisor', 'nombre')
+            .populate('receptor', 'nombre')
+            .sort({ fechaSolicitud: -1 });
 
         res.json({
-            exchanges,
-            paginacion: {
-                pagina: parseInt(page),
-                totalPaginas: Math.ceil(total / parseInt(limit)),
-                totalElementos: total,
-                elementosPorPagina: parseInt(limit)
+            success: true,
+            data: {
+                exchanges,
+                total: exchanges.length
             }
         });
 
     } catch (error) {
-        console.error('Error al obtener intercambios:', error);
+        console.error('Error al obtener exchanges:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener intercambios'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -362,42 +356,32 @@ const obtenerExchanges = async (req, res) => {
 // RF-INT-08: Historial de intercambios
 const obtenerHistorial = async (req, res) => {
     try {
-        const { page = 1, limit = 20 } = req.query;
-        const usuarioId = req.usuario._id;
+        const usuarioId = req.usuario.id;
 
-        // Solo intercambios finalizados o cancelados
-        const filtros = {
+        const exchanges = await Exchange.find({
             $or: [{ emisor: usuarioId }, { receptor: usuarioId }],
             estado: { $in: ['finalizado', 'cancelado', 'rechazado'] }
-        };
-
-        const skip = (parseInt(page) - 1) * parseInt(limit);
-
-        const exchanges = await Exchange.find(filtros)
-            .populate('emisor', 'nombre email')
-            .populate('receptor', 'nombre email')
-            .populate('cursoEmisor', 'titulo imagen categoria')
-            .populate('cursoReceptor', 'titulo imagen categoria')
-            .sort({ fechaSolicitud: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
-        const total = await Exchange.countDocuments(filtros);
+        })
+            .populate('cursoEmisor', 'titulo categoria')
+            .populate('cursoReceptor', 'titulo categoria')
+            .populate('emisor', 'nombre')
+            .populate('receptor', 'nombre')
+            .sort({ fechaSolicitud: -1 });
 
         res.json({
-            historial: exchanges,
-            paginacion: {
-                pagina: parseInt(page),
-                totalPaginas: Math.ceil(total / parseInt(limit)),
-                totalElementos: total,
-                elementosPorPagina: parseInt(limit)
+            success: true,
+            data: {
+                exchanges,
+                total: exchanges.length
             }
         });
 
     } catch (error) {
         console.error('Error al obtener historial:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener historial'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -406,38 +390,40 @@ const obtenerHistorial = async (req, res) => {
 const obtenerExchangePorId = async (req, res) => {
     try {
         const { id } = req.params;
-        const usuarioId = req.usuario._id;
+        const usuarioId = req.usuario.id;
 
         const exchange = await Exchange.findById(id)
+            .populate('cursoEmisor', 'titulo categoria imagen descripcion')
+            .populate('cursoReceptor', 'titulo categoria imagen descripcion')
             .populate('emisor', 'nombre email')
-            .populate('receptor', 'nombre email')
-            .populate('cursoEmisor', 'titulo imagen categoria descripcion')
-            .populate('cursoReceptor', 'titulo imagen categoria descripcion')
-            .populate('comentarios.usuario', 'nombre');
+            .populate('receptor', 'nombre email');
 
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Verificar que el usuario tiene acceso a este intercambio
-        if (exchange.emisor.toString() !== usuarioId.toString() && 
-            exchange.receptor.toString() !== usuarioId.toString()) {
+        // Verificar que el usuario sea parte del intercambio
+        if (exchange.emisor.toString() !== usuarioId && exchange.receptor.toString() !== usuarioId) {
             return res.status(403).json({
-                error: 'No tienes permisos para ver este intercambio'
+                success: false,
+                message: 'No tienes acceso a este intercambio'
             });
         }
 
         res.json({
-            exchange,
-            mensaje: 'Intercambio obtenido exitosamente'
+            success: true,
+            data: { exchange }
         });
 
     } catch (error) {
-        console.error('Error al obtener intercambio:', error);
+        console.error('Error al obtener exchange:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -446,58 +432,53 @@ const obtenerExchangePorId = async (req, res) => {
 const actualizarExchange = async (req, res) => {
     try {
         const { id } = req.params;
-        const usuarioId = req.usuario._id;
-        const camposActualizados = req.body;
+        const { comentario } = req.body;
+        const usuarioId = req.usuario.id;
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Solo el emisor puede actualizar campos básicos
-        if (exchange.emisor.toString() !== usuarioId.toString()) {
+        // Solo el emisor puede actualizar comentarios en intercambios pendientes
+        if (exchange.emisor.toString() !== usuarioId) {
             return res.status(403).json({
-                error: 'No tienes permisos para actualizar este intercambio'
+                success: false,
+                message: 'Solo el emisor puede actualizar el intercambio'
             });
         }
 
-        // Solo permitir actualizar ciertos campos
-        const camposPermitidos = ['comentarios', 'duracion'];
-        const camposFiltrados = {};
-        
-        Object.keys(camposActualizados).forEach(key => {
-            if (camposPermitidos.includes(key)) {
-                camposFiltrados[key] = camposActualizados[key];
-            }
-        });
-
-        if (camposFiltrados.duracion) {
-            if (!Number.isInteger(camposFiltrados.duracion) || 
-                camposFiltrados.duracion < 1 || 
-                camposFiltrados.duracion > 365) {
-                return res.status(400).json({
-                    error: 'La duración debe ser un número entero entre 1 y 365 días'
-                });
-            }
+        if (exchange.estado !== 'pendiente') {
+            return res.status(400).json({
+                success: false,
+                message: 'Solo se pueden actualizar intercambios pendientes'
+            });
         }
 
-        const exchangeActualizado = await Exchange.findByIdAndUpdate(
-            id,
-            camposFiltrados,
-            { new: true, runValidators: true }
-        ).populate('emisor receptor cursoEmisor cursoReceptor');
+        if (comentario) {
+            exchange.comentarios.push({
+                usuario: usuarioId,
+                contenido: comentario
+            });
+        }
+
+        await exchange.save();
 
         res.json({
-            mensaje: 'Intercambio actualizado exitosamente',
-            exchange: exchangeActualizado
+            success: true,
+            message: 'Intercambio actualizado exitosamente',
+            data: { exchange }
         });
 
     } catch (error) {
-        console.error('Error al actualizar intercambio:', error);
+        console.error('Error al actualizar exchange:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al actualizar intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -506,39 +487,43 @@ const actualizarExchange = async (req, res) => {
 const eliminarExchange = async (req, res) => {
     try {
         const { id } = req.params;
-        const usuarioId = req.usuario._id;
+        const usuarioId = req.usuario.id;
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Solo el emisor puede eliminar
-        if (exchange.emisor.toString() !== usuarioId.toString()) {
+        if (exchange.emisor.toString() !== usuarioId) {
             return res.status(403).json({
-                error: 'No tienes permisos para eliminar este intercambio'
+                success: false,
+                message: 'Solo el emisor puede eliminar el intercambio'
             });
         }
 
-        // Solo permitir eliminar si está cancelado o rechazado
         if (!['cancelado', 'rechazado'].includes(exchange.estado)) {
             return res.status(400).json({
-                error: 'Solo se pueden eliminar intercambios cancelados o rechazados'
+                success: false,
+                message: 'Solo se pueden eliminar intercambios cancelados o rechazados'
             });
         }
 
         await Exchange.findByIdAndDelete(id);
 
         res.json({
-            mensaje: 'Intercambio eliminado exitosamente'
+            success: true,
+            message: 'Intercambio eliminado exitosamente'
         });
 
     } catch (error) {
-        console.error('Error al eliminar intercambio:', error);
+        console.error('Error al eliminar exchange:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al eliminar intercambio'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
@@ -548,46 +533,50 @@ const agregarComentario = async (req, res) => {
     try {
         const { id } = req.params;
         const { contenido } = req.body;
-        const usuarioId = req.usuario._id;
+        const usuarioId = req.usuario.id;
 
         if (!contenido || contenido.trim().length < 3) {
             return res.status(400).json({
-                error: 'El comentario debe tener al menos 3 caracteres'
+                success: false,
+                message: 'El comentario debe tener al menos 3 caracteres'
             });
         }
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
             return res.status(404).json({
-                error: 'Intercambio no encontrado'
+                success: false,
+                message: 'Intercambio no encontrado'
             });
         }
 
-        // Verificar que el usuario participa en el intercambio
-        if (exchange.emisor.toString() !== usuarioId.toString() && 
-            exchange.receptor.toString() !== usuarioId.toString()) {
+        // Verificar que el usuario sea parte del intercambio
+        if (exchange.emisor.toString() !== usuarioId && exchange.receptor.toString() !== usuarioId) {
             return res.status(403).json({
-                error: 'No tienes permisos para comentar en este intercambio'
+                success: false,
+                message: 'No puedes comentar en este intercambio'
             });
         }
 
         exchange.comentarios.push({
             usuario: usuarioId,
-            contenido: contenido.trim(),
-            fecha: new Date()
+            contenido: contenido.trim()
         });
 
         await exchange.save();
 
         res.json({
-            mensaje: 'Comentario agregado exitosamente',
-            exchange
+            success: true,
+            message: 'Comentario agregado exitosamente',
+            data: { exchange }
         });
 
     } catch (error) {
         console.error('Error al agregar comentario:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al agregar comentario'
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
         });
     }
 };
