@@ -1,5 +1,5 @@
 // Configuración de la API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:9090/api';
 
 // Utilidades para mostrar mensajes
 function showAlert(message, type = 'info') {
@@ -67,17 +67,21 @@ async function handleLogin(event) {
             showAlert('¡Bienvenido! Iniciando sesión...', 'success');
             
             // Guardar token en localStorage
-            localStorage.setItem('authToken', result.token);
-            localStorage.setItem('user', JSON.stringify(result.usuario));
+            const token = result?.data?.apiKey;
+            const user = result?.data?.usuario;
+            if (token) localStorage.setItem('authToken', token);
+            if (user) localStorage.setItem('user', JSON.stringify(user));
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-            modal.hide();
+            if (modal && typeof modal.hide === 'function') {
+                modal.hide();
+            }
             
-            // Recargar página para actualizar la interfaz
+            // Redirigir a cursos
             setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+                window.location.href = '/cursos';
+            }, 800);
             
         } else {
             // Error en login
@@ -140,7 +144,7 @@ async function handleRegister(event) {
         
         console.log('Enviando datos de registro:', registerData);
         
-        const response = await fetch(`${API_BASE_URL}/usuarios/registro`, {
+        const response = await fetch(`${API_BASE_URL}/usuarios`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -156,17 +160,21 @@ async function handleRegister(event) {
             showAlert('¡Cuenta creada exitosamente! Iniciando sesión...', 'success');
             
             // Guardar token en localStorage
-            localStorage.setItem('authToken', result.token);
-            localStorage.setItem('user', JSON.stringify(result.usuario));
+            const token = result?.data?.usuario?.apiKey || result?.data?.apiKey;
+            const user = result?.data?.usuario || result?.data?.user;
+            if (token) localStorage.setItem('authToken', token);
+            if (user) localStorage.setItem('user', JSON.stringify(user));
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-            modal.hide();
+            if (modal && typeof modal.hide === 'function') {
+                modal.hide();
+            }
             
-            // Recargar página para actualizar la interfaz
+            // Redirigir a cursos
             setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+                window.location.href = '/cursos';
+            }, 800);
             
         } else {
             // Error en registro
