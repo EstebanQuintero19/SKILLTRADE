@@ -1,5 +1,5 @@
 // Configuración de la API
-const API_BASE_URL = 'http://localhost:9090/api';
+const API_BASE_URL_AUTH = 'http://localhost:9090/api';
 
 // Utilidades para mostrar mensajes
 function showAlert(message, type = 'info') {
@@ -51,11 +51,12 @@ async function handleLogin(event) {
         
         console.log('Enviando datos de login:', loginData);
         
-        const response = await fetch(`${API_BASE_URL}/usuarios/login`, {
+        const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'same-origin',
             body: JSON.stringify(loginData)
         });
         
@@ -78,9 +79,9 @@ async function handleLogin(event) {
                 modal.hide();
             }
             
-            // Redirigir a cursos
+            // Redirigir a la página de cursos con recarga completa
             setTimeout(() => {
-                window.location.href = '/cursos';
+                window.location.replace('/cursos');
             }, 800);
             
         } else {
@@ -144,7 +145,7 @@ async function handleRegister(event) {
         
         console.log('Enviando datos de registro:', registerData);
         
-        const response = await fetch(`${API_BASE_URL}/usuarios`, {
+        const response = await fetch(`${API_BASE_URL_AUTH}/usuarios`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -171,9 +172,9 @@ async function handleRegister(event) {
                 modal.hide();
             }
             
-            // Redirigir a cursos
+            // Redirigir a la página de cursos con recarga completa
             setTimeout(() => {
-                window.location.href = '/cursos';
+                window.location.replace('/cursos');
             }, 800);
             
         } else {

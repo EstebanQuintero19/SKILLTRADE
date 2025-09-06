@@ -6,14 +6,14 @@ const cursoSchema = new Schema({
         type: String,
         required: [true, 'El título es obligatorio'],
         trim: true,
-        minlength: [5, 'El título debe tener al menos 5 caracteres'],
+        minlength: [3, 'El título debe tener al menos 3 caracteres'],
         maxlength: [100, 'El título no puede exceder 100 caracteres']
     },
     descripcion: {
         type: String,
         required: [true, 'La descripción es obligatoria'],
         trim: true,
-        minlength: [20, 'La descripción debe tener al menos 20 caracteres'],
+        minlength: [3, 'La descripción debe tener al menos 3 caracteres'],
         maxlength: [1000, 'La descripción no puede exceder 1000 caracteres']
     },
     categoria: {
@@ -31,7 +31,7 @@ const cursoSchema = new Schema({
         required: [true, 'La imagen del curso es obligatoria'],
         validate: {
             validator: function(v) {
-                return v.startsWith('http') || v.startsWith('/') || v.startsWith('data:image');
+                return v.startsWith('http') || v.startsWith('/') || v.startsWith('data:image') || v.includes('.');
             },
             message: 'La imagen debe ser una URL válida, ruta local o base64'
         }

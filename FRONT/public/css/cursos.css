@@ -1,0 +1,233 @@
+/* Estilos para la página de cursos */
+.course-card {
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.course-img-container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.course-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-img {
+    transform: scale(1.05);
+}
+
+.course-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 200px);
+}
+
+.course-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1a202c;
+    text-decoration: none;
+    display: block;
+}
+
+.course-title:hover {
+    color: #4a5568;
+}
+
+.course-description {
+    color: #4a5568;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.course-rating {
+    color: #f6ad55;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.course-price {
+    font-weight: 700;
+    color: #2d3748;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.btn-add-to-cart {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.section-title {
+    position: relative;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+    color: #2d3748;
+    font-weight: 700;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 4px;
+    background: #4f46e5;
+    border-radius: 2px;
+}
+
+/* Estilos para los temas */
+.topics-container {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.topics-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    padding: 1rem 0;
+    gap: 0.75rem;
+}
+
+.topics-track::-webkit-scrollbar {
+    display: none;
+}
+
+.topic-tag {
+    white-space: nowrap;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    color: #4a5568;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    background: white;
+    text-decoration: none;
+}
+
+.topic-tag:hover {
+    background-color: #f7fafc;
+    color: #2d3748;
+    border-color: #cbd5e0;
+}
+
+/* Efecto de desvanecimiento en los bordes */
+.topics-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    pointer-events: none;
+}
+
+.topics-fade.left {
+    left: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+.topics-fade.right {
+    right: 0;
+    background: linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* Estilos para el buscador */
+.search-container {
+    max-width: 800px;
+    margin: 0 auto 3rem;
+}
+
+.search-form {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #a0aec0;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.search-button {
+    padding: 0 1.5rem;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-button:hover {
+    background-color: #4338ca;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .course-img-container {
+        height: 160px;
+    }
+    
+    .course-body {
+        padding: 1rem;
+    }
+    
+    .course-title {
+        font-size: 1rem;
+    }
+    
+    .course-description {
+        font-size: 0.875rem;
+    }
+    
+    .search-form {
+        flex-direction: column;
+    }
+    
+    .search-button {
+        padding: 0.75rem;
+    }
+}

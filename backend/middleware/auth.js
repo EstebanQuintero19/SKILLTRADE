@@ -43,6 +43,7 @@ const autenticarApiKey = async (req, res, next) => {
 
         // Agregar usuario al request
         req.usuario = {
+            _id: usuario._id,
             id: usuario._id,
             email: usuario.email,
             nombre: usuario.nombre,
