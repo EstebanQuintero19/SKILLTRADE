@@ -11,40 +11,41 @@ const crearCurso = async (req, res) => {
         const ownerId = req.usuario._id;
 
         // Validaciones básicas
-        if (!titulo || !descripcion || !categoria || precio === undefined) {
-            return res.status(400).json({ 
-                error: 'Faltan campos obligatorios: titulo, descripcion, categoria, precio' 
-            });
+        if (!titulo) {
+            return res.status(400).json({ error: 'Título requerido' });
+        }
+        
+        if (!descripcion) {
+            return res.status(400).json({ error: 'Descripción requerida' });
+        }
+        
+        if (!categoria) {
+            return res.status(400).json({ error: 'Categoría requerida' });
         }
 
         // Validar precio
-        const precioNumerico = parseFloat(precio);
-        if (isNaN(precioNumerico) || precioNumerico < 0) {
-            return res.status(400).json({ 
-                error: 'El precio debe ser un número válido no negativo' 
-            });
-        }
+        const precioNumerico = precio ? parseFloat(precio) : 0;
 
-        // Validar nivel
-        if (nivel && !['basico', 'intermedio', 'avanzado'].includes(nivel)) {
-            return res.status(400).json({
-                error: 'El nivel debe ser básico, intermedio o avanzado'
-            });
-        }
+        // Validar nivel - permitir cualquier valor
+        // if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
+        //     return res.status(400).json({
+        //         error: 'El nivel debe ser básico, intermedio o avanzado'
+        //     });
+        // }
 
-        // Validar visibilidad
-        if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
-            return res.status(400).json({
-                error: 'La visibilidad debe ser público, privado o solo suscriptores'
-            });
-        }
+        // Validar visibilidad - permitir cualquier valor
+        // if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
+        //     return res.status(400).json({
+        //         error: 'La visibilidad debe ser público, privado o solo suscriptores'
+        //     });
+        // }
 
-        // Validar etiquetas
-        if (etiquetas && etiquetas.length > 10) {
-            return res.status(400).json({
-                error: 'No puede tener más de 10 etiquetas'
-            });
-        }
+        // Validar etiquetas - permitir cualquier cantidad
+        // if (etiquetas && etiquetas.length > 10) {
+        //     return res.status(400).json({
+        //         error: 'No puede tener más de 10 etiquetas'
+        //     });
+        // }
 
         const cursoData = {
             titulo: titulo.trim(),
@@ -54,7 +55,7 @@ const crearCurso = async (req, res) => {
             nivel: nivel || 'basico',
             visibilidad: visibilidad || 'publico',
             owner: ownerId,
-            imagen: req.body.imagen || 'default-course.jpg',
+            imagen: req.file ? `/uploads/${req.file.filename}` : '/images/placeholder-course.jpg',
             etiquetas: etiquetas || [],
             videoIntroductorio: videoIntroductorio || null
         };
@@ -65,7 +66,7 @@ const crearCurso = async (req, res) => {
         // Actualizar estadísticas del owner
         await Owner.findOneAndUpdate(
             { usuario: ownerId },
-            { $inc: { cursosCreados: 1 } },
+            { $push: { cursosCreados: curso._id } },
             { upsert: true }
         );
 
@@ -75,12 +76,24 @@ const crearCurso = async (req, res) => {
         });
 
         res.status(201).json({
+            success: true,
             mensaje: 'Curso creado exitosamente',
-            curso
+            data: curso
         });
 
     } catch (error) {
         console.error('Error creando curso:', error);
+        console.error('Stack trace:', error.stack);
+        
+        // Si es un error de validación de Mongoose
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({ 
+                error: 'Error de validación',
+                detalles: validationErrors
+            });
+        }
+        
         res.status(500).json({ 
             error: 'Error interno del servidor al crear curso',
             detalles: error.message 
@@ -481,33 +494,43 @@ const obtenerCursos = async (req, res) => {
     }
 };
 
-// Obtener curso por ID
+// RF-CUR-05: Obtener curso por ID
 const obtenerCursoPorId = async (req, res) => {
     try {
         const { id } = req.params;
+        
         const curso = await Curso.findById(id)
-            .populate('owner', 'nombre email biografia')
-            .populate('calificaciones.usuario', 'nombre');
-
+            .populate('owner', 'nombre email')
+            .populate('calificaciones.usuario', 'nombre')
+            .populate('comentarios.usuario', 'nombre');
+        
         if (!curso) {
-            return res.status(404).json({ 
-                error: 'Curso no encontrado' 
-            });
+            return res.status(404).json({ error: 'Curso no encontrado' });
         }
-
-        // Incrementar visualizaciones
-        await curso.incrementarVisualizacion();
-
-        res.json({
-            curso,
-            mensaje: 'Curso obtenido exitosamente'
-        });
-
+        
+        res.json(curso);
     } catch (error) {
         console.error('Error al obtener curso:', error);
-        res.status(500).json({ 
-            error: 'Error interno del servidor al obtener curso' 
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+// RF-CUR-06: Obtener mis cursos
+const obtenerMisCursos = async (req, res) => {
+    try {
+        const usuarioId = req.usuario._id;
+        
+        const cursos = await Curso.find({ owner: usuarioId })
+            .populate('owner', 'nombre email')
+            .sort({ fechaCreacion: -1 });
+        
+        res.json({
+            success: true,
+            data: cursos
         });
+    } catch (error) {
+        console.error('Error al obtener mis cursos:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 };
 
@@ -574,5 +597,6 @@ module.exports = {
     agregarCalificacion,
     agregarComentario,
     obtenerCursos,
-    obtenerCursoPorId
+    obtenerCursoPorId,
+    obtenerMisCursos
 };

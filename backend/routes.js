@@ -62,7 +62,20 @@ router.get('/usuarios/:id/intercambios', autenticarApiKey, usuarioController.obt
 // ===== RUTAS DE CURSOS =====
 router.get('/cursos', cursoController.obtenerCursos);
 router.get('/cursos/:id', cursoController.obtenerCursoPorId);
-router.post('/cursos', autenticarApiKey, cursoController.crearCurso);
+router.get('/mis-cursos', autenticarApiKey, cursoController.obtenerMisCursos);
+router.post('/cursos', autenticarApiKey, (req, res, next) => {
+    const upload = req.app.locals.upload;
+    if (upload) {
+        upload.single('imagen')(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+}, cursoController.crearCurso);
 router.put('/cursos/:id', autenticarApiKey, cursoController.actualizarCurso);
 router.delete('/cursos/:id', autenticarApiKey, cursoController.eliminarCurso);
 router.patch('/cursos/:id/precio', autenticarApiKey, cursoController.actualizarPrecio);

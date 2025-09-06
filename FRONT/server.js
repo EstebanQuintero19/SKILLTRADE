@@ -23,26 +23,31 @@ app.use(cookieParser());
 
 // Configuración de sesiones
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'skilltrade_session_secret_2024',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: false, // true en producción con HTTPS
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    secret: process.env.SESSION_SECRET || 'skilltrade-secret-key-2024',
+    resave: true,
+    saveUninitialized: true,
+    name: 'skilltrade.sid',
+    cookie: {
+        secure: false,
+        httpOnly: false,
+        sameSite: 'lax'
     }
 }));
 
 // Variables globales para las vistas
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
+    res.locals.token = req.session.token || null;
     res.locals.isAuthenticated = !!req.session.user;
-    res.locals.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:9090/api/v0';
+    res.locals.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:9090/api';
+    
+    
     next();
 });
 
 // Configuración de axios para el backend
 const apiClient = axios.create({
-    baseURL: process.env.API_BASE_URL || 'http://localhost:9090/api/v0',
+    baseURL: process.env.API_BASE_URL || 'http://localhost:9090/api',
     timeout: 10000
 });
 
@@ -88,11 +93,15 @@ app.get('/', async (req, res) => {
         const cursos = cursosResponse.status === 'fulfilled' ? cursosResponse.value.data : [];
         const usuarios = usuariosResponse.status === 'fulfilled' ? usuariosResponse.value.data : [];
 
+        // Asegurar que cursos sea un array
+        const cursosArray = Array.isArray(cursos) ? cursos : [];
+        const usuariosArray = Array.isArray(usuarios) ? usuarios : [];
+
         res.render('index', {
             title: 'SkillTrade - Intercambia conocimientos',
-            cursos: cursos.slice(0, 6), // Mostrar solo los primeros 6 cursos
-            totalCursos: cursos.length,
-            totalUsuarios: usuarios.length
+            cursos: cursosArray.slice(0, 6), // Mostrar solo los primeros 6 cursos
+            totalCursos: cursosArray.length,
+            totalUsuarios: usuariosArray.length
         });
     } catch (error) {
         console.error('Error al cargar la página principal:', error.message);
@@ -119,7 +128,7 @@ app.get('/auth/login', (req, res) => {
 app.post('/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const response = await apiClient.post('/auth/login', { email, password });
+        const response = await apiClient.post('/usuarios/login', { email, password });
         
         // Guardar datos del usuario en la sesión
         req.session.user = response.data.usuario;
@@ -147,7 +156,7 @@ app.get('/auth/register', (req, res) => {
 app.post('/auth/register', async (req, res) => {
     try {
         const { nombre, email, password } = req.body;
-        const response = await apiClient.post('/auth/register', { nombre, email, password });
+        const response = await apiClient.post('/usuarios', { nombre, email, password });
         
         // Guardar datos del usuario en la sesión
         req.session.user = response.data.usuario;
@@ -203,6 +212,48 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     }
 });
 
+// API Login para el frontend (AJAX)
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const response = await apiClient.post('/usuarios/login', { email, password });
+        
+        // Guardar datos del usuario en la sesión
+        req.session.user = response.data.data.usuario;
+        req.session.token = response.data.data.apiKey || response.data.data.token;
+        
+        // Forzar guardado de la sesión
+        req.session.save((err) => {
+            if (err) {
+                console.error('Error al guardar sesión:', err);
+            }
+        });
+        
+        
+        res.json({
+            success: true,
+            data: response.data,
+            message: 'Login exitoso'
+        });
+    } catch (error) {
+        const errorMessage = error.response?.data?.error || 'Error al iniciar sesión';
+        res.status(400).json({
+            success: false,
+            error: errorMessage
+        });
+    }
+});
+
+// Logout
+app.post('/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+        }
+        res.redirect('/');
+    });
+});
+
 // ===== RUTAS DE CURSOS =====
 
 // Listar todos los cursos
@@ -218,27 +269,53 @@ app.get('/cursos', async (req, res) => {
         const response = await apiClient.get(url);
         let cursos = response.data;
         
+        // Asegurar que cursos sea un array
+        if (!Array.isArray(cursos)) {
+            cursos = cursos?.data || cursos?.cursos || [];
+        }
+        
         // Filtrar por búsqueda si se proporciona
-        if (buscar) {
+        if (buscar && Array.isArray(cursos)) {
             cursos = cursos.filter(curso => 
                 curso.titulo.toLowerCase().includes(buscar.toLowerCase()) ||
                 curso.descripcion.toLowerCase().includes(buscar.toLowerCase())
             );
         }
         
-        res.render('cursos/index', {
-            title: 'Explorar Cursos',
+        console.log('Renderizando cursos con usuario:', {
+            hasUser: !!req.session.user,
+            userEmail: req.session.user?.email
+        });
+        
+        res.render('cursos/cursos', {
+            title: 'SKILLTRADE - Cursos',
             cursos,
             categoria: categoria || '',
             buscar: buscar || ''
         });
     } catch (error) {
         console.error('Error al cargar cursos:', error.message);
-        res.render('cursos/index', {
-            title: 'Explorar Cursos',
+        res.render('cursos/cursos', {
+            title: 'SKILLTRADE - Cursos',
             cursos: [],
             categoria: '',
             buscar: ''
+        });
+    }
+});
+
+// Página de mis cursos (requiere autenticación)
+app.get('/mis-cursos', requireAuth, async (req, res) => {
+    try {
+        res.render('cursos/mis-cursos', {
+            title: 'Mis Cursos - SkillTrade',
+            user: req.session.user
+        });
+    } catch (error) {
+        console.error('Error al cargar mis cursos:', error);
+        res.status(500).render('error', { 
+            title: 'Error',
+            message: 'Error interno del servidor' 
         });
     }
 });
@@ -337,7 +414,7 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`SkillTrade Frontend ejecutándose en puerto ${PORT}`);
     console.log(`Accede en: http://localhost:${PORT}`);
-    console.log(`🔗 API Backend: ${process.env.API_BASE_URL || 'http://localhost:9090/api/v0'}`);
+    console.log(`🔗 API Backend: ${process.env.API_BASE_URL || 'http://localhost:9090/api'}`);
 });
 
 module.exports = app;
