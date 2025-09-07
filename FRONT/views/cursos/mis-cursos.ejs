@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis Cursos - SkillTrade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/mycourses.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-dark text-white">
+
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="p-3">
+        <div class="text-center mb-4">
+          <img src="/images/logo_skill.png" alt="Logo SkillTrade" width="80">
+          <h2 class="mt-2 fw-bold">SkillTrade</h2>
+        </div>
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="/dashboard"><i class="fas fa-home me-2"></i>INICIO</a>
+          <a class="nav-link" href="/intercambios"><i class="fas fa-handshake me-2"></i>INTERCAMBIO</a>
+          <a class="nav-link" href="/cursos"><i class="fas fa-book me-2"></i>VER CURSOS</a>
+          <a class="nav-link" href="/perfil"><i class="fas fa-user me-2"></i>MI PERFIL</a>
+          <a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>CERRAR SESIÓN</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-fill p-4">
+      <h4 class="fw-bold mb-3">Esta es tu biblioteca de cursos</h4>
+
+      <div class="d-flex align-items-center mb-3 gap-2">
+        <input type="text" class="form-control" placeholder="busca los cursos..." style="max-width: 300px;">
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            categorías <i class="fas fa-arrow-down ms-1"></i>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('')">Todas</a></li>
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('Idiomas')">Idiomas</a></li>
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('Programación')">Programación</a></li>
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('Música')">Música</a></li>
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('Diseño gráfico')">Diseño gráfico</a></li>
+            <li><a class="dropdown-item" href="#" onclick="filtrarPorCategoria('Marketing')">Marketing</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="ordenarAZ">
+            <label class="form-check-label" for="ordenarAZ">Ordenar A - Z</label>
+        </div>
+        <div class="text-muted">
+          <span id="totalCursos">0</span> cursos encontrados
+        </div>
+      </div>
+
+      <!-- Cursos -->
+      <div class="row g-4" id="cursosContainer">
+        <!-- Los cursos se cargarán dinámicamente -->
+        
+        <!-- Botón Crear Curso -->
+        <div class="col-md-4">
+          <div class="card crear-curso-btn text-center text-white bg-gradient-dark h-100 d-flex align-items-center justify-content-center"
+               style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#crearCursoModal">
+            <div class="d-flex flex-column align-items-center">
+              <i class="fas fa-plus-circle fa-5x mb-3"></i>
+              <h5 class="fw-bold">CREAR CURSO</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje cuando no hay cursos -->
+      <div id="noCursosMessage" class="text-center py-5" style="display: none;">
+        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No tienes cursos creados aún</h5>
+        <p class="text-muted">¡Crea tu primer curso y comparte tu conocimiento!</p>
+      </div>
+    </main>
+  </div>
+
+<!-- Modal Crear Curso -->
+<div class="modal fade" id="crearCursoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Crear nuevo curso</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formCrearCurso">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="imagenCurso" class="form-label">Imagen del curso</label>
+                  <input type="file" class="form-control" id="imagenCurso" accept="image/*" required>
+                  <div class="form-text text-muted">Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB</div>
+                </div>
+                <div class="mb-3">
+                  <label for="tituloCurso" class="form-label">Título del curso</label>
+                  <input type="text" class="form-control" id="tituloCurso" required maxlength="100">
+                  <div class="form-text text-muted">Máximo 100 caracteres</div>
+                </div>
+                <div class="mb-3">
+                  <label for="categoriaCurso" class="form-label">Categoría</label>
+                  <select class="form-select" id="categoriaCurso" required>
+                    <option value="" disabled selected>Selecciona una categoría</option>
+                    <option value="Idiomas">Idiomas</option>
+                    <option value="Programación">Programación</option>
+                    <option value="Música">Música</option>
+                    <option value="Diseño gráfico">Diseño gráfico</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Redes">Redes</option>
+                    <option value="Ofimática">Ofimática</option>
+                    <option value="Fotografía">Fotografía</option>
+                    <option value="Videojuegos">Videojuegos</option>
+                    <option value="Cine">Cine</option>
+                    <option value="Arte">Arte</option>
+                    <option value="Cocina">Cocina</option>
+                    <option value="Fitness">Fitness</option>
+                    <option value="Negocios">Negocios</option>
+                    <option value="Finanzas">Finanzas</option>
+                    <option value="Matemáticas">Matemáticas</option>
+                    <option value="Ciencia">Ciencia</option>
+                    <option value="Robótica">Robótica</option>
+                    <option value="IA y Machine Learning">IA y Machine Learning</option>
+                    <option value="Desarrollo personal">Desarrollo personal</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="descripcionCurso" class="form-label">Descripción</label>
+                  <textarea class="form-control" id="descripcionCurso" rows="5" required maxlength="500"></textarea>
+                  <div class="form-text text-muted">Máximo 500 caracteres</div>
+                </div>
+                <div class="mb-3">
+                  <label for="precioCurso" class="form-label">Precio (COP)</label>
+                  <input type="number" class="form-control" id="precioCurso" min="0" step="1000" placeholder="0">
+                  <div class="form-text text-muted">Deja en 0 para curso gratuito</div>
+                </div>
+                <div class="mb-3">
+                  <label for="nivelCurso" class="form-label">Nivel</label>
+                  <select class="form-select" id="nivelCurso" required>
+                    <option value="basico">Principiante</option>
+                    <option value="intermedio">Intermedio</option>
+                    <option value="avanzado">Avanzado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-purple flex-fill">Crear curso</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal Agregar Sesión -->
+<div class="modal fade" id="agregarSesionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar nueva sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAgregarSesion">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="tituloSesion" class="form-label">Título de la sesión</label>
+                <input type="text" class="form-control" id="tituloSesion" required maxlength="100">
+              </div>
+              <div class="mb-3">
+                <label for="descripcionSesion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcionSesion" rows="3" required maxlength="300"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="duracionSesion" class="form-label">Duración (minutos)</label>
+                <input type="number" class="form-control" id="duracionSesion" min="1" max="180" placeholder="30">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="videoSesion" class="form-label">Video de la sesión</label>
+                <input type="file" class="form-control" id="videoSesion" accept="video/*" required>
+                <div class="form-text text-muted">Formatos: MP4, AVI, MOV. Tamaño máximo: 100MB</div>
+              </div>
+              <div class="mb-3">
+                <label for="nombreCursoSesion" class="form-label">Curso al que pertenece</label>
+                <input type="text" class="form-control" id="nombreCursoSesion" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="ordenSesion" class="form-label">Orden de la sesión</label>
+                <input type="number" class="form-control" id="ordenSesion" min="1" placeholder="1">
+                <div class="form-text text-muted">Orden en el que aparecerá la sesión</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-purple flex-fill">Agregar sesión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast de notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+  <div id="toastContainer"></div>
+</div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Make session data available to JavaScript
+    window.sessionData = {
+      token: '<%= locals.token || "" %>',
+      user: <%- JSON.stringify(locals.user || null) %>
+    };
+  </script>
+  <script src="/js/miscursos.js"></script>
+  <script>
+    // Función para logout
+    function logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Función para filtrar por categoría
+    function filtrarPorCategoria(categoria) {
+      const cursos = document.querySelectorAll('#cursosContainer .col-md-4:not(:has(.crear-curso-btn))');
+      let visibleCount = 0;
+      
+      cursos.forEach(curso => {
+        const badge = curso.querySelector('.badge');
+        const cursoCategoria = badge ? badge.textContent : '';
+        
+        if (categoria === '' || cursoCategoria === categoria) {
+          curso.style.display = 'block';
+          visibleCount++;
+        } else {
+          curso.style.display = 'none';
+        }
+      });
+      
+      document.getElementById('totalCursos').textContent = visibleCount;
+      
+      // Mostrar mensaje si no hay cursos
+      const noCursosMessage = document.getElementById('noCursosMessage');
+      if (visibleCount === 0 && categoria !== '') {
+        noCursosMessage.style.display = 'block';
+        noCursosMessage.innerHTML = `
+          <i class="fas fa-search fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No se encontraron cursos en "${categoria}"</h5>
+          <p class="text-muted">Intenta con otra categoría o crea un nuevo curso.</p>
+        `;
+      } else {
+        noCursosMessage.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
