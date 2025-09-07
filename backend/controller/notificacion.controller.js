@@ -1,7 +1,8 @@
 const Notificacion = require('../model/notificacion.model');
 const Usuario = require('../model/usuario.model');
+const { log } = require('../services/fslogger');
 
-// RF-NOT-01: Solicitudes de intercambio
+
 const crearNotificacion = async (req, res) => {
     try {
         const { usuario, tipo, titulo, mensaje, accion, prioridad = 'media' } = req.body;

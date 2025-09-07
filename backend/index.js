@@ -26,7 +26,6 @@ mongoose.connection.on('error', (err) => {
 // API routes
 app.use('/api', routes);
 
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', message: 'SKILLTRADE API is running' });
 });

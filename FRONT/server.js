@@ -36,13 +36,13 @@ app.use(session({
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.isAuthenticated = !!req.session.user;
-    res.locals.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:9090/api/v0';
+    res.locals.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:9090/api';
     next();
 });
 
 // Configuración de axios para el backend
 const apiClient = axios.create({
-    baseURL: process.env.API_BASE_URL || 'http://localhost:9090/api/v0',
+    baseURL: process.env.API_BASE_URL || 'http://localhost:9090/api',
     timeout: 10000
 });
 
