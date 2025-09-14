@@ -4,10 +4,10 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "start": "node index.js",    // (Render)
+  "dev": "nodemon index.js",   // local
+  "test": "echo \"Error: no test specified\" && exit 1"
+}
   "author": "",
   "license": "ISC",
   "dependencies": {
