@@ -1,9 +1,9 @@
 module.exports = {
   default: {
     require: [
-      'test/features/unit/steps/**/*.js',
-      'test/features/integration/steps/**/*.js',
-      'test/test-helper.js'
+      'test/unit/steps/**/*.js',
+      'test/integration/steps/**/*.js',
+      'test/support/**/*.js'
     ],
     format: [
       'progress-bar',
@@ -11,7 +11,6 @@ module.exports = {
       'json:test/reports/cucumber-report.json'
     ],
     tags: 'not @wip',
-    publishQuiet: true,
-    parallel: 1
+    publishQuiet: true
   }
 };

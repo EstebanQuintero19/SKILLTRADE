@@ -1,8 +1,7 @@
 module.exports = {
   default: {
     require: [
-      'test/features/unit/steps/**/*.js',
-      'test/features/integration/steps/**/*.js',
+      'test/features/integration/steps/*.js',
       'test/test-helper.js'
     ],
     format: [
@@ -10,7 +9,7 @@ module.exports = {
       'html:test/reports/cucumber-report.html',
       'json:test/reports/cucumber-report.json'
     ],
-    tags: 'not @wip',
+    tags: '@integracion',
     publishQuiet: true,
     parallel: 1
   }
