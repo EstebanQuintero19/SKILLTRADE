@@ -1,0 +1,85 @@
+<% 
+// Componente de botón reutilizable
+// Parámetros:
+// - type: tipo de botón (primary, secondary, success, danger, warning, info)
+// - size: tamaño (sm, md, lg, xl)
+// - variant: variante (solid, outline, ghost)
+// - icon: icono de Bootstrap Icons
+// - text: texto del botón
+// - disabled: si está deshabilitado
+// - loading: si está en estado de carga
+// - onclick: función onclick
+// - class: clases CSS adicionales
+// - id: ID del elemento
+
+const type = typeof type !== 'undefined' ? type : 'primary';
+const size = typeof size !== 'undefined' ? size : 'md';
+const variant = typeof variant !== 'undefined' ? variant : 'solid';
+const icon = typeof icon !== 'undefined' ? icon : '';
+const text = typeof text !== 'undefined' ? text : 'Botón';
+const disabled = typeof disabled !== 'undefined' ? disabled : false;
+const loading = typeof loading !== 'undefined' ? loading : false;
+const onclick = typeof onclick !== 'undefined' ? onclick : '';
+const additionalClass = typeof class !== 'undefined' ? class : '';
+const buttonId = typeof id !== 'undefined' ? id : '';
+
+// Configuración de estilos por tipo
+const typeStyles = {
+    primary: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white',
+    secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
+    success: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white',
+    danger: 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white',
+    warning: 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white',
+    info: 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white'
+};
+
+// Configuración de tamaños
+const sizeStyles = {
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-4 py-3 text-base',
+    lg: 'px-6 py-4 text-lg',
+    xl: 'px-8 py-5 text-xl'
+};
+
+// Configuración de variantes
+const variantStyles = {
+    solid: '',
+    outline: 'border-2 bg-transparent hover:bg-opacity-10',
+    ghost: 'bg-transparent hover:bg-opacity-10'
+};
+
+// Clases base
+let baseClasses = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
+
+// Aplicar estilos
+baseClasses += ` ${typeStyles[type] || typeStyles.primary}`;
+baseClasses += ` ${sizeStyles[size] || sizeStyles.md}`;
+baseClasses += ` ${variantStyles[variant] || variantStyles.solid}`;
+baseClasses += ` ${additionalClass}`;
+
+// Estilos específicos para outline
+if (variant === 'outline') {
+    baseClasses += ` border-${type === 'primary' ? 'blue' : type === 'secondary' ? 'gray' : type}-500 text-${type === 'primary' ? 'blue' : type === 'secondary' ? 'gray' : type}-400 hover:text-white`;
+}
+
+// Estilos específicos para ghost
+if (variant === 'ghost') {
+    baseClasses += ` text-${type === 'primary' ? 'blue' : type === 'secondary' ? 'gray' : type}-400 hover:text-white`;
+}
+%>
+
+<button 
+    type="button"
+    <% if (buttonId) { %>id="<%= buttonId %>"<% } %>
+    class="<%= baseClasses %>"
+    <% if (disabled || loading) { %>disabled<% } %>
+    <% if (onclick) { %>onclick="<%= onclick %>"<% } %>
+    <% if (loading) { %>data-loading="true"<% } %>
+>
+    <% if (loading) { %>
+        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+    <% } else if (icon) { %>
+        <i class="bi bi-<%= icon %> mr-2"></i>
+    <% } %>
+    <span><%= text %></span>
+</button>

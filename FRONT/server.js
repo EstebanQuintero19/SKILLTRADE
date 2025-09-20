@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const axios = require('axios');
@@ -7,7 +6,25 @@ const session = require('express-session');
 const multer = require('multer');
 const expressLayouts = require('express-ejs-layouts');
 
+// Importar configuración
+const config = require('./config/environment');
+
+// Importar middlewares de seguridad
+const { 
+    cspConfig, 
+    frontendLimiter, 
+    sanitizeInput, 
+    validateSession, 
+    securityHeaders 
+} = require('./middleware/security');
+
 const app = express();
+
+// ===== MIDDLEWARE DE SEGURIDAD =====
+app.use(cspConfig);
+app.use(securityHeaders);
+app.use(frontendLimiter);
+app.use(sanitizeInput);
 
 // Configuración del motor de plantillas EJS
 app.use(expressLayouts);
@@ -15,37 +32,54 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layout');
 
-// Middleware
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// ===== MIDDLEWARE GENERAL =====
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: config.STATIC_CACHE_MAX_AGE,
+    etag: true
+}));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Configuración de sesiones
+// ===== CONFIGURACIÓN DE SESIONES SEGURA =====
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'skilltrade-secret-key-2024',
-    resave: true,
-    saveUninitialized: true,
+    secret: config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
     name: 'skilltrade.sid',
     cookie: {
-        secure: false,
-        httpOnly: false,
-        sameSite: 'lax'
-    }
+        secure: config.NODE_ENV === 'production', // HTTPS en producción
+        httpOnly: true, // Prevenir acceso desde JavaScript
+        sameSite: 'strict', // Protección CSRF
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    },
+    store: config.NODE_ENV === 'production' ? 
+        // En producción usar Redis o similar
+        undefined : 
+        // En desarrollo usar memoria
+        undefined
 }));
 
-// Variables globales para las vistas
+// ===== VARIABLES GLOBALES PARA LAS VISTAS =====
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.token = req.session.token || null;
     res.locals.isAuthenticated = !!req.session.user;
-    res.locals.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:9090/api/v0';
+    res.locals.API_BASE_URL = config.API_BASE_URL;
+    res.locals.NODE_ENV = config.NODE_ENV;
+    res.locals.canonicalUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+    res.locals.analytics = config.ENABLE_ANALYTICS;
+    res.locals.googleAnalyticsId = config.GOOGLE_ANALYTICS_ID;
+    res.locals.hotjarId = config.HOTJAR_ID;
     next();
 });
 
-// Configuración de axios para el backend
+// ===== VALIDACIÓN DE SESIÓN =====
+app.use(validateSession);
+
+// ===== CONFIGURACIÓN DE AXIOS PARA EL BACKEND =====
 const apiClient = axios.create({
-    baseURL: process.env.API_BASE_URL || 'http://localhost:9090/api',
+    baseURL: config.API_BASE_URL,
     timeout: 10000
 });
 
@@ -407,12 +441,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Iniciar servidor
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`SkillTrade Frontend ejecutándose en puerto ${PORT}`);
-    console.log(`Accede en: http://localhost:${PORT}`);
-    console.log(`🔗 API Backend: ${process.env.API_BASE_URL || 'http://localhost:9090/api'}`);
+// ===== INICIAR SERVIDOR =====
+app.listen(config.PORT, () => {
+    console.log(`🚀 SkillTrade Frontend ejecutándose en puerto ${config.PORT}`);
+    console.log(`🌐 Accede en: http://localhost:${config.PORT}`);
+    console.log(`🔗 API Backend: ${config.API_BASE_URL}`);
 });
 
 module.exports = app;

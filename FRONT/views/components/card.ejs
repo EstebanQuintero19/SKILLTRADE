@@ -1,0 +1,113 @@
+<% 
+// Componente de tarjeta reutilizable
+// Parámetros:
+// - type: tipo de tarjeta (default, course, user, exchange, stats)
+// - title: título de la tarjeta
+// - subtitle: subtítulo
+// - image: URL de la imagen
+// - imageAlt: texto alternativo de la imagen
+// - content: contenido principal
+// - footer: contenido del pie
+// - actions: botones de acción
+// - class: clases CSS adicionales
+// - id: ID del elemento
+// - loading: si está en estado de carga
+// - clickable: si es clickeable
+
+const cardType = typeof type !== 'undefined' ? type : 'default';
+const cardTitle = typeof title !== 'undefined' ? title : '';
+const cardSubtitle = typeof subtitle !== 'undefined' ? subtitle : '';
+const cardImage = typeof image !== 'undefined' ? image : '';
+const cardImageAlt = typeof imageAlt !== 'undefined' ? imageAlt : cardTitle || 'Imagen';
+const cardContent = typeof content !== 'undefined' ? content : '';
+const cardFooter = typeof footer !== 'undefined' ? footer : '';
+const cardActions = typeof actions !== 'undefined' ? actions : '';
+const additionalClass = typeof class !== 'undefined' ? class : '';
+const cardId = typeof id !== 'undefined' ? id : '';
+const cardLoading = typeof loading !== 'undefined' ? loading : false;
+const cardClickable = typeof clickable !== 'undefined' ? clickable : false;
+
+// Clases base para la tarjeta
+let cardClasses = 'bg-gray-800 rounded-xl border border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg';
+if (cardClickable) {
+    cardClasses += ' cursor-pointer hover:scale-105 hover:border-gray-600';
+}
+if (cardLoading) {
+    cardClasses += ' opacity-75';
+}
+cardClasses += ` ${additionalClass}`;
+
+// Estilos específicos por tipo
+const typeStyles = {
+    default: '',
+    course: 'hover:shadow-purple-500/20',
+    user: 'hover:shadow-blue-500/20',
+    exchange: 'hover:shadow-green-500/20',
+    stats: 'hover:shadow-yellow-500/20'
+};
+
+cardClasses += ` ${typeStyles[cardType] || typeStyles.default}`;
+%>
+
+<div 
+    <% if (cardId) { %>id="<%= cardId %>"<% } %>
+    class="<%= cardClasses %>"
+    <% if (cardLoading) { %>data-loading="true"<% } %>
+>
+    <% if (cardImage) { %>
+        <div class="relative overflow-hidden">
+            <img 
+                src="<%= cardImage %>" 
+                alt="<%= cardImageAlt %>"
+                class="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
+                loading="lazy"
+            />
+            <% if (cardType === 'course') { %>
+                <div class="absolute top-3 right-3">
+                    <span class="bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                        Curso
+                    </span>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+    
+    <div class="p-6">
+        <% if (cardTitle) { %>
+            <div class="mb-3">
+                <h3 class="text-xl font-bold text-white mb-1">
+                    <%= cardTitle %>
+                </h3>
+                <% if (cardSubtitle) { %>
+                    <p class="text-gray-400 text-sm">
+                        <%= cardSubtitle %>
+                    </p>
+                <% } %>
+            </div>
+        <% } %>
+        
+        <% if (cardContent) { %>
+            <div class="text-gray-300 mb-4">
+                <%= cardContent %>
+            </div>
+        <% } %>
+        
+        <% if (cardActions) { %>
+            <div class="flex gap-2 mb-4">
+                <%= cardActions %>
+            </div>
+        <% } %>
+        
+        <% if (cardFooter) { %>
+            <div class="border-t border-gray-700 pt-4">
+                <%= cardFooter %>
+            </div>
+        <% } %>
+    </div>
+    
+    <% if (cardLoading) { %>
+        <div class="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
+    <% } %>
+</div>

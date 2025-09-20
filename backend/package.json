@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "docs": "jsdoc -c jsdoc.json"
+    "docs": "jsdoc -c jsdoc.json",
+    "test": "cucumber-js",
+    "test:unit": "cucumber-js --grep '@unit'",
+    "test:integration": "cucumber-js --grep '@integration'",
+    "test:user-registration": "cucumber-js --grep '@user-registration'"
   },
   "author": "",
   "license": "ISC",
@@ -21,12 +25,19 @@
     "mongoose": "^8.0.0",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
-    "nodemailer": "^6.9.7",
+    "nodemailer": "^6.10.1",
     "nodemon": "^3.1.10",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "@cucumber/cucumber": "^10.0.0",
+    "chai": "^4.3.10",
+    "supertest": "^7.0.0",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.1",
+    "mongodb-memory-server": "^9.1.3"
   }
 }

@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SkillTrade - Plataforma de intercambio de conocimientos y cursos">
+    <meta name="keywords" content="cursos, educación, intercambio, aprendizaje, skilltrade">
+    <meta name="author" content="SkillTrade Team">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://skilltrade.com' %>">
+    <meta property="og:title" content="<%= title %> | SkillTrade">
+    <meta property="og:description" content="Intercambia conocimientos y transforma tu futuro">
+    <meta property="og:image" content="/images/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'https://skilltrade.com' %>">
+    <meta property="twitter:title" content="<%= title %> | SkillTrade">
+    <meta property="twitter:description" content="Intercambia conocimientos y transforma tu futuro">
+    <meta property="twitter:image" content="/images/og-image.jpg">
+    
     <title><%= title %> | SkillTrade</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/css/main.css" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" as="style">
     
     <!-- CSS Principal -->
     <link rel="stylesheet" href="/css/main.css">
@@ -13,13 +35,35 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#1f2937">
+    
+    <!-- Canonical URL -->
+    <% if (typeof canonicalUrl !== 'undefined') { %>
+        <link rel="canonical" href="<%= canonicalUrl %>">
+    <% } %>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Global Loader -->
+    <div id="global-loader" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p class="text-gray-300">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50">
+        Saltar al contenido principal
+    </a>
+    
     <!-- Header -->
     <%- include('partials/header') %>
     
     <!-- Main Content -->
-    <main class="flex-1">
+    <main id="main-content" class="flex-1" role="main">
         <%- body %>
     </main>
     
@@ -275,7 +319,9 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- JavaScript Principal -->
+    <!-- Core JavaScript -->
+    <script src="/js/stateManager.js"></script>
+    <script src="/js/validation.js"></script>
     <script src="/js/main.js"></script>
     
     <!-- JavaScript de Autenticación -->
@@ -287,5 +333,25 @@
             <script src="<%= script %>"></script>
         <% }) %>
     <% } %>
+    
+    <!-- Analytics (opcional) -->
+    <% if (typeof analytics !== 'undefined' && analytics) { %>
+        <!-- Google Analytics o similar -->
+    <% } %>
+    
+    <!-- Service Worker (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

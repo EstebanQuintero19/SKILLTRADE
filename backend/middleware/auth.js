@@ -126,7 +126,8 @@ const verificarAccesoCurso = async (req, res, next) => {
         // Aquí implementarías la lógica para verificar acceso al curso
         // Por ejemplo: si es propietario, si tiene suscripción, si lo compró, etc.
         
-        // Por ahora, permitimos acceso a todos los usuarios autenticados
+        /* Por ahora, permitimos acceso a todos los usuarios
+        autenticados sino pues a llorar un ratico*/
         next();
 
     } catch (error) {

@@ -1,0 +1,134 @@
+<% 
+// Componente de input reutilizable
+// Parámetros:
+// - type: tipo de input (text, email, password, number, tel, url, search)
+// - name: nombre del campo
+// - id: ID del elemento
+// - label: etiqueta del campo
+// - placeholder: texto placeholder
+// - value: valor inicial
+// - required: si es requerido
+// - disabled: si está deshabilitado
+// - readonly: si es solo lectura
+// - icon: icono de Bootstrap Icons
+// - error: mensaje de error
+// - help: texto de ayuda
+// - class: clases CSS adicionales
+// - min, max: valores mínimos y máximos
+// - step: paso para números
+// - pattern: patrón de validación
+// - autocomplete: autocompletado
+
+const inputType = typeof type !== 'undefined' ? type : 'text';
+const inputName = typeof name !== 'undefined' ? name : '';
+const inputId = typeof id !== 'undefined' ? id : inputName || 'input';
+const inputLabel = typeof label !== 'undefined' ? label : '';
+const inputPlaceholder = typeof placeholder !== 'undefined' ? placeholder : '';
+const inputValue = typeof value !== 'undefined' ? value : '';
+const inputRequired = typeof required !== 'undefined' ? required : false;
+const inputDisabled = typeof disabled !== 'undefined' ? disabled : false;
+const inputReadonly = typeof readonly !== 'undefined' ? readonly : false;
+const inputIcon = typeof icon !== 'undefined' ? icon : '';
+const inputError = typeof error !== 'undefined' ? error : '';
+const inputHelp = typeof help !== 'undefined' ? help : '';
+const additionalClass = typeof class !== 'undefined' ? class : '';
+const inputMin = typeof min !== 'undefined' ? min : '';
+const inputMax = typeof max !== 'undefined' ? max : '';
+const inputStep = typeof step !== 'undefined' ? step : '';
+const inputPattern = typeof pattern !== 'undefined' ? pattern : '';
+const inputAutocomplete = typeof autocomplete !== 'undefined' ? autocomplete : '';
+
+// Clases base para el input
+let inputClasses = 'w-full px-4 py-3 text-white bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 placeholder-gray-400';
+if (inputIcon) {
+    inputClasses += ' pl-12';
+}
+if (inputError) {
+    inputClasses += ' border-red-500 focus:ring-red-500';
+}
+if (inputDisabled) {
+    inputClasses += ' opacity-50 cursor-not-allowed';
+}
+if (inputReadonly) {
+    inputClasses += ' bg-gray-700';
+}
+inputClasses += ` ${additionalClass}`;
+
+// Clases para el contenedor
+let containerClasses = 'mb-4';
+if (inputError) {
+    containerClasses += ' has-error';
+}
+%>
+
+<div class="<%= containerClasses %>">
+    <% if (inputLabel) { %>
+        <label for="<%= inputId %>" class="block text-sm font-medium text-gray-300 mb-2">
+            <%= inputLabel %>
+            <% if (inputRequired) { %>
+                <span class="text-red-400 ml-1">*</span>
+            <% } %>
+        </label>
+    <% } %>
+    
+    <div class="relative">
+        <% if (inputIcon) { %>
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="bi bi-<%= inputIcon %> text-gray-400"></i>
+            </div>
+        <% } %>
+        
+        <input 
+            type="<%= inputType %>"
+            id="<%= inputId %>"
+            name="<%= inputName %>"
+            <% if (inputPlaceholder) { %>placeholder="<%= inputPlaceholder %>"<% } %>
+            <% if (inputValue) { %>value="<%= inputValue %>"<% } %>
+            <% if (inputRequired) { %>required<% } %>
+            <% if (inputDisabled) { %>disabled<% } %>
+            <% if (inputReadonly) { %>readonly<% } %>
+            <% if (inputMin !== '') { %>min="<%= inputMin %>"<% } %>
+            <% if (inputMax !== '') { %>max="<%= inputMax %>"<% } %>
+            <% if (inputStep !== '') { %>step="<%= inputStep %>"<% } %>
+            <% if (inputPattern) { %>pattern="<%= inputPattern %>"<% } %>
+            <% if (inputAutocomplete) { %>autocomplete="<%= inputAutocomplete %>"<% } %>
+            class="<%= inputClasses %>"
+        />
+        
+        <% if (inputType === 'password') { %>
+            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('<%= inputId %>')">
+                <i class="bi bi-eye text-gray-400 hover:text-gray-300 transition-colors" id="<%= inputId %>-toggle"></i>
+            </button>
+        <% } %>
+    </div>
+    
+    <% if (inputError) { %>
+        <div class="mt-2 text-sm text-red-400 flex items-center">
+            <i class="bi bi-exclamation-circle mr-1"></i>
+            <%= inputError %>
+        </div>
+    <% } %>
+    
+    <% if (inputHelp && !inputError) { %>
+        <div class="mt-2 text-sm text-gray-400">
+            <%= inputHelp %>
+        </div>
+    <% } %>
+</div>
+
+<% if (inputType === 'password') { %>
+<script>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const toggle = document.getElementById(inputId + '-toggle');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        toggle.className = 'bi bi-eye-slash text-gray-400 hover:text-gray-300 transition-colors';
+    } else {
+        input.type = 'password';
+        toggle.className = 'bi bi-eye text-gray-400 hover:text-gray-300 transition-colors';
+    }
+}
+</script>
+<% } %>

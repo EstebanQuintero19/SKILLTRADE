@@ -26,26 +26,26 @@ const crearCurso = async (req, res) => {
         // Validar precio
         const precioNumerico = precio ? parseFloat(precio) : 0;
 
-        // Validar nivel - permitir cualquier valor
-        // if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
-        //     return res.status(400).json({
-        //         error: 'El nivel debe ser básico, intermedio o avanzado'
-        //     });
-        // }
+        /* Validar nivel - permitir cualquier valor
+         if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
+             return res.status(400).json({
+                 error: 'El nivel debe ser básico, intermedio o avanzado'
+             });
+         }
 
-        // Validar visibilidad - permitir cualquier valor
-        // if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
-        //     return res.status(400).json({
-        //         error: 'La visibilidad debe ser público, privado o solo suscriptores'
-        //     });
-        // }
+         Validar visibilidad - permitir cualquier valor
+         if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
+             return res.status(400).json({
+                 error: 'La visibilidad debe ser público, privado o solo suscriptores'
+             });
+         }
 
-        // Validar etiquetas - permitir cualquier cantidad
-        // if (etiquetas && etiquetas.length > 10) {
-        //     return res.status(400).json({
-        //         error: 'No puede tener más de 10 etiquetas'
-        //     });
-        // }
+         Validar etiquetas - permitir cualquier cantidad
+         if (etiquetas && etiquetas.length > 10) {
+             return res.status(400).json({
+                 error: 'No puede tener más de 10 etiquetas'
+             });
+         }*/
 
         const cursoData = {
             titulo: titulo.trim(),
