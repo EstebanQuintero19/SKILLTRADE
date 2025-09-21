@@ -1,7 +1,14 @@
 {
+  "name": "skilltrade",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm start --prefix backend\" \"npm start --prefix FRONT\""
+  },
   "devDependencies": {
-    "@types/node": "^24.3.0",
-    "jsdoc": "^4.0.4"
+    "concurrently": "8.2.2",
+    "jsdoc": "^4.0.4",
+    "@types/node": "^24.3.0"
   },
   "dependencies": {
     "child_process": "^1.0.2",
