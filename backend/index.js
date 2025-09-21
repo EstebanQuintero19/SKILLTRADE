@@ -85,7 +85,7 @@ app.use((req, res) => {
 
 // Server
 const PORT = process.env.PORT || 9090;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`API REST corriendo en el puerto: ${PORT}`);
     console.log(`Endpoint base: http://localhost:${PORT}/api`);
 });
