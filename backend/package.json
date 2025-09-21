@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "docs": "jsdoc -c jsdoc.json"
+    "docs": "jsdoc -c jsdoc.json",
+    "build": "npm install --production",
+    "postinstall": "npm ls mongoose"
   },
   "author": "",
   "license": "ISC",
@@ -18,7 +20,7 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.8.0",
+    "mongoose": "7.6.3",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "nodemailer": "^6.9.7",
@@ -32,6 +34,7 @@
     "typescript": "^5.9.2"
   },
   "engines": {
-    "node": ">=18.0.0 <23.0.0"
+    "node": "18.20.4",
+    "npm": ">=9.0.0"
   }
 }
