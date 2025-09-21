@@ -1,5 +1,21 @@
 services:
   - type: web
+    name: skilltrade-frontend
+    env: node
+    plan: free
+    buildCommand: cd FRONT && npm install
+    startCommand: cd FRONT && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
+      - key: NODE_ENV
+        value: production
+      - key: API_BASE_URL
+        value: https://skilltrade-backend-147.onrender.com/api
+      - key: SESSION_SECRET
+        value: skilltrade-secret-key-production-2024
+        
+  - type: web
     name: skilltrade-backend
     env: node
     plan: free
@@ -10,5 +26,3 @@ services:
         value: 18.20.4
       - key: NODE_ENV
         value: production
-      - key: NPM_CONFIG_PRODUCTION
-        value: false

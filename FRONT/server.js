@@ -411,7 +411,7 @@ app.use((err, req, res, next) => {
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`SkillTrade Frontend ejecutándose en puerto ${PORT}`);
     console.log(`Accede en: http://localhost:${PORT}`);
     console.log(`🔗 API Backend: ${process.env.API_BASE_URL || 'http://localhost:9090/api'}`);
