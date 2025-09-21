@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "child_process": "^1.0.2",
+    "concurrently": "^9.2.1",
     "fs": "^0.0.1-security"
   }
 }
