@@ -4,8 +4,8 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js && node ../FRONT/index",
-    "dev": "concurrently \"npm start --prefix backend\" \"npm start --prefix FRONT\"",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "docs": "jsdoc -c jsdoc.json"
   },
   "author": "",
