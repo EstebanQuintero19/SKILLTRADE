@@ -1,0 +1,34 @@
+<% layout('layout') %>
+
+<section class="mb-4">
+  <h1 class="text-2xl font-extrabold text-[#151117]">Historial de compras</h1>
+  <p class="text-sm text-[#6f6880]">Revisa tus compras y descarga comprobantes.</p>
+</section>
+
+<div class="overflow-x-auto rounded-lg border border-[#edeaf0]">
+  <table class="w-full text-sm">
+    <thead class="bg-[#f5f2f8] text-[#6f6880]">
+      <tr>
+        <th class="px-4 py-2 text-left">ID</th>
+        <th class="px-4 py-2 text-left">Curso</th>
+        <th class="px-4 py-2 text-left">Monto</th>
+        <th class="px-4 py-2 text-left">Fecha</th>
+        <th class="px-4 py-2 text-left">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (ventas||[]).forEach(v => { %>
+        <tr class="border-t border-[#edeaf0]">
+          <td class="px-4 py-3">#<%= v._id %></td>
+          <td class="px-4 py-3 text-[#5a1593]"><%= v.curso?.titulo || '-' %></td>
+          <td class="px-4 py-3">$<%= Number(v.monto||v.precio||0).toFixed(2) %></td>
+          <td class="px-4 py-3"><%= (new Date(v.fecha||v.createdAt)).toISOString().slice(0,10) %></td>
+          <td class="px-4 py-3">
+            <a class="text-[#5a1593]" href="<%= API_BASE %>/api/ventas/<%= v._id %>/comprobante" target="_blank">Comprobante</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+

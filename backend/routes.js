@@ -1,9 +1,32 @@
 const express = require('express');
 const router = express.Router();
 
-// Importar middlewares de seguridad
-const { validateApiKey, authLimiter, createLimiter } = require('./middleware/security');
-const { catchAsync, validateObjectId } = require('./middleware/errorHandler');
+// Validador local de API Key con bypass por entorno
+const validateApiKey = (req, res, next) => {
+    // Bypass temporal controlado por variable de entorno
+    if (process.env.AUTH_DISABLED === 'true') {
+        return next();
+    }
+    const apiKey = req.headers['rh-api-key'];
+    console.log('API Key recibida:', apiKey);
+    const validApiKey = 'skilltrade-api-key-2025';
+
+    if (!apiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    if (apiKey !== validApiKey) {
+        return res.status(401).json({
+            error: 'API Key inválida',
+            mensaje: 'La API Key proporcionada no es válida'
+        });
+    }
+
+    next();
+};
 
 // Import controllers
 const usuarioController = require('./controller/usuario.controller');
@@ -19,9 +42,9 @@ const notificacionController = require('./controller/notificacion.controller');
 const { autenticarApiKey, requerirRol, verificarPropietario } = require('./middleware/auth');
 
 // ===== RUTAS DE AUTENTICACIÓN =====
-router.post('/usuarios', catchAsync(usuarioController.registrarUsuario));
-router.post('/usuarios/login', authLimiter, catchAsync(usuarioController.loginUsuario));
-router.post('/auth/logout', validateApiKey, catchAsync(usuarioController.cerrarSesion));
+router.post('/usuarios', usuarioController.registrarUsuario);
+router.post('/usuarios/login', usuarioController.loginUsuario);
+router.post('/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
 
 // ===== RUTAS DE USUARIOS =====
 router.get('/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);

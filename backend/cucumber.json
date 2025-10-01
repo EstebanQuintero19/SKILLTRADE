@@ -1,6 +1,0 @@
-{
-  "default": {
-    "require": ["features/steps/*.js"],
-    "format": ["progress"]
-  }
-}

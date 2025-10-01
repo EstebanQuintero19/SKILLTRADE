@@ -1,0 +1,47 @@
+<% layout('layout') %>
+
+<section class="mb-4">
+  <h1 class="text-2xl font-extrabold text-[#151117]">Notificaciones</h1>
+  <div class="mt-3 flex gap-2">
+    <form method="post" action="/notificaciones/leer-todas">
+      <button class="h-9 px-3 rounded-lg bg-[#eee8f3] text-[#151117] text-sm font-semibold">Marcar todas como leídas</button>
+    </form>
+  </div>
+  <div class="mt-3 relative">
+    <input id="q" class="w-full h-11 rounded-lg border border-[#edeaf0] pl-10 pr-3" placeholder="Buscar por texto o tipo" />
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a92ad]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path fill="currentColor" d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72Z"/></svg>
+  </div>
+</section>
+
+<div class="rounded-lg border border-[#edeaf0] divide-y" id="list">
+  <% (items||[]).forEach(n => { %>
+    <div class="p-4 notification" data-type="<%= n.tipo || '' %>" data-text="<%= (n.titulo||'') + ' ' + (n.mensaje||'') %>">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-semibold text-[#151117]"><%= n.titulo || n.tipo || 'Notificación' %></h3>
+          <p class="text-sm text-[#6f6880]"><%= n.mensaje || '' %></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <% if (!n.leida) { %>
+            <form method="post" action="/notificaciones/<%= n._id %>/leida"><button class="text-[#5a1593]">Marcar leída</button></form>
+          <% } %>
+          <form method="post" action="/notificaciones/<%= n._id %>/eliminar"><button class="text-red-600">Eliminar</button></form>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<script>
+  const q = document.getElementById('q');
+  const rows = Array.from(document.querySelectorAll('.notification'));
+  q.addEventListener('input', () => {
+    const t = (q.value||'').toLowerCase();
+    rows.forEach(r => {
+      const text = (r.dataset.text||'').toLowerCase();
+      const type = (r.dataset.type||'').toLowerCase();
+      r.style.display = (!t || text.includes(t) || type.includes(t)) ? '' : 'none';
+    })
+  });
+</script>
+

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || 'SkillTrade' %></title>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <style>body{font-family:Manrope,"Noto Sans",system-ui,-apple-system,Segoe UI,Roboto}</style>
+</head>
+<body class="bg-[#faf9fb] min-h-screen">
+  <%- include('partials/header') %>
+  <main class="mx-auto max-w-[1200px] px-6 py-6">
+    <%- body %>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>
+

@@ -1,0 +1,173 @@
+<% layout('layout') %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-[#6f6880] mb-6">
+    <a href="/cursos" class="hover:text-[#5a1593] transition-colors">Cursos</a>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+    </svg>
+    <span class="text-[#151117] font-medium"><%= curso?.titulo %></span>
+  </nav>
+
+  <div class="grid lg:grid-cols-3 gap-8">
+    <!-- Contenido principal -->
+    <div class="lg:col-span-2">
+      <!-- Imagen del curso -->
+      <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-6">
+        <div 
+          class="w-full h-full bg-cover bg-center"
+          style="background-image:url('<%= curso?.imagen || 'https://via.placeholder.com/640x360' %>')"
+        ></div>
+        <div class="absolute top-4 left-4">
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-[#5a1593]">
+            <%= curso?.nivel || 'Intermedio' %>
+          </span>
+        </div>
+      </div>
+
+      <!-- Título y descripción -->
+      <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] p-6 mb-6">
+        <h1 class="text-3xl font-bold text-[#151117] mb-4"><%= curso?.titulo %></h1>
+        <p class="text-[#6f6880] leading-relaxed mb-6"><%= curso?.descripcion %></p>
+
+        <!-- Información del curso en badges -->
+        <div class="flex flex-wrap gap-3">
+          <% if (curso?.categoria && curso.categoria.length > 0) { %>
+            <% curso.categoria.forEach(cat => { %>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f5f2f8] text-[#5a1593]">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                </svg>
+                <%= cat %>
+              </span>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Detalles adicionales -->
+      <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] p-6 mb-6">
+        <h2 class="text-xl font-bold text-[#151117] mb-4">Detalles del Curso</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-10 h-10 bg-[#f5f2f8] rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#5a1593]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-[#6f6880]">Nivel</p>
+              <p class="font-semibold text-[#151117]"><%= curso?.nivel || 'No especificado' %></p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-10 h-10 bg-[#f5f2f8] rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#5a1593]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-[#6f6880]">Visibilidad</p>
+              <p class="font-semibold text-[#151117] capitalize"><%= curso?.visibilidad || 'Público' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de comentarios -->
+      <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] p-6">
+        <h2 class="text-xl font-bold text-[#151117] mb-4">Comentarios y Reseñas</h2>
+        
+        <form method="post" action="<%= API_BASE %>/api/cursos/<%= curso?._id %>/comentario" class="mb-6">
+          <div class="mb-3">
+            <label class="block text-sm font-medium text-[#151117] mb-2">
+              Comparte tu experiencia
+            </label>
+            <textarea 
+              name="comentario" 
+              class="w-full rounded-lg border border-[#edeaf0] p-3 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+              rows="4" 
+              placeholder="¿Qué te pareció este curso? Ayuda a otros estudiantes con tu opinión..."
+              required
+            ></textarea>
+          </div>
+          <button 
+            type="submit"
+            class="px-4 py-2 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors"
+          >
+            Publicar Comentario
+          </button>
+        </form>
+
+        <!-- Aquí irían los comentarios existentes -->
+        <div class="space-y-4 mt-6">
+          <p class="text-sm text-[#6f6880] italic">No hay comentarios aún. ¡Sé el primero en opinar!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar de compra -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl shadow-lg border border-[#edeaf0] p-6 sticky top-4">
+        <!-- Precio -->
+        <div class="text-center mb-6 pb-6 border-b border-[#edeaf0]">
+          <p class="text-sm text-[#6f6880] mb-1">Precio del curso</p>
+          <p class="text-4xl font-bold text-[#5a1593]">
+            $<%= Number(curso?.precio || 0).toFixed(2) %>
+          </p>
+        </div>
+
+        <!-- Características incluidas -->
+        <div class="space-y-3 mb-6">
+          <div class="flex items-center gap-3 text-sm text-[#6f6880]">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Acceso de por vida</span>
+          </div>
+          <div class="flex items-center gap-3 text-sm text-[#6f6880]">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Certificado al completar</span>
+          </div>
+          <div class="flex items-center gap-3 text-sm text-[#6f6880]">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Soporte del instructor</span>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="space-y-3">
+          <form action="/carrito" method="post">
+            <input type="hidden" name="cursoId" value="<%= curso?._id %>">
+            <button 
+              type="submit"
+              class="w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
+            >
+              Agregar al Carrito
+            </button>
+          </form>
+          <a 
+            href="/cursos"
+            class="block w-full py-3 px-4 rounded-lg bg-[#eee8f3] text-[#5a1593] font-semibold text-center hover:bg-[#e0d5ed] transition-colors"
+          >
+            Explorar Más Cursos
+          </a>
+        </div>
+
+        <!-- Garantía -->
+        <div class="mt-6 pt-6 border-t border-[#edeaf0] text-center">
+          <p class="text-xs text-[#6f6880]">
+            Garantía de devolución de 30 días
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

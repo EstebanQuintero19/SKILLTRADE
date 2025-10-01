@@ -21,3 +21,5 @@ echo "- reports/cucumber_report.json"
 
 echo ""
 echo "✅ Pruebas completadas!"
+
+

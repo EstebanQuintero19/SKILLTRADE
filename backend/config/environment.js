@@ -5,42 +5,37 @@
 
 require('dotenv').config();
 
+// Variables mínimas requeridas para poder arrancar el servidor en desarrollo
+// En producción se recomienda definir todas explícitamente
 const requiredEnvVars = [
     'NODE_ENV',
-    'PORT',
-    'USER_DB',
-    'PASS_DB',
-    'DB_NAME',
-    'JWT_SECRET',
-    'API_KEY'
+    'PORT'
 ];
 
 // Validar variables críticas
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-    console.error('❌ Variables de entorno faltantes:', missingVars.join(', '));
-    console.error('💡 Crea un archivo .env con las siguientes variables:');
-    missingVars.forEach(varName => {
-        console.error(`   ${varName}=tu_valor_aqui`);
-    });
-    process.exit(1);
+    console.warn('⚠️  Variables mínimas faltantes. Se usarán valores por defecto:', missingVars.join(', '));
 }
 
 const config = {
     // Servidor
     NODE_ENV: process.env.NODE_ENV || 'development',
-    PORT: parseInt(process.env.PORT) || 9090,
+    PORT: parseInt(process.env.PORT) || 3000,
     
     // Base de datos
-    MONGODB_URI: `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@adso2873441.ex6dvxq.mongodb.net/${process.env.DB_NAME}`,
+    // Si hay credenciales de Atlas, úsalas; si no, usa Mongo local por defecto
+    MONGODB_URI: (process.env.USER_DB && process.env.PASS_DB && process.env.DB_NAME)
+        ? `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@adso2873441.ex6dvxq.mongodb.net/${process.env.DB_NAME}`
+        : (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/skilltrade'),
     
     // Seguridad
-    JWT_SECRET: process.env.JWT_SECRET,
-    API_KEY: process.env.API_KEY,
+    JWT_SECRET: process.env.JWT_SECRET || 'dev-secret',
+    API_KEY: process.env.API_KEY || 'dev-api-key',
     
     // CORS
-    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:4000'],
     
     // Rate Limiting
     RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutos

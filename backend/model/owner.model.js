@@ -51,8 +51,7 @@ const ownerSchema = new Schema({
     timestamps: true
 });
 
-// Índices básicos
-ownerSchema.index({ usuario: 1 });
+// Índices básicos (usuario ya tiene índice único por el campo 'unique: true')
 ownerSchema.index({ rating: -1 });
 
 

@@ -89,6 +89,22 @@ const registrarUsuario = async (req, res) => {
 // RF-USU-02: Login de usuario con API Key
 const loginUsuario = async (req, res) => {
     try {
+        // Bypass temporal de login controlado por variable de entorno
+        if (process.env.AUTH_DISABLED === 'true') {
+            return res.json({
+                success: true,
+                message: 'Login exitoso (bypass habilitado)',
+                data: {
+                    apiKey: 'dev-api-key',
+                    usuario: {
+                        id: 'dev-user-id',
+                        email: req.body?.email || 'dev@example.com',
+                        nombre: 'Usuario Dev'
+                    }
+                }
+            });
+        }
+
         const { email, password } = req.body;
 
         if (!email || !password) {

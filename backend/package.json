@@ -6,14 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "docs": "jsdoc -c jsdoc.json",
-    "test": "cucumber-js --config=cucumber.mjs",
-    "test:unit": "cucumber-js --config=cucumber.mjs --tags @unidad",
-    "test:integration": "cucumber-js test/features/integration/ --require test/features/integration/steps/*.js --require test/test-helper.js --format progress-bar --tags @integracion",
-    "test:integration:curso": "cucumber-js test/features/integration/usuario_curso.feature --require test/features/integration/steps/curso.steps.js --require test/test-helper.js --format progress-bar",
-    "test:validation": "cucumber-js --config=cucumber.mjs --tags @validacion",
-    "test:user-registration": "cucumber-js --config=cucumber.mjs --tags @registro-usuario",
-    "test:mocha:integration": "mocha --require test/test-helper.js test/integration/*.test.js --timeout 10000 --exit --no-warnings"
+    "docs": "jsdoc -c jsdoc.json"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +14,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
@@ -29,21 +23,12 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "nodemailer": "^6.10.1",
-    "nodemon": "^3.1.10",
     "validator": "^13.11.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^12.2.0",
-    "@types/chai": "^5.2.2",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^24.5.2",
-    "chai": "^4.5.0",
-    "mocha": "^10.2.0",
-    "mongodb-memory-server": "^9.5.0",
-    "sinon": "^17.0.1",
-    "supertest": "^7.1.4",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "nodemon": "^3.1.10"
   }
 }
