@@ -4,9 +4,12 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",    // (Render)
-    "dev": "nodemon index.js",   // local
-    "docs": "jsdoc -c jsdoc.json"
+    "start": "node index.js && node frontend/server.js",
+    "dev": "nodemon index.js",
+    "docs": "jsdoc -c jsdoc.json",
+    "build": "npm install",
+    "postinstall": "npm ls mongoose",
+    "clean": "rm -rf node_modules package-lock.json && npm install"
   },
   "author": "",
   "license": "ISC",
