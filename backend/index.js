@@ -155,7 +155,7 @@ app.get('/health', (req, res) => {
 // Manejadores de error comentados temporalmente
 
 // ===== SERVIDOR =====
-const server = app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, "0.0.0.0", () => {
     logger.info('Servidor iniciado', {
         port: config.PORT,
         environment: config.NODE_ENV,
@@ -163,20 +163,12 @@ const server = app.listen(config.PORT, () => {
     });
 });
 
-<<<<<<< HEAD
 // Manejo de errores del servidor
 server.on('error', (err) => {
-    console.error('❌ Error del servidor:', err.message);
+    console.error('Error del servidor:', err.message);
     if (err.code === 'EADDRINUSE') {
-        console.error(`🚫 Puerto ${config.PORT} ya está en uso`);
+        console.error(`Puerto ${config.PORT} ya está en uso`);
     }
-=======
-// Server
-const PORT = process.env.PORT || 9090;
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`API REST corriendo en el puerto: ${PORT}`);
-    console.log(`Endpoint base: http://localhost:${PORT}/api`);
->>>>>>> 21b26b5 (Corrección error Render)
 });
 
 // Evitar que el proceso se cierre por errores no manejados
