@@ -1,0 +1,18 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+
+mongoose.set('strictQuery', true);
+
+const URI = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@adso2873441.ex6dvxq.mongodb.net/${process.env.DB_NAME}`;
+
+// Conexión con opciones compatibles con Mongoose 8+
+mongoose.connect(URI, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    bufferCommands: false
+}).catch(err => {
+    console.error('❌ Error de conexión en config/db.js:', err.message);
+});
+
+module.exports = mongoose;

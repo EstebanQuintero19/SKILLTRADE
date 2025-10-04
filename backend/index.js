@@ -1,19 +1,19 @@
-require('dotenv').config();
-
 const express = require('express');
 const morgan = require('morgan');
-const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const routes = require('./routes');
-const mongoose = require('./config/db');
+const mongoose = require('mongoose');
+
+// Importar configuración y middlewares
+const config = require('./config/environment');
+const logger = require('./services/winston-logger');
 
 const app = express();
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, config.UPLOAD_PATH);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -24,68 +24,186 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB límite
+        fileSize: config.MAX_FILE_SIZE,
+        files: 1 // Solo un archivo por petición
     },
     fileFilter: function (req, file, cb) {
-        // Permitir imágenes y videos
-        if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+        // Validación más estricta de archivos
+        const allowedMimes = [
+            'image/jpeg',
+            'image/jpg', 
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'video/mp4',
+            'video/webm',
+            'video/avi'
+        ];
+        
+        if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Solo se permiten archivos de imagen y video'));
+            cb(new Error(`Tipo de archivo no permitido: ${file.mimetype}`));
         }
     }
 });
 
-// Middleware
-app.use(cors());
-app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ===== CORS BÁSICO =====
+const cors = require('cors');
+app.use(cors({
+    origin: ['http://localhost:4000', 'http://localhost:3001'],
+    credentials: true
+}));
 
-// Middleware para servir archivos estáticos
-app.use('/uploads', express.static('uploads'));
+// ===== MIDDLEWARE GENERAL =====
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Database connection
+// ===== ARCHIVOS ESTÁTICOS =====
+app.use('/uploads', express.static(config.UPLOAD_PATH));
+
+// ===== CONFIGURACIÓN DE MONGOOSE =====
+mongoose.set('strictQuery', true);
+
+// ===== CONEXIÓN A BASE DE DATOS =====
+
+mongoose.connect(config.MONGODB_URI, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    bufferCommands: false
+}).catch(err => {
+    console.error('❌ Error inicial de conexión a MongoDB:', err.message);
+    // No cerrar el servidor, solo mostrar el error
+});
+
 mongoose.connection.on('connected', () => {
-    console.log('Conectado a MongoDB');
+    logger.info('Conectado a MongoDB', {
+        environment: config.NODE_ENV,
+        database: config.DB_NAME
+    });
 });
 
 mongoose.connection.on('error', (err) => {
-    console.error('Error de conexión a MongoDB:', err);
+    logger.error('Error de conexión a MongoDB', {
+        error: err.message,
+        stack: err.stack
+    });
 });
 
-// Hacer disponible multer globalmente
+mongoose.connection.on('disconnected', () => {
+    logger.warn('Desconectado de MongoDB');
+});
+
+// ===== CONFIGURACIÓN GLOBAL =====
 app.locals.upload = upload;
 
-// API routes
-app.use('/api', routes);
+// ===== RUTAS =====
+// Cargar controladores necesarios
+const usuarioController = require('./controller/usuario.controller');
+const cursoController = require('./controller/curso.controller');
 
-// Health check endpoint
+// Rutas de usuario
+app.post('/api/usuarios', usuarioController.registrarUsuario);
+app.post('/api/usuarios/login', usuarioController.loginUsuario);
+
+// Cargar middleware de autenticación
+const { autenticarApiKey } = require('./middleware/auth');
+
+// Rutas de cursos (básicas para el frontend)
+app.get('/api/cursos', cursoController.obtenerCursos);
+app.get('/api/cursos/:id', cursoController.obtenerCursoPorId);
+app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
+    const upload = req.app.locals.upload;
+    if (upload) {
+        upload.single('imagen')(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+}, cursoController.crearCurso);
+
+app.get('/api', (req, res) => {
+    res.json({
+        success: true,
+        message: 'SKILLTRADE API v1.0',
+        version: '1.0.0',
+        endpoints: {
+            health: '/health',
+            register: 'POST /api/usuarios',
+            login: 'POST /api/usuarios/login',
+            cursos: 'GET /api/cursos'
+        }
+    });
+});
+
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'SKILLTRADE API is running' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ 
-        success: false,
-        message: 'Error interno del servidor',
-        error: err.message 
+    res.json({ 
+        success: true,
+        status: 'OK', 
+        message: 'SKILLTRADE API is running',
+        timestamp: new Date().toISOString(),
+        environment: config.NODE_ENV
     });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ 
-        success: false,
-        message: 'Ruta no encontrada' 
+// ===== MANEJO DE ERRORES =====
+// Manejadores de error comentados temporalmente
+
+// ===== SERVIDOR =====
+const server = app.listen(config.PORT, "0.0.0.0", () => {
+    logger.info('Servidor iniciado', {
+        port: config.PORT,
+        environment: config.NODE_ENV,
+        endpoint: `http://localhost:${config.PORT}/api`
     });
 });
 
-// Server
-const PORT = process.env.PORT || 9090;
-app.listen(PORT, () => {
-    console.log(`API REST corriendo en el puerto: ${PORT}`);
-    console.log(`Endpoint base: http://localhost:${PORT}/api`);
+// Manejo de errores del servidor
+server.on('error', (err) => {
+    console.error('Error del servidor:', err.message);
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Puerto ${config.PORT} ya está en uso`);
+    }
 });
+
+// Evitar que el proceso se cierre por errores no manejados
+process.on('uncaughtException', (err) => {
+    console.error('❌ Excepción no capturada:', err.message);
+    console.error('Stack:', err.stack);
+    // No cerrar el proceso, solo loguear el error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Promesa rechazada no manejada:', reason);
+    // No cerrar el proceso, solo loguear el error
+});
+
+// Manejo de cierre graceful
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM recibido, cerrando servidor gracefully');
+    server.close(() => {
+        logger.info('Servidor cerrado');
+        mongoose.connection.close(false, () => {
+            logger.info('Conexión a MongoDB cerrada');
+            process.exit(0);
+        });
+    });
+});
+
+process.on('SIGINT', () => {
+    logger.info('SIGINT recibido, cerrando servidor gracefully');
+    server.close(() => {
+        logger.info('Servidor cerrado');
+        mongoose.connection.close(false, () => {
+            logger.info('Conexión a MongoDB cerrada');
+            process.exit(0);
+        });
+    });
+});
+
+

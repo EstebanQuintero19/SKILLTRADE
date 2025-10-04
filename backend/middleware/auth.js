@@ -3,6 +3,18 @@ const Usuario = require('../model/usuario.model');
 // Middleware de autenticación con API Key (TTL: 24 horas)
 const autenticarApiKey = async (req, res, next) => {
     try {
+        // Bypass temporal de autenticación controlado por variable de entorno
+        // Si AUTH_DISABLED === 'true', se asigna un usuario mock y se continúa
+        if (process.env.AUTH_DISABLED === 'true') {
+            req.usuario = {
+                id: 'dev-user-id',
+                email: 'dev@example.com',
+                nombre: 'Usuario Dev',
+                rol: 'admin'
+            };
+            return next();
+        }
+
         // Obtener API Key del header
         const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
 

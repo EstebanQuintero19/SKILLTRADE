@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Curso - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .upload-area {
+      background-image: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cpattern id='a' patternUnits='userSpaceOnUse' width='20' height='20' patternTransform='scale(2) rotate(0)'%3e%3crect x='0' y='0' width='100%25' height='100%25' fill='%23f8fafc'/%3e%3cpath d='m0 10h20M10 0v20' stroke-width='0.5' stroke='%23e2e8f0' fill='none'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='100%25' height='100%25' fill='url(%23a)'/%3e%3c/svg%3e");
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+  <!-- Header con navegación -->
+  <header class="gradient-bg shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center space-x-4">
+          <a href="/cursos" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-graduation-cap text-white"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white">SkillTrade</h1>
+          </div>
+        </div>
+        <nav class="flex items-center space-x-6">
+          <a href="/" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-home mr-2"></i>Inicio
+          </a>
+          <a href="/cursos" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-book-open mr-2"></i>Cursos
+          </a>
+          <a href="/perfil" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-user mr-2"></i>Perfil
+          </a>
+          <a href="/logout" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-sign-out-alt mr-2"></i>Salir
+          </a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Título de la página -->
+    <div class="text-center mb-8">
+      <h2 class="text-4xl font-bold text-gray-800 mb-4">Crear Nuevo Curso</h2>
+      <p class="text-gray-600 text-lg">Comparte tu conocimiento con la comunidad de SkillTrade</p>
+    </div>
+
+    <!-- Formulario de creación -->
+    <div class="bg-white rounded-2xl card-shadow p-8">
+      <form id="crearCursoForm" method="POST" action="/api/cursos" enctype="multipart/form-data" class="space-y-8">
+        
+        <!-- Información básica -->
+        <section>
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Información Básica</h3>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Título del curso -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Título del Curso <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                name="titulo" 
+                id="titulo"
+                placeholder="Ej: Introducción a JavaScript para Principiantes"
+                class="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                required
+              />
+            </div>
+            
+            <!-- Categoría -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Categoría <span class="text-red-500">*</span>
+              </label>
+              <select 
+                name="categoria" 
+                id="categoria"
+                class="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                required
+              >
+                <option value="">Selecciona una categoría</option>
+                <option value="programacion">Programación</option>
+                <option value="diseno">Diseño</option>
+                <option value="marketing">Marketing</option>
+                <option value="negocios">Negocios</option>
+                <option value="idiomas">Idiomas</option>
+                <option value="musica">Música</option>
+                <option value="cocina">Cocina</option>
+                <option value="fotografia">Fotografía</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            
+            <!-- Nivel -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Nivel <span class="text-red-500">*</span>
+              </label>
+              <select 
+                name="nivel" 
+                id="nivel"
+                class="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                required
+              >
+                <option value="">Selecciona el nivel</option>
+                <option value="principiante">Principiante</option>
+                <option value="intermedio">Intermedio</option>
+                <option value="avanzado">Avanzado</option>
+              </select>
+            </div>
+            
+            <!-- Precio -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Precio (COP) <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <input 
+                  type="number" 
+                  name="precio" 
+                  id="precio"
+                  placeholder="50000"
+                  min="0"
+                  step="1000"
+                  class="w-full h-12 pl-8 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  required
+                />
+              </div>
+            </div>
+            
+            <!-- Duración -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Duración (horas)
+              </label>
+              <input 
+                type="number" 
+                name="duracion" 
+                id="duracion"
+                placeholder="10"
+                min="1"
+                max="200"
+                class="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Descripción -->
+        <section>
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-file-alt text-green-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Descripción del Curso</h3>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Descripción Detallada <span class="text-red-500">*</span>
+            </label>
+            <textarea 
+              name="descripcion" 
+              id="descripcion"
+              rows="6"
+              placeholder="Describe tu curso: qué aprenderán los estudiantes, qué incluye, requisitos previos, etc."
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+              required
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- Imagen del curso -->
+        <section>
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-image text-purple-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Imagen del Curso</h3>
+          </div>
+          
+          <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+            <div class="space-y-4">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                <i class="fas fa-cloud-upload-alt text-blue-600 text-2xl"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-2">Subir Imagen del Curso</h4>
+                <p class="text-gray-600 mb-4">Arrastra y suelta una imagen o haz clic para seleccionar</p>
+                <p class="text-sm text-gray-500">Formatos soportados: JPG, PNG, GIF (máximo 5MB)</p>
+              </div>
+              <input 
+                type="file" 
+                name="imagen" 
+                id="imagen"
+                accept="image/*"
+                class="hidden"
+              />
+              <button 
+                type="button" 
+                onclick="document.getElementById('imagen').click()"
+                class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+              >
+                <i class="fas fa-folder-open mr-2"></i>
+                Seleccionar Archivo
+              </button>
+            </div>
+            <div id="imagePreview" class="mt-4 hidden">
+              <img id="previewImg" src="" alt="Preview" class="max-w-xs mx-auto rounded-lg shadow-md">
+              <p id="fileName" class="mt-2 text-sm text-gray-600"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-200">
+          <button 
+            type="button" 
+            onclick="window.history.back()"
+            class="flex-1 sm:flex-none inline-flex items-center justify-center px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition-colors"
+          >
+            <i class="fas fa-times mr-2"></i>
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="flex-1 inline-flex items-center justify-center px-8 py-3 gradient-bg hover:opacity-90 text-white font-semibold rounded-lg transition-all shadow-lg"
+          >
+            <i class="fas fa-save mr-2"></i>
+            Crear Curso
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- JavaScript para funcionalidad -->
+  <script>
+    // Preview de imagen
+    document.getElementById('imagen').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('previewImg').src = e.target.result;
+          document.getElementById('fileName').textContent = file.name;
+          document.getElementById('imagePreview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Manejo del formulario
+    document.getElementById('crearCursoForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      // Mostrar loading
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando curso...';
+      submitBtn.disabled = true;
+      
+      try {
+        const response = await fetch('/api/cursos', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert('¡Curso creado exitosamente!');
+          window.location.href = '/cursos';
+        } else {
+          console.error('Error response:', response.status, result);
+          throw new Error(result.message || result.error || `Error ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('Error completo:', error);
+        alert('Error al crear el curso: ' + error.message);
+      } finally {
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Validación en tiempo real
+    document.getElementById('titulo').addEventListener('input', function() {
+      if (this.value.length > 100) {
+        this.setCustomValidity('El título no puede exceder 100 caracteres');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+
+    document.getElementById('descripcion').addEventListener('input', function() {
+      if (this.value.length > 1000) {
+        this.setCustomValidity('La descripción no puede exceder 1000 caracteres');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+  </script>
+
+</body>
+</html>

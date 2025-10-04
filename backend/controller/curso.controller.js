@@ -7,8 +7,13 @@ const Venta = require('../model/venta.model');
 // RF-CUR-01: Crear curso (titulo, descripcion, categoria, imagen, adjuntos)
 const crearCurso = async (req, res) => {
     try {
+        console.log('=== CREAR CURSO DEBUG ===');
+        console.log('Body:', req.body);
+        console.log('Usuario:', req.usuario);
+        console.log('File:', req.file);
+        
         const { titulo, descripcion, categoria, precio, nivel, visibilidad, etiquetas, videoIntroductorio } = req.body;
-        const ownerId = req.usuario._id;
+        const ownerId = req.usuario?._id;
 
         // Validaciones básicas
         if (!titulo) {
@@ -26,26 +31,26 @@ const crearCurso = async (req, res) => {
         // Validar precio
         const precioNumerico = precio ? parseFloat(precio) : 0;
 
-        // Validar nivel - permitir cualquier valor
-        // if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
-        //     return res.status(400).json({
-        //         error: 'El nivel debe ser básico, intermedio o avanzado'
-        //     });
-        // }
+        /* Validar nivel - permitir cualquier valor
+         if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
+             return res.status(400).json({
+                 error: 'El nivel debe ser básico, intermedio o avanzado'
+             });
+         }
 
-        // Validar visibilidad - permitir cualquier valor
-        // if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
-        //     return res.status(400).json({
-        //         error: 'La visibilidad debe ser público, privado o solo suscriptores'
-        //     });
-        // }
+         Validar visibilidad - permitir cualquier valor
+         if (visibilidad && !['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
+             return res.status(400).json({
+                 error: 'La visibilidad debe ser público, privado o solo suscriptores'
+             });
+         }
 
-        // Validar etiquetas - permitir cualquier cantidad
-        // if (etiquetas && etiquetas.length > 10) {
-        //     return res.status(400).json({
-        //         error: 'No puede tener más de 10 etiquetas'
-        //     });
-        // }
+         Validar etiquetas - permitir cualquier cantidad
+         if (etiquetas && etiquetas.length > 10) {
+             return res.status(400).json({
+                 error: 'No puede tener más de 10 etiquetas'
+             });
+         }*/
 
         const cursoData = {
             titulo: titulo.trim(),

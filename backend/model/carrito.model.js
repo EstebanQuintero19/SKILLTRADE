@@ -68,8 +68,7 @@ const carritoSchema = new Schema({
     timestamps: true
 });
 
-// Índices básicos
-carritoSchema.index({ usuario: 1 });
+// Índices básicos (usuario ya tiene índice único por la definición del campo)
 carritoSchema.index({ estado: 1 });
 carritoSchema.index({ expiraEn: 1 });
 
