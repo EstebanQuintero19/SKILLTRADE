@@ -1,33 +1,39 @@
 <% layout('layout') %>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <h1 class="text-4xl font-bold text-[#151117] mb-8">Mi Biblioteca</h1>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <h1 class="text-4xl font-extrabold text-gray-900 mb-10 tracking-tight">Mi Biblioteca</h1>
 
   <% if (needAuth) { %>
-    <div class="rounded-xl border border-[#edeaf0] bg-white p-6 text-center shadow-sm">
-      <p class="text-[#6f6880] mb-3">Necesitas iniciar sesión para ver tu biblioteca.</p>
-      <a href="/login" class="inline-block bg-[#5a1593] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#4a1275] transition-colors">
+    <div class="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-md">
+      <p class="text-gray-500 mb-4 text-lg">Necesitas iniciar sesión para ver tu biblioteca.</p>
+      <a href="/login" class="inline-block bg-violet-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-violet-800 transition-colors shadow">
         Iniciar Sesión
       </a>
     </div>
   <% } else { %>
     
     <!-- Mis Cursos (En progreso) -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold text-[#151117] mb-6">Mis Cursos</h2>
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Mis Cursos</h2>
       <% if (cursosProgreso && cursosProgreso.length) { %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <% cursosProgreso.forEach(c => { %>
-            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
-              <div class="aspect-video bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                <span class="text-white text-sm font-medium px-4 text-center"><%= c.titulo.substring(0, 30) %></span>
+            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+              <div class="aspect-video bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center relative">
+                <span class="text-white text-base font-semibold px-4 text-center drop-shadow-md"><%= c.titulo.substring(0, 30) %></span>
+                <div class="absolute top-3 right-3 bg-white/80 rounded-full p-1 shadow">
+                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="8" fill="currentColor" opacity="0.15"/>
+                    <circle cx="10" cy="10" r="3" fill="currentColor"/>
+                  </svg>
+                </div>
               </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-[#151117] mb-1 group-hover:text-[#5a1593] transition-colors line-clamp-2">
+              <div class="p-5">
+                <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-violet-700 transition-colors line-clamp-2 text-lg">
                   <%= c.titulo %>
                 </h3>
-                <p class="text-sm text-[#6f6880]">
-                  <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                <p class="text-sm text-gray-500 flex items-center">
+                  <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                   En progreso
                 </p>
               </div>
@@ -35,33 +41,33 @@
           <% }) %>
         </div>
       <% } else { %>
-        <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <p class="text-[#6f6880]">No tienes cursos en progreso.</p>
+        <div class="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-16 text-center">
+          <p class="text-gray-400 text-lg">No tienes cursos en progreso.</p>
         </div>
       <% } %>
     </section>
 
     <!-- Cursos Completados -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold text-[#151117] mb-6">Completados</h2>
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Completados</h2>
       <% if (cursosCompletados && cursosCompletados.length) { %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <% cursosCompletados.forEach(c => { %>
-            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
+            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 border border-gray-100">
               <div class="aspect-video bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center relative">
-                <span class="text-white text-sm font-medium px-4 text-center"><%= c.titulo.substring(0, 30) %></span>
-                <div class="absolute top-2 right-2 bg-white rounded-full p-1">
-                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <span class="text-white text-base font-semibold px-4 text-center drop-shadow-md"><%= c.titulo.substring(0, 30) %></span>
+                <div class="absolute top-3 right-3 bg-white rounded-full p-1 shadow">
+                  <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
                 </div>
               </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-[#151117] mb-1 group-hover:text-[#5a1593] transition-colors line-clamp-2">
+              <div class="p-5">
+                <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-violet-700 transition-colors line-clamp-2 text-lg">
                   <%= c.titulo %>
                 </h3>
-                <p class="text-sm text-[#6f6880]">
-                  <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                <p class="text-sm text-gray-500 flex items-center">
+                  <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                   Completado
                 </p>
               </div>
@@ -69,8 +75,8 @@
           <% }) %>
         </div>
       <% } else { %>
-        <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <p class="text-[#6f6880]">No tienes cursos completados aún.</p>
+        <div class="bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-16 text-center">
+          <p class="text-gray-400 text-lg">No tienes cursos completados aún.</p>
         </div>
       <% } %>
     </section>

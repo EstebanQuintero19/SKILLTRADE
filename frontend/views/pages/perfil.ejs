@@ -1,30 +1,320 @@
 <% layout('layout') %>
 
-<section class="grid md:grid-cols-3 gap-6">
-  <aside class="md:col-span-1 rounded-lg border border-[#edeaf0] p-4">
-    <div class="w-24 h-24 rounded-full bg-cover bg-center mx-auto" style="background-image:url('<%= (usuario?.fotoUrl)||'https://via.placeholder.com/160' %>')"></div>
-    <h1 class="mt-3 text-center text-xl font-extrabold text-[#151117]"><%= usuario?.nombre %></h1>
-    <p class="text-center text-sm text-[#6f6880]"><%= usuario?.email %></p>
-    <div class="mt-4 grid gap-2">
-      <a href="/perfil/editar" class="h-9 px-3 rounded-lg bg-[#eee8f3] text-[#151117] text-sm font-semibold text-center">Editar perfil</a>
-      <form method="post" action="/perfil/eliminar" onsubmit="return confirm('¿Eliminar cuenta definitivamente?');">
-        <button class="h-9 w-full px-3 rounded-lg bg-red-600 text-white text-sm font-semibold">Eliminar cuenta</button>
+<section class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto py-10">
+  <!-- Sidebar -->
+  <aside class="md:col-span-1 bg-white rounded-2xl shadow border border-gray-100 p-6 flex flex-col items-center">
+    <div class="relative group mb-4">
+      <div class="w-28 h-28 rounded-full bg-gray-100 bg-cover bg-center border-4 border-white shadow" style="background-image:url('<%= (usuario?.fotoUrl)||'https://via.placeholder.com/160' %>')"></div>
+      <label for="photoUpload" class="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-all cursor-pointer flex items-center justify-center">
+        <svg class="w-9 h-9 text-white opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+          <path fill="currentColor" d="M208 56h-27.72l-13.63-20.44A8 8 0 0 0 160 32H96a8 8 0 0 0-6.65 3.56L75.72 56H48a24 24 0 0 0-24 24v112a24 24 0 0 0 24 24h160a24 24 0 0 0 24-24V80a24 24 0 0 0-24-24Zm-80 112a44 44 0 1 1 44-44a44.05 44.05 0 0 1-44 44Z"/>
+        </svg>
+      </label>
+      <input type="file" id="photoUpload" class="hidden" accept="image/*" />
+    </div>
+    <h1 class="mt-2 text-center text-2xl font-bold text-gray-900"><%= usuario?.nombre %></h1>
+    <p class="text-center text-base text-gray-500"><%= usuario?.email %></p>
+    <!-- Extra info -->
+    <div class="mt-6 space-y-3 w-full">
+      <% if (usuario?.telefono) { %>
+        <div class="flex items-center gap-2 text-gray-500">
+          <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+            <path fill="currentColor" d="M222.37 158.46l-47.11-21.11l-.13-.06a16 16 0 0 0-15.17 1.4a8.12 8.12 0 0 0-.75.56L134.87 160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16 16 0 0 0 1.32-15.06v-.12L97.54 33.64a16 16 0 0 0-16.62-9.52A56.26 56.26 0 0 0 32 80c0 79.4 64.6 144 144 144a56.26 56.26 0 0 0 55.88-48.92a16 16 0 0 0-9.51-16.62Z"/>
+          </svg>
+          <span><%= usuario.telefono %></span>
+        </div>
+      <% } %>
+      <% if (usuario?.ubicacion) { %>
+        <div class="flex items-center gap-2 text-gray-500">
+          <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+            <path fill="currentColor" d="M128 64a40 40 0 1 0 40 40a40 40 0 0 0-40-40Zm0 64a24 24 0 1 1 24-24a24 24 0 0 1-24 24Zm0-112a88.1 88.1 0 0 0-88 88c0 31.4 14.51 64.68 42 96.25a254.19 254.19 0 0 0 41.45 38.3a8 8 0 0 0 9.18 0a254.19 254.19 0 0 0 41.37-38.3c27.45-31.57 42-64.85 42-96.25a88.1 88.1 0 0 0-88-88Zm0 206c-16.53-13-72-60.75-72-118a72 72 0 0 1 144 0c0 57.23-55.47 105-72 118Z"/>
+          </svg>
+          <span><%= usuario.ubicacion %></span>
+        </div>
+      <% } %>
+      <% if (usuario?.fechaRegistro) { %>
+        <div class="flex items-center gap-2 text-gray-500">
+          <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+            <path fill="currentColor" d="M208 32h-24v-8a8 8 0 0 0-16 0v8H88v-8a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16ZM72 184a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm40 40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm40 80a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm40 40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Zm0-40a8 8 0 1 1 8-8a8 8 0 0 1-8 8Z"/>
+          </svg>
+          <span class="truncate">Miembro desde <%= new Date(usuario.fechaRegistro).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }) %></span>
+        </div>
+      <% } %>
+    </div>
+    <div class="mt-8 w-full flex flex-col gap-2">
+      <a href="/perfil/editar" class="h-10 rounded-lg bg-purple-50 text-purple-700 font-semibold text-center flex items-center justify-center hover:bg-purple-100 transition">
+        Editar perfil
+      </a>
+      <form method="post" action="/perfil/eliminar" onsubmit="return confirm('¿Eliminar cuenta definitivamente? Esta acción no se puede deshacer.');">
+        <button class="h-10 w-full rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">
+          Eliminar cuenta
+        </button>
       </form>
     </div>
   </aside>
-  <div class="md:col-span-2 grid gap-6">
-    <section class="rounded-lg border border-[#edeaf0] p-4">
-      <h2 class="font-bold text-[#151117] mb-2">Biografía</h2>
-      <p class="text-[#6f6880]"><%= usuario?.biografia || 'Sin biografía' %></p>
+
+  <!-- Main content -->
+  <div class="md:col-span-2 flex flex-col gap-8">
+    <!-- Biografía -->
+    <section class="bg-white rounded-2xl shadow border border-gray-100 p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold text-lg text-gray-900">Biografía</h2>
+        <button id="editBioBtn" class="text-purple-700 text-sm font-semibold hover:text-purple-900 transition">
+          Editar
+        </button>
+      </div>
+      <div id="bioDisplay">
+        <p class="text-gray-600 whitespace-pre-wrap"><%= usuario?.biografia || 'Sin biografía. Cuéntanos algo sobre ti.' %></p>
+      </div>
+      <form id="bioForm" class="hidden mt-2" method="post" action="/perfil/biografia">
+        <textarea 
+          name="biografia" 
+          class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none text-gray-700" 
+          rows="4" 
+          maxlength="500" 
+          placeholder="Escribe algo sobre ti..."
+        ><%= usuario?.biografia || '' %></textarea>
+        <div class="flex items-center justify-between mt-2">
+          <span id="bioCounter" class="text-xs text-gray-400"></span>
+          <div class="flex gap-2">
+            <button type="button" id="cancelBioBtn" class="h-9 px-4 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition">
+              Cancelar
+            </button>
+            <button type="submit" class="h-9 px-4 rounded-lg bg-purple-700 text-white text-sm font-semibold hover:bg-purple-900 transition">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </form>
     </section>
-    <section class="rounded-lg border border-[#edeaf0] p-4">
-      <h2 class="font-bold text-[#151117] mb-3">Cambiar contraseña</h2>
-      <form method="post" action="/perfil/password" class="grid md:grid-cols-3 gap-3">
-        <input class="h-10 px-3 rounded-lg border border-[#edeaf0]" type="password" name="actual" placeholder="Actual" required />
-        <input class="h-10 px-3 rounded-lg border border-[#edeaf0]" type="password" name="nueva" placeholder="Nueva" required />
-        <button class="h-10 px-4 rounded-lg bg-[#5a1593] text-white font-semibold" type="submit">Actualizar</button>
+
+    <!-- Cambiar contraseña -->
+    <section class="bg-white rounded-2xl shadow border border-gray-100 p-6">
+      <h2 class="font-bold text-lg text-gray-900 mb-4">Cambiar contraseña</h2>
+      <form method="post" action="/perfil/password" class="flex flex-col gap-4" id="passwordForm">
+        <div class="relative">
+          <input 
+            class="w-full h-11 px-4 pr-12 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-700" 
+            type="password" 
+            name="actual" 
+            id="currentPass"
+            placeholder="Contraseña actual" 
+            required 
+          />
+          <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" data-target="currentPass">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+              <path fill="currentColor" d="M247.31 124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57 61.26 162.88 48 128 48S61.43 61.26 36.34 86.35C17.51 105.18 9 124 8.69 124.76a8 8 0 0 0 0 6.5c.35.79 8.82 19.57 27.65 38.4C61.43 194.74 93.12 208 128 208s66.57-13.26 91.66-38.34c18.83-18.83 27.3-37.61 27.65-38.4a8 8 0 0 0 0-6.5ZM128 192c-30.78 0-57.67-11.19-79.93-33.25A133.47 133.47 0 0 1 25 128a133.33 133.33 0 0 1 23.07-30.75C70.33 75.19 97.22 64 128 64s57.67 11.19 79.93 33.25A133.46 133.46 0 0 1 231.05 128c-7.21 13.46-38.62 64-103.05 64Zm0-112a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48Zm0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32Z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="relative">
+          <input 
+            class="w-full h-11 px-4 pr-12 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-700" 
+            type="password" 
+            name="nueva" 
+            id="newPass"
+            placeholder="Nueva contraseña" 
+            required 
+            minlength="8"
+          />
+          <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" data-target="newPass">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+              <path fill="currentColor" d="M247.31 124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57 61.26 162.88 48 128 48S61.43 61.26 36.34 86.35C17.51 105.18 9 124 8.69 124.76a8 8 0 0 0 0 6.5c.35.79 8.82 19.57 27.65 38.4C61.43 194.74 93.12 208 128 208s66.57-13.26 91.66-38.34c18.83-18.83 27.3-37.61 27.65-38.4a8 8 0 0 0 0-6.5ZM128 192c-30.78 0-57.67-11.19-79.93-33.25A133.47 133.47 0 0 1 25 128a133.33 133.33 0 0 1 23.07-30.75C70.33 75.19 97.22 64 128 64s57.67 11.19 79.93 33.25A133.46 133.46 0 0 1 231.05 128c-7.21 13.46-38.62 64-103.05 64Zm0-112a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48Zm0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32Z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="relative">
+          <input 
+            class="w-full h-11 px-4 pr-12 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-gray-700" 
+            type="password" 
+            name="confirmar" 
+            id="confirmPass"
+            placeholder="Confirmar nueva contraseña" 
+            required 
+            minlength="8"
+          />
+          <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" data-target="confirmPass">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+              <path fill="currentColor" d="M247.31 124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57 61.26 162.88 48 128 48S61.43 61.26 36.34 86.35C17.51 105.18 9 124 8.69 124.76a8 8 0 0 0 0 6.5c.35.79 8.82 19.57 27.65 38.4C61.43 194.74 93.12 208 128 208s66.57-13.26 91.66-38.34c18.83-18.83 27.3-37.61 27.65-38.4a8 8 0 0 0 0-6.5ZM128 192c-30.78 0-57.67-11.19-79.93-33.25A133.47 133.47 0 0 1 25 128a133.33 133.33 0 0 1 23.07-30.75C70.33 75.19 97.22 64 128 64s57.67 11.19 79.93 33.25A133.46 133.46 0 0 1 231.05 128c-7.21 13.46-38.62 64-103.05 64Zm0-112a48 48 0 1 0 48 48a48.05 48.05 0 0 0-48-48Zm0 80a32 32 0 1 1 32-32a32 32 0 0 1-32 32Z"/>
+            </svg>
+          </button>
+        </div>
+        <div id="passwordStrength" class="hidden">
+          <div class="flex gap-1 mb-2">
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength1"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength2"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength3"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength4"></div>
+          </div>
+          <p id="strengthText" class="text-xs text-gray-500"></p>
+        </div>
+        <button class="h-11 rounded-lg bg-purple-700 text-white font-semibold hover:bg-purple-900 transition" type="submit">
+          Actualizar contraseña
+        </button>
+      </form>
+    </section>
+
+    <!-- Preferencias -->
+    <section class="bg-white rounded-2xl shadow border border-gray-100 p-6">
+      <h2 class="font-bold text-lg text-gray-900 mb-4">Preferencias</h2>
+      <form method="post" action="/perfil/preferencias" class="space-y-4">
+        <label class="flex items-center justify-between cursor-pointer">
+          <span class="text-gray-800">Notificaciones por email</span>
+          <input type="checkbox" name="notificacionesEmail" <%= usuario?.notificacionesEmail ? 'checked' : '' %> class="toggle-checkbox">
+        </label>
+        <label class="flex items-center justify-between cursor-pointer">
+          <span class="text-gray-800">Newsletter mensual</span>
+          <input type="checkbox" name="newsletter" <%= usuario?.newsletter ? 'checked' : '' %> class="toggle-checkbox">
+        </label>
+        <button class="h-11 rounded-lg bg-purple-700 text-white font-semibold hover:bg-purple-900 transition w-full" type="submit">
+          Guardar preferencias
+        </button>
       </form>
     </section>
   </div>
 </section>
 
+<!-- Custom toggle switch styles with Tailwind -->
+<style>
+  .toggle-checkbox {
+    @apply appearance-none w-11 h-6 bg-gray-200 rounded-full relative cursor-pointer transition;
+  }
+  .toggle-checkbox:checked {
+    @apply bg-purple-700;
+  }
+  .toggle-checkbox::before {
+    content: '';
+    @apply absolute w-5 h-5 rounded-full bg-white top-0.5 left-0.5 transition;
+  }
+  .toggle-checkbox:checked::before {
+    left: 2.25rem;
+  }
+</style>
+
+<script>
+  // Biografía editable
+  const editBioBtn = document.getElementById('editBioBtn');
+  const bioDisplay = document.getElementById('bioDisplay');
+  const bioForm = document.getElementById('bioForm');
+  const cancelBioBtn = document.getElementById('cancelBioBtn');
+  const bioTextarea = bioForm?.querySelector('textarea');
+  const bioCounter = document.getElementById('bioCounter');
+
+  editBioBtn?.addEventListener('click', () => {
+    bioDisplay.classList.add('hidden');
+    bioForm.classList.remove('hidden');
+    bioTextarea.focus();
+    updateBioCounter();
+  });
+
+  cancelBioBtn?.addEventListener('click', () => {
+    bioForm.classList.add('hidden');
+    bioDisplay.classList.remove('hidden');
+  });
+
+  bioTextarea?.addEventListener('input', updateBioCounter);
+
+  function updateBioCounter() {
+    const current = bioTextarea.value.length;
+    const max = bioTextarea.maxLength;
+    bioCounter.textContent = `${current}/${max} caracteres`;
+  }
+
+  // Toggle password visibility
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      const type = input.type === 'password' ? 'text' : 'password';
+      input.type = type;
+    });
+  });
+
+  // Password strength indicator
+  const newPassInput = document.getElementById('newPass');
+  const strengthIndicator = document.getElementById('passwordStrength');
+  const strengthBars = [
+    document.getElementById('strength1'),
+    document.getElementById('strength2'),
+    document.getElementById('strength3'),
+    document.getElementById('strength4')
+  ];
+  const strengthText = document.getElementById('strengthText');
+
+  newPassInput?.addEventListener('input', () => {
+    const password = newPassInput.value;
+    if (password.length === 0) {
+      strengthIndicator.classList.add('hidden');
+      return;
+    }
+
+    strengthIndicator.classList.remove('hidden');
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+    const colors = ['#ef4444', '#f59e0b', '#eab308', '#22c55e'];
+    const texts = ['Débil', 'Regular', 'Buena', 'Fuerte'];
+
+    strengthBars.forEach((bar, index) => {
+      if (index < strength) {
+        bar.style.backgroundColor = colors[strength - 1];
+      } else {
+        bar.style.backgroundColor = '#e5e7eb';
+      }
+    });
+
+    strengthText.textContent = `Seguridad: ${texts[strength - 1] || 'Muy débil'}`;
+    strengthText.style.color = colors[strength - 1] || '#ef4444';
+  });
+
+  // Password confirmation validation
+  const passwordForm = document.getElementById('passwordForm');
+  const confirmPassInput = document.getElementById('confirmPass');
+
+  passwordForm?.addEventListener('submit', (e) => {
+    if (newPassInput.value !== confirmPassInput.value) {
+      e.preventDefault();
+      alert('Las contraseñas no coinciden');
+      confirmPassInput.focus();
+    }
+  });
+
+  // Photo upload
+  const photoUpload = document.getElementById('photoUpload');
+  photoUpload?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar 5MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('foto', file);
+
+    try {
+      const response = await fetch('/perfil/foto', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Error al subir la foto');
+      }
+    } catch (error) {
+      alert('Error al subir la foto');
+    }
+  });
+</script>

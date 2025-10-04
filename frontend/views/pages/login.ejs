@@ -1,25 +1,22 @@
 <% layout('layout') %>
 
-<div class="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f3f0fa] to-[#f8f7fc] px-4 py-12">
   <div class="w-full max-w-md">
-    
     <!-- Card principal -->
-    <div class="bg-white rounded-2xl shadow-xl border border-[#edeaf0] overflow-hidden">
-      
+    <div class="bg-white rounded-2xl shadow-2xl border border-[#e5e3ea] overflow-hidden">
       <!-- Header con gradiente -->
       <div class="bg-gradient-to-br from-[#5a1593] to-[#8b4dbf] p-8 text-center">
-        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-[#f3f0fa]">
           <svg class="w-10 h-10 text-[#5a1593]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
         </div>
-        <h1 class="text-3xl font-bold text-white mb-2">¡Bienvenido!</h1>
-        <p class="text-white/90">Inicia sesión para continuar aprendiendo</p>
+        <h1 class="text-3xl font-extrabold text-white mb-1 tracking-tight">¡Bienvenido!</h1>
+        <p class="text-white/90 text-base">Inicia sesión para continuar aprendiendo</p>
       </div>
 
       <!-- Formulario -->
       <div class="p-8">
-        
         <!-- Mensaje de error -->
         <% if (typeof error !== 'undefined' && error) { %>
           <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 flex items-start gap-3">
@@ -27,17 +24,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div>
-              <p class="text-sm font-medium text-red-800">Error al iniciar sesión</p>
+              <p class="text-sm font-semibold text-red-800">Error al iniciar sesión</p>
               <p class="text-sm text-red-700 mt-1"><%= error %></p>
             </div>
           </div>
         <% } %>
 
-        <form method="post" action="/login" class="space-y-5">
-          
+        <form method="post" action="/login" class="space-y-6">
           <!-- Email -->
           <div>
-            <label class="block text-sm font-medium text-[#151117] mb-2">
+            <label class="block text-sm font-semibold text-[#151117] mb-2">
               Correo electrónico
             </label>
             <div class="relative">
@@ -47,7 +43,7 @@
                 </svg>
               </div>
               <input 
-                class="w-full h-12 rounded-lg border border-[#edeaf0] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                class="w-full h-12 rounded-lg border border-[#e5e3ea] bg-[#f8f7fc] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all placeholder-[#b8b3c6] text-[#151117]" 
                 type="email" 
                 name="email" 
                 placeholder="tu@email.com"
@@ -58,7 +54,7 @@
 
           <!-- Contraseña -->
           <div>
-            <label class="block text-sm font-medium text-[#151117] mb-2">
+            <label class="block text-sm font-semibold text-[#151117] mb-2">
               Contraseña
             </label>
             <div class="relative">
@@ -68,7 +64,7 @@
                 </svg>
               </div>
               <input 
-                class="w-full h-12 rounded-lg border border-[#edeaf0] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                class="w-full h-12 rounded-lg border border-[#e5e3ea] bg-[#f8f7fc] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all placeholder-[#b8b3c6] text-[#151117]" 
                 type="password" 
                 name="password" 
                 placeholder="••••••••"
@@ -80,17 +76,17 @@
           <!-- Recordarme / Olvidé contraseña -->
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" class="w-4 h-4 text-[#5a1593] border-[#edeaf0] rounded focus:ring-[#5a1593]" />
+              <input type="checkbox" class="w-4 h-4 text-[#5a1593] border-[#e5e3ea] rounded focus:ring-[#5a1593]" />
               <span class="text-[#6f6880]">Recordarme</span>
             </label>
-            <a href="/recuperar-password" class="text-[#5a1593] font-medium hover:text-[#4a1275] transition-colors">
+            <a href="/recuperar-password" class="text-[#5a1593] font-semibold hover:text-[#4a1275] transition-colors">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
 
           <!-- Botón de envío -->
           <button 
-            class="w-full h-12 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2" 
+            class="w-full h-12 rounded-lg bg-[#5a1593] text-white font-bold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base" 
             type="submit"
           >
             <span>Iniciar Sesión</span>
@@ -103,7 +99,7 @@
         <!-- Divider -->
         <div class="relative my-6">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-[#edeaf0]"></div>
+            <div class="w-full border-t border-[#e5e3ea]"></div>
           </div>
           <div class="relative flex justify-center text-sm">
             <span class="px-4 bg-white text-[#6f6880]">o continúa con</span>
@@ -114,7 +110,7 @@
         <div class="grid grid-cols-2 gap-3">
           <button 
             type="button"
-            class="h-11 rounded-lg border-2 border-[#edeaf0] text-[#151117] font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            class="h-11 rounded-lg border-2 border-[#e5e3ea] text-[#151117] font-semibold hover:bg-[#f3f0fa] transition-colors flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -127,7 +123,7 @@
           
           <button 
             type="button"
-            class="h-11 rounded-lg border-2 border-[#edeaf0] text-[#151117] font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            class="h-11 rounded-lg border-2 border-[#e5e3ea] text-[#151117] font-semibold hover:bg-[#f3f0fa] transition-colors flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -137,10 +133,10 @@
         </div>
 
         <!-- Registro -->
-        <div class="mt-6 pt-6 border-t border-[#edeaf0] text-center">
+        <div class="mt-8 pt-6 border-t border-[#e5e3ea] text-center">
           <p class="text-sm text-[#6f6880]">
             ¿No tienes una cuenta? 
-            <a href="/registro" class="text-[#5a1593] font-semibold hover:text-[#4a1275] transition-colors">
+            <a href="/registro" class="text-[#5a1593] font-bold hover:text-[#4a1275] transition-colors">
               Crear cuenta gratis
             </a>
           </p>

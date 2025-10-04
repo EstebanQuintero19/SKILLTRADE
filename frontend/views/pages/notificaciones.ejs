@@ -1,47 +1,192 @@
 <% layout('layout') %>
 
-<section class="mb-4">
-  <h1 class="text-2xl font-extrabold text-[#151117]">Notificaciones</h1>
-  <div class="mt-3 flex gap-2">
+<section class="mb-8">
+  <h1 class="text-3xl font-bold text-gray-900">Notificaciones</h1>
+  <div class="mt-4 flex gap-3">
     <form method="post" action="/notificaciones/leer-todas">
-      <button class="h-9 px-3 rounded-lg bg-[#eee8f3] text-[#151117] text-sm font-semibold">Marcar todas como leídas</button>
+      <button class="h-10 px-4 rounded-md bg-purple-50 text-purple-700 text-base font-semibold hover:bg-purple-100 transition-colors shadow-sm border border-purple-100">
+        Marcar todas como leídas
+      </button>
     </form>
+    <button id="deleteAllRead" class="h-10 px-4 rounded-md bg-red-50 text-red-600 text-base font-semibold hover:bg-red-100 transition-colors shadow-sm border border-red-100">
+      Eliminar leídas
+    </button>
   </div>
-  <div class="mt-3 relative">
-    <input id="q" class="w-full h-11 rounded-lg border border-[#edeaf0] pl-10 pr-3" placeholder="Buscar por texto o tipo" />
-    <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a92ad]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path fill="currentColor" d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72Z"/></svg>
+  <div class="mt-5 relative">
+    <input 
+      id="q" 
+      class="w-full h-12 rounded-md border border-gray-200 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-base shadow-sm" 
+      placeholder="Buscar por texto o tipo" 
+    />
+    <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 256 256">
+      <path fill="currentColor" d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72Z"/>
+    </svg>
+  </div>
+  
+  <!-- Filtros por tipo -->
+  <div class="mt-5 flex gap-2 flex-wrap" id="filters">
+    <button class="filter-btn active h-10 px-4 rounded-md bg-purple-700 text-white text-base font-semibold shadow-sm" data-filter="all">
+      Todas
+    </button>
+    <button class="filter-btn h-10 px-4 rounded-md bg-gray-100 text-gray-800 text-base font-semibold hover:bg-purple-50 hover:text-purple-700 transition-colors shadow-sm" data-filter="unread">
+      No leídas
+    </button>
   </div>
 </section>
 
-<div class="rounded-lg border border-[#edeaf0] divide-y" id="list">
-  <% (items||[]).forEach(n => { %>
-    <div class="p-4 notification" data-type="<%= n.tipo || '' %>" data-text="<%= (n.titulo||'') + ' ' + (n.mensaje||'') %>">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="font-semibold text-[#151117]"><%= n.titulo || n.tipo || 'Notificación' %></h3>
-          <p class="text-sm text-[#6f6880]"><%= n.mensaje || '' %></p>
-        </div>
-        <div class="flex items-center gap-2">
-          <% if (!n.leida) { %>
-            <form method="post" action="/notificaciones/<%= n._id %>/leida"><button class="text-[#5a1593]">Marcar leída</button></form>
-          <% } %>
-          <form method="post" action="/notificaciones/<%= n._id %>/eliminar"><button class="text-red-600">Eliminar</button></form>
+<div class="rounded-lg border border-gray-200 divide-y bg-white shadow-sm" id="list">
+  <% if (!items || items.length === 0) { %>
+    <div class="p-12 text-center text-gray-400">
+      <svg class="mx-auto mb-4 text-gray-300" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 256 256">
+        <path fill="currentColor" d="M221.8 175.94c-5.55-9.56-13.8-36.61-13.8-71.94a80 80 0 1 0-160 0c0 35.34-8.26 62.38-13.81 71.94A16 16 0 0 0 48 200h40.81a40 40 0 0 0 78.38 0H208a16 16 0 0 0 13.8-24.06ZM128 216a24 24 0 0 1-22.62-16h45.24A24 24 0 0 1 128 216Z"/>
+      </svg>
+      <p class="font-semibold text-lg">No hay notificaciones</p>
+      <p class="text-base mt-2">Cuando recibas notificaciones aparecerán aquí</p>
+    </div>
+  <% } else { %>
+    <% items.forEach(n => { %>
+      <div class="p-6 notification <%= !n.leida ? 'bg-purple-50' : '' %> hover:bg-purple-100 transition-colors" 
+           data-type="<%= n.tipo || '' %>" 
+           data-text="<%= (n.titulo||'') + ' ' + (n.mensaje||'') %>"
+           data-read="<%= n.leida ? 'true' : 'false' %>"
+           data-id="<%= n._id %>">
+        <div class="flex items-start justify-between gap-6">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <% if (!n.leida) { %>
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-700"></span>
+              <% } %>
+              <h3 class="font-semibold text-gray-900 truncate text-lg">
+                <%= n.titulo || n.tipo || 'Notificación' %>
+              </h3>
+              <% if (n.tipo) { %>
+                <span class="px-3 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 font-medium">
+                  <%= n.tipo %>
+                </span>
+              <% } %>
+            </div>
+            <p class="text-base text-gray-600 line-clamp-2"><%= n.mensaje || '' %></p>
+            <% if (n.fecha) { %>
+              <p class="text-xs text-gray-400 mt-2">
+                <%= new Date(n.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+              </p>
+            <% } %>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <% if (!n.leida) { %>
+              <form method="post" action="/notificaciones/<%= n._id %>/leida">
+                <button class="text-purple-700 hover:text-purple-900 text-base font-medium transition-colors" title="Marcar como leída">
+                  Marcar leída
+                </button>
+              </form>
+            <% } %>
+            <form method="post" action="/notificaciones/<%= n._id %>/eliminar" onsubmit="return confirm('¿Eliminar esta notificación?')">
+              <button class="text-red-600 hover:text-red-700 text-base font-medium transition-colors" title="Eliminar">
+                Eliminar
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  <% }) %>
+    <% }) %>
+  <% } %>
 </div>
 
 <script>
   const q = document.getElementById('q');
   const rows = Array.from(document.querySelectorAll('.notification'));
-  q.addEventListener('input', () => {
-    const t = (q.value||'').toLowerCase();
-    rows.forEach(r => {
-      const text = (r.dataset.text||'').toLowerCase();
-      const type = (r.dataset.type||'').toLowerCase();
-      r.style.display = (!t || text.includes(t) || type.includes(t)) ? '' : 'none';
-    })
-  });
-</script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  let currentFilter = 'all';
 
+  // Búsqueda
+  q.addEventListener('input', () => {
+    applyFilters();
+  });
+
+  // Filtros por estado
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => {
+        b.classList.remove('active', 'bg-purple-700', 'text-white');
+        b.classList.add('bg-gray-100', 'text-gray-800');
+      });
+      btn.classList.add('active', 'bg-purple-700', 'text-white');
+      btn.classList.remove('bg-gray-100', 'text-gray-800');
+      
+      currentFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  // Aplicar filtros combinados
+  function applyFilters() {
+    const searchText = (q.value || '').toLowerCase();
+    
+    rows.forEach(r => {
+      const text = (r.dataset.text || '').toLowerCase();
+      const type = (r.dataset.type || '').toLowerCase();
+      const isRead = r.dataset.read === 'true';
+      
+      // Filtro de búsqueda
+      const matchesSearch = !searchText || text.includes(searchText) || type.includes(searchText);
+      
+      // Filtro de estado
+      let matchesFilter = true;
+      if (currentFilter === 'unread') {
+        matchesFilter = !isRead;
+      }
+      
+      r.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+    });
+    
+    updateResultsCount();
+  }
+
+  // Contador de resultados
+  function updateResultsCount() {
+    const visible = rows.filter(r => r.style.display !== 'none').length;
+    const total = rows.length;
+    
+    let countEl = document.getElementById('results-count');
+    if (!countEl && total > 0) {
+      countEl = document.createElement('p');
+      countEl.id = 'results-count';
+      countEl.className = 'text-sm text-gray-500 mt-4';
+      document.querySelector('section').appendChild(countEl);
+    }
+    
+    if (countEl) {
+      if (visible === total) {
+        countEl.textContent = `${total} notificación${total !== 1 ? 'es' : ''}`;
+      } else {
+        countEl.textContent = `${visible} de ${total} notificación${total !== 1 ? 'es' : ''}`;
+      }
+    }
+  }
+
+  // Eliminar todas las leídas
+  const deleteAllReadBtn = document.getElementById('deleteAllRead');
+  if (deleteAllReadBtn) {
+    deleteAllReadBtn.addEventListener('click', async () => {
+      const readNotifications = rows.filter(r => r.dataset.read === 'true');
+      
+      if (readNotifications.length === 0) {
+        alert('No hay notificaciones leídas para eliminar');
+        return;
+      }
+      
+      if (confirm(`¿Eliminar ${readNotifications.length} notificación${readNotifications.length !== 1 ? 'es' : ''} leída${readNotifications.length !== 1 ? 's' : ''}?`)) {
+        const deletePromises = readNotifications.map(r => {
+          const form = r.querySelector('form[action*="/eliminar"]');
+          return fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        });
+        
+        await Promise.all(deletePromises);
+        location.reload();
+      }
+    });
+  }
+
+  // Inicializar contador
+  updateResultsCount();
+</script>

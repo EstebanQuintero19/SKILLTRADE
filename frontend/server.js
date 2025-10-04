@@ -24,8 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Estáticos opcionales (si usas public/ para assets del front)
-app.use('/static', express.static(path.join(__dirname, 'public')));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Inyectar variables globales para las vistas (por ejemplo, base de API)
 app.locals.API_BASE = API_BASE;
