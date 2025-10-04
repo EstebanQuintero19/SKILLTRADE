@@ -7,8 +7,13 @@ const Venta = require('../model/venta.model');
 // RF-CUR-01: Crear curso (titulo, descripcion, categoria, imagen, adjuntos)
 const crearCurso = async (req, res) => {
     try {
+        console.log('=== CREAR CURSO DEBUG ===');
+        console.log('Body:', req.body);
+        console.log('Usuario:', req.usuario);
+        console.log('File:', req.file);
+        
         const { titulo, descripcion, categoria, precio, nivel, visibilidad, etiquetas, videoIntroductorio } = req.body;
-        const ownerId = req.usuario._id;
+        const ownerId = req.usuario?._id;
 
         // Validaciones básicas
         if (!titulo) {

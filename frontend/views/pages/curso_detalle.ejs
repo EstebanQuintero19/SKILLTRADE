@@ -1,11 +1,22 @@
-<% layout('layout') %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= curso?.titulo || 'Curso' %> - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-2 text-sm text-[#6f6880] mb-6">
     <a href="/cursos" class="hover:text-[#5a1593] transition-colors">Cursos</a>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
     </svg>
     <span class="text-[#151117] font-medium"><%= curso?.titulo %></span>
   </nav>
@@ -171,3 +182,6 @@
     </div>
   </div>
 </div>
+
+</body>
+</html>

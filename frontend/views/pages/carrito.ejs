@@ -1,11 +1,22 @@
-<% layout('layout') %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrito - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <h1 class="text-4xl font-bold text-[#151117] mb-8">Carrito de Compras</h1>
 
   <% if (items && items.length > 0) { %>
     <div class="grid lg:grid-cols-3 gap-8">
-      <!-- Lista de cursos -->
       <div class="lg:col-span-2">
         <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] overflow-hidden">
           <div class="px-6 py-4 bg-[#f5f2f8] border-b border-[#edeaf0]">
@@ -131,3 +142,6 @@
     </div>
   <% } %>
 </div>
+
+</body>
+</html>

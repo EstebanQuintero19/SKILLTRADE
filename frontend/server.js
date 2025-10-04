@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
@@ -86,12 +87,109 @@ app.get('/biblioteca', async (req, res) => {
 
 app.get('/cursos', async (req, res) => {
   try {
+    const q = req.query.q || ''; // Obtener el parámetro de búsqueda
     const { data } = await api.get(`/cursos`, { __req: req });
-    const cursos = data?.data?.cursos || data?.cursos || data || [];
-    res.render('pages/cursos', { title: 'Cursos', cursos, API_BASE });
-  } catch (err) {
-    console.error('Error fetching cursos:', err.message);
-    res.render('pages/cursos', { title: 'Cursos', cursos: [], API_BASE });
+    
+    // Normalizar la respuesta para asegurar que cursos sea un array
+    console.log('Respuesta del backend cursos:', data);
+    let cursos = [];
+    if (Array.isArray(data)) {
+      cursos = data;
+    } else if (data && Array.isArray(data.cursos)) {
+      cursos = data.cursos;
+    } else if (data && Array.isArray(data.data)) {
+      cursos = data.data;
+    } else if (data && data.data && Array.isArray(data.data.cursos)) {
+      cursos = data.data.cursos;
+    }
+    
+    console.log('Cursos normalizados:', cursos.length, 'cursos encontrados');
+    
+    res.render('pages/cursos', { title: 'Cursos', cursos: cursos, API_BASE, q: q });
+  } catch (error) {
+    console.error('Error fetching cursos for cursos page:', error.message);
+    res.render('pages/cursos', { title: 'Cursos', cursos: [], API_BASE, q: q });
+  }
+});
+
+// Ruta para mostrar el formulario de crear curso
+app.get('/cursos/crear', (req, res) => {
+  if (!req.cookies?.auth_token) return res.redirect('/login');
+  res.render('pages/crear_curso', { title: 'Crear Curso' });
+});
+
+// Configurar multer para subida de archivos
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de imagen'));
+    }
+  }
+});
+
+// Ruta proxy para crear cursos
+app.post('/api/cursos', upload.single('imagen'), async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  
+  try {
+    console.log('=== PROXY FRONTEND DEBUG ===');
+    console.log('Body recibido:', req.body);
+    console.log('Archivo recibido:', req.file ? { name: req.file.originalname, size: req.file.size } : 'No file');
+    console.log('Auth token:', req.cookies.auth_token ? 'Presente' : 'Ausente');
+    
+    // Usar form-data para Node.js
+    const FormData = require('form-data');
+    const formData = new FormData();
+    
+    // Agregar todos los campos del formulario
+    Object.keys(req.body).forEach(key => {
+      if (req.body[key]) {
+        console.log(`Agregando campo: ${key} = ${req.body[key]}`);
+        formData.append(key, req.body[key]);
+      }
+    });
+    
+    // Agregar archivo si existe
+    if (req.file) {
+      console.log('Agregando archivo:', req.file.originalname);
+      formData.append('imagen', req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype
+      });
+    }
+    
+    console.log('Enviando request al backend...');
+    const response = await axios.post(`${API_BASE}/api/cursos`, formData, {
+      headers: {
+        'X-API-Key': req.cookies.auth_token,
+        'rh-api-key': req.cookies.auth_token,
+        'Authorization': `Bearer ${req.cookies.auth_token}`,
+        ...formData.getHeaders()
+      }
+    });
+    
+    const result = response.data;
+    console.log('Respuesta del backend:', response.status, result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error creating course:', error);
+    
+    // Si es un error de axios, extraer la respuesta del backend
+    if (error.response) {
+      console.error('Backend error:', error.response.status, error.response.data);
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   }
 });
 
@@ -102,14 +200,47 @@ app.get('/registro', (req, res) => {
 });
 app.post('/registro', async (req, res) => {
   try {
-    const { email, nombre, password, biografia, telefono } = req.body || {};
-    const { data } = await axios.post(`${API_BASE}/api/usuarios`, { email, nombre, password, biografia, telefono });
+    const { email, nombre, password, confirmPassword, biografia, telefono } = req.body || {};
+    
+    console.log('Datos de registro recibidos:', { email, nombre, password: '***', confirmPassword: '***', biografia, telefono });
+    
+    const { data } = await axios.post(`${API_BASE}/api/usuarios`, { 
+      email, 
+      nombre, 
+      password, 
+      confirmPassword, 
+      biografia, 
+      telefono 
+    });
+    
     const apiKey = data?.apiKey || data?.data?.apiKey || data?.data?.usuario?.apiKey || data?.usuario?.apiKey;
-    if (!apiKey) return res.status(400).render('pages/registro', { title: 'Crear cuenta', error: 'No se pudo crear la cuenta' });
+    
+    if (!apiKey) {
+      console.log('No se pudo obtener API key de la respuesta:', data);
+      return res.status(400).render('pages/registro', { 
+        title: 'Crear cuenta', 
+        error: 'No se pudo crear la cuenta. Intenta nuevamente.' 
+      });
+    }
+    
+    console.log('Usuario registrado exitosamente, API Key obtenida');
     res.cookie('auth_token', apiKey, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400000 });
     res.redirect('/');
+    
   } catch (err) {
-    res.status(400).render('pages/registro', { title: 'Crear cuenta', error: 'Error en el registro' });
+    console.error('Error en registro:', err.response?.data || err.message);
+    
+    let errorMessage = 'Error en el registro';
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.response?.status === 400 && err.response?.data?.success === false) {
+      errorMessage = err.response.data.message || 'Datos inválidos';
+    }
+    
+    res.status(400).render('pages/registro', { 
+      title: 'Crear cuenta', 
+      error: errorMessage 
+    });
   }
 });
 

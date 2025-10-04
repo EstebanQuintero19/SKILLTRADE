@@ -14,7 +14,7 @@ const generarApiKey = () => {
 // RF-USU-01: Registrar usuario (email, nombre, password hash)
 const registrarUsuario = async (req, res) => {
     try {
-        const { email, nombre, password, biografia, telefono } = req.body;
+        const { email, nombre, password, confirmPassword, biografia, telefono } = req.body;
 
         // Validar campos requeridos
         if (!email || !nombre || !password) {
@@ -24,12 +24,45 @@ const registrarUsuario = async (req, res) => {
             });
         }
 
+        // Validar confirmación de contraseña
+        if (confirmPassword && password !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Las contraseñas no coinciden'
+            });
+        }
+
+        // Validar longitud de contraseña
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'La contraseña debe tener al menos 6 caracteres'
+            });
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Por favor ingresa un email válido'
+            });
+        }
+
+        // Validar longitud del nombre
+        if (nombre.trim().length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'El nombre debe tener al menos 2 caracteres'
+            });
+        }
+
         // Verificar si el usuario ya existe
         const usuarioExistente = await Usuario.findOne({ email });
         if (usuarioExistente) {
             return res.status(400).json({
                 success: false,
-                message: 'El email ya está registrado'
+                message: 'Este email ya está registrado'
             });
         }
 
@@ -42,11 +75,11 @@ const registrarUsuario = async (req, res) => {
 
         // Crear usuario
         const nuevoUsuario = new Usuario({
-            email,
-            nombre,
+            email: email.toLowerCase().trim(),
+            nombre: nombre.trim(),
             password: passwordHash,
-            biografia: biografia || '',
-            telefono: telefono || '',
+            biografia: biografia ? biografia.trim() : '',
+            telefono: telefono ? telefono.trim() : '',
             apiKey,
             fechaCreacion: new Date()
         });

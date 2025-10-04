@@ -1,12 +1,37 @@
-<footer class="border-t border-[#edeaf0] mt-10">
-  <div class="mx-auto max-w-[1200px] px-6 py-8 text-center text-sm text-[#6f6880]">
-    <nav class="flex flex-wrap gap-6 justify-center mb-3">
-      <a href="#" class="hover:text-[#5a1593]">Acerca de</a>
-      <a href="#" class="hover:text-[#5a1593]">Contacto</a>
-      <a href="#" class="hover:text-[#5a1593]">Términos</a>
-      <a href="#" class="hover:text-[#5a1593]">Privacidad</a>
-    </nav>
-    <p>© <%= new Date().getFullYear() %> SkillTrade</p>
+<footer class="bg-gray-900 text-white mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex items-center space-x-2 mb-4">
+          <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">ST</span>
+          </div>
+          <span class="text-xl font-bold">SkillTrade</span>
+        </div>
+        <p class="text-gray-400 mb-4">
+          La plataforma líder para el intercambio de conocimientos y habilidades profesionales.
+        </p>
+      </div>
+      <div>
+        <h3 class="font-semibold mb-4">Plataforma</h3>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="/cursos" class="hover:text-white">Cursos</a></li>
+          <li><a href="/intercambios" class="hover:text-white">Intercambios</a></li>
+          <li><a href="/ventas" class="hover:text-white">Ventas</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold mb-4">Cuenta</h3>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="/login" class="hover:text-white">Iniciar Sesión</a></li>
+          <li><a href="/registro" class="hover:text-white">Registrarse</a></li>
+          <li><a href="/perfil" class="hover:text-white">Mi Perfil</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+      <p>&copy; <%= new Date().getFullYear() %> SkillTrade. Todos los derechos reservados.</p>
+    </div>
   </div>
 </footer>
 
