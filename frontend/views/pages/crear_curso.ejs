@@ -119,13 +119,13 @@
                 Nivel <span class="text-red-500">*</span>
               </label>
               <select 
-                name="nivel" 
+                name="nivel"
                 id="nivel"
                 class="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 required
               >
                 <option value="">Selecciona el nivel</option>
-                <option value="principiante">Principiante</option>
+                <option value="Principiante">Principiante</option>
                 <option value="intermedio">Intermedio</option>
                 <option value="avanzado">Avanzado</option>
               </select>
@@ -144,6 +144,7 @@
                   id="precio"
                   placeholder="50000"
                   min="0"
+                  max="100000"
                   step="1000"
                   class="w-full h-12 pl-8 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   required
@@ -322,6 +323,18 @@
     document.getElementById('descripcion').addEventListener('input', function() {
       if (this.value.length > 1000) {
         this.setCustomValidity('La descripción no puede exceder 1000 caracteres');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+    
+    // Validación del precio
+    document.getElementById('precio').addEventListener('input', function() {
+      const precio = parseFloat(this.value);
+      if (precio > 100000) {
+        this.setCustomValidity('El precio máximo es $100,000');
+      } else if (precio < 0) {
+        this.setCustomValidity('El precio no puede ser negativo');
       } else {
         this.setCustomValidity('');
       }

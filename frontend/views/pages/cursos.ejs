@@ -9,121 +9,429 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .course-card {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+    }
+    .course-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15);
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .filter-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+<%- include('../partials/header') %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <!-- Header -->
-  <div class="mb-8 flex justify-between items-center">
-    <div>
-      <h1 class="text-4xl font-bold text-gray-800 mb-2">Explorar Cursos</h1>
-      <p class="text-gray-600">Descubre y aprende con nuestros cursos especializados</p>
+  
+  <!-- Hero Section -->
+  <section class="mb-12">
+    <div class="gradient-bg rounded-2xl p-8 md:p-12 text-white relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+      
+      <div class="relative z-10">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div class="mb-6 md:mb-0">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+              <i class="fas fa-graduation-cap mr-4"></i>
+              Explorar Cursos
+            </h1>
+            <p class="text-xl text-purple-100 mb-6 max-w-2xl">
+              Descubre conocimientos increíbles y acelera tu crecimiento profesional con nuestros cursos especializados
+            </p>
+            
+            <!-- Estadísticas rápidas -->
+            <div class="flex flex-wrap gap-6">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-book text-sm"></i>
+                </div>
+                <div>
+                  <div class="font-semibold"><%= (cursos || []).length %></div>
+                  <div class="text-xs text-purple-200">Cursos</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-users text-sm"></i>
+                </div>
+                <div>
+                  <div class="font-semibold">500+</div>
+                  <div class="text-xs text-purple-200">Estudiantes</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-star text-sm"></i>
+                </div>
+                <div>
+                  <div class="font-semibold">4.8</div>
+                  <div class="text-xs text-purple-200">Calificación</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <% if (locals.signedIn) { %>
+          <div class="flex-shrink-0">
+            <a href="/cursos/crear" 
+               class="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="fas fa-plus mr-3"></i>
+              Crear Curso
+            </a>
+          </div>
+          <% } %>
+        </div>
+      </div>
     </div>
-    <% if (locals.signedIn) { %>
-    <a href="/cursos/crear" 
-       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-      <i class="fas fa-plus mr-2"></i>
-      Crear Curso
-    </a>
-    <% } %>
-  </div>
+  </section>
 
-  <!-- Búsqueda -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-    <div class="relative">
-      <input 
-        id="q" 
-        name="q" 
-        value="<%= q || '' %>" 
-        class="w-full h-12 rounded-lg border border-gray-300 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
-        placeholder="Buscar cursos por título o palabra clave..." 
-      />
-      <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+  <!-- Filtros y Búsqueda -->
+  <section class="mb-8">
+    <div class="bg-white rounded-2xl card-shadow p-6">
+      <!-- Búsqueda -->
+      <div class="relative mb-6">
+        <input 
+          id="searchInput" 
+          name="q" 
+          value="<%= q || '' %>" 
+          class="w-full h-14 rounded-xl border border-gray-300 pl-14 pr-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+          placeholder="Buscar cursos por título, categoría o instructor..." 
+        />
+        <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+      </div>
+
+      <!-- Filtros rápidos -->
+      <div class="flex flex-wrap gap-3">
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="all">
+          <i class="fas fa-th-large mr-2"></i>
+          Todos
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="programacion">
+          <i class="fas fa-code mr-2"></i>
+          Programación
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="diseno">
+          <i class="fas fa-palette mr-2"></i>
+          Diseño
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="marketing">
+          <i class="fas fa-bullhorn mr-2"></i>
+          Marketing
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="negocios">
+          <i class="fas fa-briefcase mr-2"></i>
+          Negocios
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="gratis">
+          <i class="fas fa-gift mr-2"></i>
+          Gratis
+        </button>
+      </div>
+
+      <!-- Contador de resultados -->
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <p class="text-sm text-gray-600">
+          Mostrando <span id="results-count" class="font-semibold text-purple-600"><%= (cursos || []).length %></span> cursos
+        </p>
+      </div>
     </div>
-  </div>
+  </section>
 
   <!-- Lista de cursos -->
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <% if (cursos && cursos.length > 0) { %>
-      <% cursos.forEach(curso => { %>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-          <!-- Imagen del curso -->
-          <div class="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 relative">
-            <% if (curso.imagen) { %>
-              <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-full object-cover">
-            <% } else { %>
-              <div class="w-full h-full flex items-center justify-center">
-                <i class="fas fa-graduation-cap text-white text-4xl"></i>
-              </div>
-            <% } %>
-            <div class="absolute top-4 left-4">
-              <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-blue-600">
-                <%= curso.nivel || 'Intermedio' %>
-              </span>
-            </div>
-          </div>
-
-          <!-- Contenido -->
-          <div class="p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
-              <%= curso.titulo %>
-            </h3>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-              <%= curso.descripcion %>
-            </p>
-
-            <!-- Categorías -->
-            <div class="flex flex-wrap gap-2 mb-4">
-              <% if (curso.categoria && Array.isArray(curso.categoria)) { %>
-                <% curso.categoria.slice(0, 2).forEach(cat => { %>
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    <%= cat %>
-                  </span>
-                <% }) %>
+  <section>
+    <div id="courses-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <% if (cursos && cursos.length > 0) { %>
+        <% cursos.forEach((curso, index) => { %>
+          <div class="course-card bg-white rounded-2xl card-shadow overflow-hidden animate-fade-in" 
+               style="animation-delay: <%= index * 0.1 %>s"
+               data-categories="<%= (curso.categoria || []).join(',').toLowerCase() %>"
+               data-price="<%= curso.precio || 0 %>"
+               data-title="<%= curso.titulo.toLowerCase() %>">
+            
+            <!-- Imagen del curso -->
+            <div class="relative aspect-video overflow-hidden">
+              <% if (curso.imagen && curso.imagen !== '/images/placeholder-course.jpg') { %>
+                <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-full object-cover">
+              <% } else { %>
+                <div class="w-full h-full gradient-bg flex items-center justify-center">
+                  <i class="fas fa-graduation-cap text-white text-4xl"></i>
+                </div>
               <% } %>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex items-center justify-between">
-              <div class="text-2xl font-bold text-green-600">
-                <% if (curso.precio && curso.precio > 0) { %>
-                  $<%= curso.precio.toLocaleString() %>
-                <% } else { %>
-                  Gratis
+              
+              <!-- Overlay con información -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              
+              <!-- Badges -->
+              <div class="absolute top-4 left-4 flex gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-purple-600">
+                  <%= curso.nivel || 'Principiante' %>
+                </span>
+                <% if (curso.precio === 0) { %>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">
+                  GRATIS
+                </span>
                 <% } %>
               </div>
-              <a href="/curso/<%= curso._id %>" 
-                 class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors">
-                Ver curso
-                <i class="fas fa-arrow-right ml-2"></i>
-              </a>
+
+              <!-- Rating (si existe) -->
+              <div class="absolute top-4 right-4">
+                <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur">
+                  <i class="fas fa-star text-yellow-400 text-xs"></i>
+                  <span class="text-xs font-semibold text-gray-800">4.8</span>
+                </div>
+              </div>
+
+              <!-- Precio en la esquina inferior -->
+              <div class="absolute bottom-4 right-4">
+                <div class="px-3 py-2 rounded-lg bg-white/95 backdrop-blur">
+                  <div class="text-lg font-bold text-gray-800">
+                    <% if (curso.precio && curso.precio > 0) { %>
+                      $<%= Number(curso.precio).toLocaleString() %>
+                    <% } else { %>
+                      <span class="text-green-600">Gratis</span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contenido -->
+            <div class="p-6">
+              <!-- Título -->
+              <h3 class="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-purple-600 transition-colors">
+                <%= curso.titulo %>
+              </h3>
+              
+              <!-- Descripción -->
+              <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                <%= curso.descripcion %>
+              </p>
+
+              <!-- Categorías -->
+              <div class="flex flex-wrap gap-2 mb-4">
+                <% if (curso.categoria && Array.isArray(curso.categoria)) { %>
+                  <% curso.categoria.slice(0, 3).forEach(cat => { %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                      <i class="fas fa-tag mr-1"></i>
+                      <%= cat %>
+                    </span>
+                  <% }) %>
+                <% } %>
+              </div>
+
+              <!-- Información adicional -->
+              <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-1">
+                    <i class="fas fa-clock"></i>
+                    <span>2-4 horas</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <i class="fas fa-users"></i>
+                    <span>120 estudiantes</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botón de acción -->
+              <div class="flex gap-3">
+                <a href="/curso/<%= curso._id %>" 
+                   class="flex-1 inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  <i class="fas fa-play mr-2"></i>
+                  Ver Curso
+                </a>
+                <button class="px-4 py-3 border border-gray-300 text-gray-600 rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all">
+                  <i class="fas fa-heart"></i>
+                </button>
+              </div>
             </div>
           </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <!-- Estado vacío mejorado -->
+    <% if (!cursos || cursos.length === 0) { %>
+      <div class="text-center py-20">
+        <div class="w-32 h-32 gradient-bg rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+          <i class="fas fa-graduation-cap text-white text-5xl"></i>
         </div>
-      <% }) %>
-    <% } else { %>
-      <!-- Estado vacío -->
-      <div class="col-span-full text-center py-16">
-        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <i class="fas fa-book-open text-gray-400 text-3xl"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">No hay cursos disponibles</h3>
-        <p class="text-gray-600 mb-6">Aún no se han publicado cursos en la plataforma.</p>
+        <h3 class="text-3xl font-bold text-gray-800 mb-4">¡Próximamente cursos increíbles!</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto text-lg">
+          Estamos preparando contenido educativo de alta calidad para ti. Mientras tanto, ¿por qué no creas el primer curso?
+        </p>
         <% if (locals.signedIn) { %>
         <a href="/cursos/crear" 
-           class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-          <i class="fas fa-plus mr-2"></i>
-          Crear el primer curso
+           class="inline-flex items-center px-8 py-4 gradient-bg text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <i class="fas fa-plus mr-3"></i>
+          Crear el Primer Curso
+        </a>
+        <% } else { %>
+        <a href="/login" 
+           class="inline-flex items-center px-8 py-4 gradient-bg text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <i class="fas fa-sign-in-alt mr-3"></i>
+          Iniciar Sesión para Crear
         </a>
         <% } %>
       </div>
     <% } %>
-  </div>
+
+    <!-- Sin resultados de búsqueda -->
+    <div id="no-results" class="hidden text-center py-16">
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-search text-gray-400 text-3xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-3">No se encontraron cursos</h3>
+      <p class="text-gray-600 mb-6">Intenta con otros términos de búsqueda o filtros</p>
+      <button id="clear-search" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all">
+        <i class="fas fa-eraser mr-2"></i>
+        Limpiar Búsqueda
+      </button>
+    </div>
+  </section>
 </div>
 
 <script>
-  console.log('Cursos cargados:', <%= JSON.stringify(cursos || []) %>);
+  // Variables globales
+  const searchInput = document.getElementById('searchInput');
+  const coursesGrid = document.getElementById('courses-grid');
+  const noResults = document.getElementById('no-results');
+  const resultsCount = document.getElementById('results-count');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const clearSearchBtn = document.getElementById('clear-search');
+  
+  let currentFilter = 'all';
+  let currentSearch = '';
+
+  // Función para filtrar cursos
+  function filterCourses() {
+    const courses = document.querySelectorAll('.course-card');
+    let visibleCount = 0;
+
+    courses.forEach(course => {
+      const title = course.dataset.title || '';
+      const categories = course.dataset.categories || '';
+      const price = parseFloat(course.dataset.price) || 0;
+      
+      // Filtro por búsqueda
+      const matchesSearch = !currentSearch || 
+        title.includes(currentSearch.toLowerCase()) || 
+        categories.includes(currentSearch.toLowerCase());
+      
+      // Filtro por categoría
+      let matchesFilter = true;
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'gratis') {
+          matchesFilter = price === 0;
+        } else {
+          matchesFilter = categories.includes(currentFilter);
+        }
+      }
+      
+      const isVisible = matchesSearch && matchesFilter;
+      course.style.display = isVisible ? 'block' : 'none';
+      
+      if (isVisible) {
+        visibleCount++;
+        // Animación de entrada
+        course.style.animation = 'none';
+        course.offsetHeight; // Trigger reflow
+        course.style.animation = 'fadeIn 0.6s ease-out forwards';
+      }
+    });
+
+    // Actualizar contador y mostrar/ocultar mensaje de sin resultados
+    resultsCount.textContent = visibleCount;
+    
+    if (visibleCount === 0 && courses.length > 0) {
+      coursesGrid.classList.add('hidden');
+      noResults.classList.remove('hidden');
+    } else {
+      coursesGrid.classList.remove('hidden');
+      noResults.classList.add('hidden');
+    }
+  }
+
+  // Event listeners para búsqueda
+  searchInput.addEventListener('input', (e) => {
+    currentSearch = e.target.value.trim();
+    filterCourses();
+  });
+
+  // Event listeners para filtros
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Remover clase activa de todos los botones
+      filterButtons.forEach(b => b.classList.remove('filter-active'));
+      
+      // Agregar clase activa al botón clickeado
+      btn.classList.add('filter-active');
+      
+      currentFilter = btn.dataset.filter;
+      filterCourses();
+    });
+  });
+
+  // Limpiar búsqueda
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      currentSearch = '';
+      currentFilter = 'all';
+      
+      // Resetear filtros
+      filterButtons.forEach(b => b.classList.remove('filter-active'));
+      filterButtons[0].classList.add('filter-active');
+      
+      filterCourses();
+    });
+  }
+
+  // Inicializar
+  document.addEventListener('DOMContentLoaded', () => {
+    // Activar primer filtro
+    if (filterButtons.length > 0) {
+      filterButtons[0].classList.add('filter-active');
+    }
+    
+    // Si hay búsqueda inicial
+    if (searchInput.value) {
+      currentSearch = searchInput.value.trim();
+      filterCourses();
+    }
+    
+    // Animación inicial de las tarjetas
+    const cards = document.querySelectorAll('.course-card');
+    cards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.1}s`;
+    });
+  });
+
+  // Efecto parallax sutil en el hero
+  window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const hero = document.querySelector('.gradient-bg');
+    if (hero) {
+      hero.style.transform = `translateY(${scrolled * 0.2}px)`;
+    }
+  });
 </script>
 
 </body>
