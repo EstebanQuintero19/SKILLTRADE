@@ -725,6 +725,46 @@ const actualizarUsuario = async (req, res) => {
     }
 };
 
+// Obtener estadísticas generales de la plataforma
+const obtenerEstadisticasGenerales = async (req, res) => {
+    try {
+        const Curso = require('../model/curso.model');
+        
+        // Obtener conteo de usuarios
+        const totalUsuarios = await Usuario.countDocuments();
+        
+        // Obtener conteo de cursos
+        const totalCursos = await Curso.countDocuments();
+        
+        // Obtener conteo de cursos gratis
+        const cursosGratis = await Curso.countDocuments({ precio: { $lte: 0 } });
+        
+        // Obtener conteo de cursos de pago
+        const cursosPago = await Curso.countDocuments({ precio: { $gt: 0 } });
+        
+        res.json({
+            success: true,
+            data: {
+                estadisticas: {
+                    totalUsuarios,
+                    totalCursos,
+                    cursosGratis,
+                    cursosPago,
+                    calificacionPromedio: 4.9 // Valor fijo por ahora
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al obtener estadísticas generales:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     registrarUsuario,
     loginUsuario,
@@ -739,5 +779,6 @@ module.exports = {
     cerrarSesion,
     obtenerUsuarios,
     crearUsuario,
-    actualizarUsuario
+    actualizarUsuario,
+    obtenerEstadisticasGenerales
 };

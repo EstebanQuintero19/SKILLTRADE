@@ -106,6 +106,7 @@ const cursoController = require('./controller/curso.controller');
 // Rutas de usuario
 app.post('/api/usuarios', usuarioController.registrarUsuario);
 app.post('/api/usuarios/login', usuarioController.loginUsuario);
+app.get('/api/estadisticas', usuarioController.obtenerEstadisticasGenerales);
 
 // Cargar middleware de autenticación
 const { autenticarApiKey } = require('./middleware/auth');

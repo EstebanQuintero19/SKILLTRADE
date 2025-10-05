@@ -82,12 +82,35 @@ app.use(async (req, res, next) => {
 app.get('/', async (req, res) => {
   console.log(`Ruta HOME - signedIn: ${res.locals.signedIn}, user: ${res.locals.user ? res.locals.user.nombre : 'null'}`);
   try {
-    const { data } = await api.get(`/cursos`, { __req: req });
-    const cursos = data?.data?.cursos || data?.cursos || data || [];
-    res.render('pages/index', { title: 'Home', cursos, API_BASE });
+    // Obtener cursos y estadísticas en paralelo
+    const [cursosResponse, estadisticasResponse] = await Promise.all([
+      api.get(`/cursos`, { __req: req }),
+      api.get(`/estadisticas`, { __req: req })
+    ]);
+    
+    const cursos = cursosResponse.data?.data?.cursos || cursosResponse.data?.cursos || cursosResponse.data || [];
+    const estadisticas = estadisticasResponse.data?.data?.estadisticas || {};
+    
+    res.render('pages/index', { 
+      title: 'Home', 
+      cursos, 
+      estadisticas,
+      API_BASE 
+    });
   } catch (err) {
-    console.error('Error fetching cursos for home:', err.message);
-    res.render('pages/index', { title: 'Home', cursos: [], API_BASE });
+    console.error('Error fetching data for home:', err.message);
+    // Valores por defecto si hay error
+    const estadisticasDefault = {
+      totalCursos: 0,
+      totalUsuarios: 0,
+      calificacionPromedio: 4.9
+    };
+    res.render('pages/index', { 
+      title: 'Home', 
+      cursos: [], 
+      estadisticas: estadisticasDefault,
+      API_BASE 
+    });
   }
 });
 
@@ -113,11 +136,17 @@ app.get('/biblioteca', async (req, res) => {
 app.get('/cursos', async (req, res) => {
   try {
     const q = req.query.q || ''; // Obtener el parámetro de búsqueda
-    const { data } = await api.get(`/cursos`, { __req: req });
+    
+    // Obtener cursos y estadísticas en paralelo
+    const [cursosResponse, estadisticasResponse] = await Promise.all([
+      api.get(`/cursos`, { __req: req }),
+      api.get(`/estadisticas`, { __req: req })
+    ]);
     
     // Normalizar la respuesta para asegurar que cursos sea un array
-    console.log('Respuesta del backend cursos:', data);
+    console.log('Respuesta del backend cursos:', cursosResponse.data);
     let cursos = [];
+    const data = cursosResponse.data;
     if (Array.isArray(data)) {
       cursos = data;
     } else if (data && Array.isArray(data.cursos)) {
@@ -128,12 +157,32 @@ app.get('/cursos', async (req, res) => {
       cursos = data.data.cursos;
     }
     
+    const estadisticas = estadisticasResponse.data?.data?.estadisticas || {};
+    
     console.log('Cursos normalizados:', cursos.length, 'cursos encontrados');
     
-    res.render('pages/cursos', { title: 'Cursos', cursos: cursos, API_BASE, q: q });
+    res.render('pages/cursos', { 
+      title: 'Cursos', 
+      cursos: cursos, 
+      estadisticas,
+      API_BASE, 
+      q: q 
+    });
   } catch (error) {
     console.error('Error fetching cursos for cursos page:', error.message);
-    res.render('pages/cursos', { title: 'Cursos', cursos: [], API_BASE, q: q });
+    // Valores por defecto si hay error
+    const estadisticasDefault = {
+      totalCursos: 0,
+      totalUsuarios: 0,
+      calificacionPromedio: 4.9
+    };
+    res.render('pages/cursos', { 
+      title: 'Cursos', 
+      cursos: [], 
+      estadisticas: estadisticasDefault,
+      API_BASE, 
+      q: q 
+    });
   }
 });
 
