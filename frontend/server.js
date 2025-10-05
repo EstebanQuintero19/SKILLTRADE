@@ -48,14 +48,39 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Middleware para inyectar signedIn
-app.use((req, res, next) => {
-  res.locals.signedIn = Boolean(req.cookies?.auth_token);
+// Middleware para inyectar signedIn y datos de usuario
+app.use(async (req, res, next) => {
+  const hasToken = Boolean(req.cookies?.auth_token);
+  res.locals.signedIn = hasToken;
+  res.locals.user = null;
+  
+  console.log(`Middleware auth - Ruta: ${req.path}, Token presente: ${hasToken}`);
+  
+  // Si hay token, intentar obtener datos del usuario (evitar rutas de auth y assets)
+  if (hasToken && !req.path.includes('/login') && !req.path.includes('/registro') && !req.path.includes('/static')) {
+    try {
+      const { data } = await api.get('/usuarios/perfil', { __req: req });
+      res.locals.user = data?.data?.usuario || data?.usuario || null;
+      console.log(`Usuario autenticado: ${res.locals.user?.nombre || 'Sin nombre'}`);
+    } catch (error) {
+      console.log('Error validando token en middleware:', error.response?.status, error.message);
+      // Solo limpiar cookie si es un error 401 (token inválido) y no estamos en rutas críticas
+      if (error.response?.status === 401 && !req.path.includes('/logout')) {
+        console.log('Token inválido detectado, limpiando cookie');
+        res.clearCookie('auth_token');
+        res.locals.signedIn = false;
+      }
+      // Para otros errores (500, timeout, etc.), mantener signedIn = true pero sin datos de usuario
+    }
+  }
+  
+  console.log(`Middleware resultado - signedIn: ${res.locals.signedIn}, user: ${res.locals.user ? 'presente' : 'null'}`);
   next();
 });
 
 // Rutas de páginas
 app.get('/', async (req, res) => {
+  console.log(`Ruta HOME - signedIn: ${res.locals.signedIn}, user: ${res.locals.user ? res.locals.user.nombre : 'null'}`);
   try {
     const { data } = await api.get(`/cursos`, { __req: req });
     const cursos = data?.data?.cursos || data?.cursos || data || [];
@@ -224,7 +249,20 @@ app.post('/registro', async (req, res) => {
     }
     
     console.log('Usuario registrado exitosamente, API Key obtenida');
-    res.cookie('auth_token', apiKey, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 86400000 });
+    
+    // Configurar cookie con opciones mejoradas
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    };
+    
+    res.cookie('auth_token', apiKey, cookieOptions);
+    
+    console.log('Cookie de autenticación establecida para usuario registrado');
+    
+    // Redirigir directamente sin parámetros para evitar problemas
     res.redirect('/');
     
   } catch (err) {
@@ -406,17 +444,35 @@ app.get('/login', (req, res) => {
 
 app.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body || {};
+    const { email, password, rememberMe } = req.body || {};
     const { data } = await axios.post(`${API_BASE}/api/usuarios/login`, { email, password });
     const apiKey = data?.apiKey || data?.data?.apiKey || data?.data?.usuario?.apiKey || data?.usuario?.apiKey;
     if (!apiKey) return res.status(401).render('pages/login', { title: 'Iniciar sesión', error: 'Credenciales inválidas' });
-    // Set cookie segura
-    res.cookie('auth_token', apiKey, {
+    
+    // Configurar cookie basada en "Recordarme"
+    const cookieOptions = {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000
+      secure: process.env.NODE_ENV === 'production'
+    };
+    
+    // Si "Recordarme" está marcado, la cookie dura 30 días, sino es sesión
+    if (rememberMe === 'on') {
+      cookieOptions.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 días
+      console.log('Login con "Recordarme" activado - cookie persistente por 30 días');
+    } else {
+      // Sin maxAge = cookie de sesión (se elimina al cerrar navegador)
+      console.log('Login sin "Recordarme" - cookie de sesión');
+    }
+    
+    res.cookie('auth_token', apiKey, cookieOptions);
+    
+    console.log('Cookie de autenticación establecida para login:', {
+      rememberMe: rememberMe === 'on' ? 'Sí' : 'No',
+      cookieDuration: rememberMe === 'on' ? '30 días' : 'sesión',
+      apiKeyLength: apiKey ? apiKey.length : 0
     });
+    
     res.redirect('/');
   } catch (err) {
     console.error('Login error:', err.message);

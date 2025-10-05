@@ -11,181 +11,534 @@
     body { font-family: 'Inter', sans-serif; }
     .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-    .profile-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+    .profile-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-avatar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
 
-  <!-- Header con navegación -->
-  <header class="gradient-bg shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4">
-        <div class="flex items-center space-x-4">
-          <a href="/" class="text-white hover:text-gray-200 transition-colors">
-            <i class="fas fa-arrow-left text-lg"></i>
-          </a>
-          <h1 class="text-2xl font-bold text-white">Mi Perfil</h1>
-        </div>
-        <nav class="flex items-center space-x-6">
-          <a href="/cursos" class="text-white hover:text-gray-200 transition-colors">
-            <i class="fas fa-book-open mr-2"></i>Cursos
-          </a>
-          <a href="/logout" class="text-white hover:text-gray-200 transition-colors">
-            <i class="fas fa-sign-out-alt mr-2"></i>Salir
-          </a>
-        </nav>
-      </div>
-    </div>
-  </header>
+<%- include('../partials/header') %>
 
-  <!-- Contenido principal -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid lg:grid-cols-3 gap-8">
+<!-- Hero Section del Perfil -->
+<section class="gradient-bg relative overflow-hidden">
+  <!-- Elementos decorativos -->
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col md:flex-row items-center gap-8">
       
-      <!-- Sidebar del perfil -->
-      <aside class="lg:col-span-1">
-        <div class="profile-card rounded-2xl card-shadow p-8 text-center">
-          <!-- Foto de perfil -->
-          <div class="relative inline-block">
-            <div class="w-32 h-32 rounded-full bg-cover bg-center mx-auto border-4 border-white shadow-lg" 
-                 style="background-image:url('<%= (usuario?.fotoUrl)||'https://via.placeholder.com/200' %>')">
-            </div>
-            <div class="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full border-2 border-white"></div>
+      <!-- Avatar y info básica -->
+      <div class="text-center md:text-left">
+        <div class="relative inline-block mb-6">
+          <!-- Avatar principal -->
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full profile-avatar border-4 border-white shadow-2xl flex items-center justify-center">
+            <% if (usuario?.fotoUrl && usuario.fotoUrl !== 'https://via.placeholder.com/200') { %>
+              <img src="<%= usuario.fotoUrl %>" alt="<%= usuario?.nombre %>" class="w-full h-full rounded-full object-cover">
+            <% } else { %>
+              <i class="fas fa-user text-white text-4xl md:text-5xl"></i>
+            <% } %>
           </div>
           
-          <!-- Información básica -->
-          <h2 class="mt-6 text-2xl font-bold text-gray-800"><%= usuario?.nombre %></h2>
-          <p class="text-gray-600 mt-2 flex items-center justify-center">
-            <i class="fas fa-envelope mr-2 text-blue-500"></i>
-            <%= usuario?.email %>
+          <!-- Indicador de estado online -->
+          <div class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg">
+            <div class="w-full h-full bg-green-500 rounded-full animate-ping"></div>
+          </div>
+          
+          <!-- Botón de editar foto -->
+          <button class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-purple-600 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-camera text-sm"></i>
+          </button>
+        </div>
+        
+        <div class="text-white">
+          <h1 class="text-3xl md:text-4xl font-bold mb-2"><%= usuario?.nombre || 'Usuario' %></h1>
+          <p class="text-purple-100 text-lg mb-4 flex items-center justify-center md:justify-start">
+            <i class="fas fa-envelope mr-2"></i>
+            <%= usuario?.email || 'No especificado' %>
           </p>
           
           <% if (usuario?.telefono) { %>
-          <p class="text-gray-600 mt-1 flex items-center justify-center">
-            <i class="fas fa-phone mr-2 text-green-500"></i>
+          <p class="text-purple-100 flex items-center justify-center md:justify-start">
+            <i class="fas fa-phone mr-2"></i>
             <%= usuario.telefono %>
           </p>
           <% } %>
+        </div>
+      </div>
+      
+      <!-- Estadísticas rápidas -->
+      <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div class="text-2xl font-bold">0</div>
+          <div class="text-xs text-purple-100">Cursos</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-exchange-alt"></i>
+          </div>
+          <div class="text-2xl font-bold">0</div>
+          <div class="text-xs text-purple-100">Intercambios</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="text-2xl font-bold">4.8</div>
+          <div class="text-xs text-purple-100">Calificación</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="text-2xl font-bold">12</div>
+          <div class="text-xs text-purple-100">Logros</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contenido principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="grid lg:grid-cols-3 gap-8">
+    
+    <!-- Sidebar con acciones rápidas -->
+    <aside class="lg:col-span-1 space-y-6">
+      
+      <!-- Tarjeta de acciones -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-cogs text-purple-600 mr-2"></i>
+          Acciones Rápidas
+        </h3>
+        
+        <div class="space-y-3">
+          <a href="/perfil/editar" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-edit mr-2"></i>
+            Editar Perfil
+          </a>
           
-          <!-- Estadísticas -->
-          <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-200">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-blue-600">0</div>
-              <div class="text-sm text-gray-600">Cursos</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-purple-600">0</div>
-              <div class="text-sm text-gray-600">Intercambios</div>
-            </div>
+          <a href="/cursos/crear" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-plus mr-2"></i>
+            Crear Curso
+          </a>
+          
+          <a href="/mis-cursos" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-book mr-2"></i>
+            Mis Cursos
+          </a>
+        </div>
+      </div>
+      
+      <!-- Progreso del perfil -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.1s">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+          Completar Perfil
+        </h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Progreso del perfil</span>
+            <span class="font-semibold text-green-600">75%</span>
           </div>
           
-          <!-- Botones de acción -->
-          <div class="mt-8 space-y-3">
-            <a href="/perfil/editar" 
-               class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md">
-              <i class="fas fa-edit mr-2"></i>
-              Editar perfil
-            </a>
-            <form method="post" action="/perfil/eliminar" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
-              <button type="submit" 
-                      class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-md">
-                <i class="fas fa-trash-alt mr-2"></i>
-                Eliminar cuenta
-              </button>
-            </form>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 75%"></div>
+          </div>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-2"></i>
+              Información básica
+            </div>
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-2"></i>
+              Email verificado
+            </div>
+            <div class="flex items-center text-gray-400">
+              <i class="fas fa-circle mr-2"></i>
+              Agregar biografía
+            </div>
+            <div class="flex items-center text-gray-400">
+              <i class="fas fa-circle mr-2"></i>
+              Subir foto de perfil
+            </div>
           </div>
         </div>
-      </aside>
+      </div>
       
-      <!-- Contenido principal -->
-      <div class="lg:col-span-2 space-y-8">
+      <!-- Configuración de cuenta -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.2s">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-shield-alt text-red-600 mr-2"></i>
+          Zona Peligrosa
+        </h3>
         
-        <!-- Biografía -->
-        <section class="bg-white rounded-2xl card-shadow p-8">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+        <form method="post" action="/perfil/eliminar" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
+          <button type="submit" 
+                  class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg">
+            <i class="fas fa-trash-alt mr-2"></i>
+            Eliminar Cuenta
+          </button>
+        </form>
+      </div>
+    </aside>
+    
+    <!-- Contenido principal -->
+    <div class="lg:col-span-2 space-y-8">
+      
+      <!-- Biografía -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.3s">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
               <i class="fas fa-user text-blue-600 text-xl"></i>
             </div>
             <h3 class="text-2xl font-bold text-gray-800">Biografía</h3>
           </div>
-          
-          <div class="bg-gray-50 rounded-lg p-6">
-            <% if (usuario?.biografia) { %>
-              <p class="text-gray-700 leading-relaxed"><%= usuario.biografia %></p>
-            <% } else { %>
-              <div class="text-center py-8">
-                <i class="fas fa-user-edit text-gray-400 text-4xl mb-4"></i>
-                <p class="text-gray-500 mb-4">Aún no has agregado una biografía</p>
-                <a href="/perfil/editar" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <i class="fas fa-plus mr-2"></i>
-                  Agregar biografía
-                </a>
-              </div>
-            <% } %>
-          </div>
-        </section>
+          <a href="/perfil/editar" class="text-blue-600 hover:text-blue-700 transition-colors">
+            <i class="fas fa-edit"></i>
+          </a>
+        </div>
         
-        <!-- Cambiar contraseña -->
-        <section class="bg-white rounded-2xl card-shadow p-8">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-              <i class="fas fa-lock text-purple-600 text-xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800">Seguridad</h3>
+        <% if (usuario?.biografia) { %>
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+            <p class="text-gray-700 leading-relaxed text-lg"><%= usuario.biografia %></p>
           </div>
+        <% } else { %>
+          <div class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-user-edit text-blue-600 text-2xl"></i>
+            </div>
+            <h4 class="text-xl font-semibold text-gray-800 mb-2">Cuéntanos sobre ti</h4>
+            <p class="text-gray-500 mb-6 max-w-md mx-auto">Agrega una biografía para que otros usuarios puedan conocerte mejor</p>
+            <a href="/perfil/editar" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Biografía
+            </a>
+          </div>
+        <% } %>
+      </section>
+      
+      <!-- Seguridad -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.4s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-lock text-purple-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Seguridad</h3>
+        </div>
+        
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+          <h4 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-key text-purple-600 mr-2"></i>
+            Cambiar Contraseña
+          </h4>
           
-          <div class="bg-gray-50 rounded-lg p-6">
-            <h4 class="text-lg font-semibold text-gray-800 mb-4">Cambiar contraseña</h4>
-            <form method="post" action="/perfil/password" class="space-y-4">
+          <form method="post" action="/perfil/password" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña actual</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña Actual</label>
                 <div class="relative">
-                  <input class="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                         type="password" name="actual" placeholder="Ingresa tu contraseña actual" required />
+                  <input class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                         type="password" name="actual" placeholder="••••••••" required />
                   <i class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
                 </div>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nueva contraseña</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
                 <div class="relative">
-                  <input class="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                         type="password" name="nueva" placeholder="Ingresa tu nueva contraseña" required />
+                  <input class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                         type="password" name="nueva" placeholder="••••••••" required />
                   <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
                 </div>
               </div>
-              
-              <button type="submit" 
-                      class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors shadow-md">
-                <i class="fas fa-save mr-2"></i>
-                Actualizar contraseña
-              </button>
-            </form>
-          </div>
-        </section>
-        
-        <!-- Actividad reciente -->
-        <section class="bg-white rounded-2xl card-shadow p-8">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-              <i class="fas fa-chart-line text-green-600 text-xl"></i>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800">Actividad reciente</h3>
+            
+            <!-- Indicador de fortaleza de contraseña -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Fortaleza de la contraseña</span>
+                <span id="password-strength" class="font-semibold text-gray-400">Sin evaluar</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="password-strength-bar" class="bg-gray-300 h-2 rounded-full transition-all" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <i class="fas fa-shield-alt mr-2"></i>
+              Actualizar Contraseña
+            </button>
+          </form>
+        </div>
+      </section>
+      
+      <!-- Actividad reciente -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.5s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-history text-green-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Actividad Reciente</h3>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Actividades de ejemplo -->
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-sign-in-alt text-blue-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Inicio de sesión</p>
+              <p class="text-sm text-gray-500">Hace 2 horas</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              Hoy
+            </div>
           </div>
           
-          <div class="bg-gray-50 rounded-lg p-6">
-            <div class="text-center py-8">
-              <i class="fas fa-history text-gray-400 text-4xl mb-4"></i>
-              <p class="text-gray-500 mb-4">No hay actividad reciente</p>
-              <p class="text-sm text-gray-400">Cuando realices acciones en la plataforma, aparecerán aquí</p>
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-edit text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Perfil actualizado</p>
+              <p class="text-sm text-gray-500">Información de contacto modificada</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              Ayer
             </div>
           </div>
-        </section>
+          
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-graduation-cap text-purple-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Curso creado</p>
+              <p class="text-sm text-gray-500">Introducción a JavaScript</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              3 días
+            </div>
+          </div>
+          
+          <!-- Ver más actividades -->
+          <div class="text-center pt-4">
+            <button class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all">
+              <i class="fas fa-history mr-2"></i>
+              Ver Más Actividad
+            </button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Logros y badges -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-trophy text-yellow-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Logros y Badges</h3>
+        </div>
         
-      </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-star text-yellow-600 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-1">Primer Curso</h4>
+            <p class="text-sm text-gray-600">Creaste tu primer curso</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-users text-blue-600 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-1">Mentor</h4>
+            <p class="text-sm text-gray-600">10+ estudiantes inscritos</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl border border-green-200 opacity-50">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-medal text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-500 mb-1">Experto</h4>
+            <p class="text-sm text-gray-400">50+ estudiantes (Bloqueado)</p>
+          </div>
+        </div>
+      </section>
     </div>
-  </main>
+  </div>
+</main>
+
+<script>
+  // Función para mostrar/ocultar contraseña
+  function togglePassword(button) {
+    const input = button.parentElement.querySelector('input');
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fas fa-eye';
+    }
+  }
+  
+  // Evaluador de fortaleza de contraseña
+  function evaluatePasswordStrength(password) {
+    let strength = 0;
+    let feedback = 'Muy débil';
+    let color = 'bg-red-500';
+    let width = '20%';
+    
+    if (password.length >= 8) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    
+    switch (strength) {
+      case 0:
+      case 1:
+        feedback = 'Muy débil';
+        color = 'bg-red-500';
+        width = '20%';
+        break;
+      case 2:
+        feedback = 'Débil';
+        color = 'bg-orange-500';
+        width = '40%';
+        break;
+      case 3:
+        feedback = 'Regular';
+        color = 'bg-yellow-500';
+        width = '60%';
+        break;
+      case 4:
+        feedback = 'Fuerte';
+        color = 'bg-blue-500';
+        width = '80%';
+        break;
+      case 5:
+        feedback = 'Muy fuerte';
+        color = 'bg-green-500';
+        width = '100%';
+        break;
+    }
+    
+    return { feedback, color, width };
+  }
+  
+  // Event listener para evaluación de contraseña
+  document.addEventListener('DOMContentLoaded', function() {
+    const newPasswordInput = document.querySelector('input[name="nueva"]');
+    const strengthText = document.getElementById('password-strength');
+    const strengthBar = document.getElementById('password-strength-bar');
+    
+    if (newPasswordInput && strengthText && strengthBar) {
+      newPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        if (password.length === 0) {
+          strengthText.textContent = 'Sin evaluar';
+          strengthText.className = 'font-semibold text-gray-400';
+          strengthBar.className = 'bg-gray-300 h-2 rounded-full transition-all';
+          strengthBar.style.width = '0%';
+          return;
+        }
+        
+        const { feedback, color, width } = evaluatePasswordStrength(password);
+        strengthText.textContent = feedback;
+        
+        // Actualizar colores del texto
+        strengthText.className = `font-semibold ${
+          feedback === 'Muy débil' ? 'text-red-600' :
+          feedback === 'Débil' ? 'text-orange-600' :
+          feedback === 'Regular' ? 'text-yellow-600' :
+          feedback === 'Fuerte' ? 'text-blue-600' :
+          'text-green-600'
+        }`;
+        
+        strengthBar.className = `${color} h-2 rounded-full transition-all`;
+        strengthBar.style.width = width;
+      });
+    }
+  });
+  
+  // Animaciones de entrada
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  }, observerOptions);
+  
+  document.querySelectorAll('section, aside > div').forEach(el => {
+    observer.observe(el);
+  });
+</script>
 
 </body>
 </html>
-
