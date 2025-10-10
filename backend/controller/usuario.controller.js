@@ -57,13 +57,33 @@ const registrarUsuario = async (req, res) => {
             });
         }
 
-        // Verificar si el usuario ya existe
+        // Verificar si el usuario ya existe y limpiar datos residuales
         const usuarioExistente = await Usuario.findOne({ email });
         if (usuarioExistente) {
-            return res.status(400).json({
-                success: false,
-                message: 'Este email ya está registrado'
-            });
+            // Verificar si el usuario está realmente activo o es un registro residual
+            try {
+                // Intentar limpiar datos residuales relacionados
+                await Biblioteca.deleteMany({ usuario: usuarioExistente._id });
+                await Suscripcion.deleteMany({ usuario: usuarioExistente._id });
+                await Exchange.deleteMany({ 
+                    $or: [
+                        { emisor: usuarioExistente._id }, 
+                        { receptor: usuarioExistente._id }
+                    ]
+                });
+                await Venta.deleteMany({ usuario: usuarioExistente._id });
+                
+                // Eliminar el usuario residual
+                await Usuario.findByIdAndDelete(usuarioExistente._id);
+                
+                console.log(`Usuario residual eliminado: ${email}`);
+            } catch (cleanupError) {
+                console.error('Error limpiando datos residuales:', cleanupError);
+                return res.status(400).json({
+                    success: false,
+                    message: 'Este email ya está registrado'
+                });
+            }
         }
 
         // Hash de la contraseña
@@ -141,9 +161,9 @@ const loginUsuario = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            logLine('LOGIN_EQUIVOCADO', {
-              email: email || null,
-              razon: 'faltan campos',
+            return res.status(400).json({
+                success: false,
+                message: 'Email y password son requeridos'
             });
         }
 
@@ -326,13 +346,26 @@ const editarPerfil = async (req, res) => {
 // RF-USU-07: Cambiar contraseña autenticado
 const cambiarPassword = async (req, res) => {
     try {
-        const { passwordActual, passwordNuevo } = req.body;
+        // Aceptar ambos formatos de nombres de campos
+        const passwordActual = req.body.passwordActual || req.body.actual;
+        const passwordNuevo = req.body.passwordNuevo || req.body.nueva;
         const usuarioId = req.usuario.id;
+
+        console.log('Cambiar password - Usuario ID:', usuarioId);
+        console.log('Cambiar password - Datos recibidos:', { passwordActual: !!passwordActual, passwordNuevo: !!passwordNuevo });
 
         if (!passwordActual || !passwordNuevo) {
             return res.status(400).json({
                 success: false,
                 message: 'Password actual y nuevo son requeridos'
+            });
+        }
+
+        // Validar longitud de nueva contraseña
+        if (passwordNuevo.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'La nueva contraseña debe tener al menos 6 caracteres'
             });
         }
 
@@ -360,9 +393,19 @@ const cambiarPassword = async (req, res) => {
 
         await usuario.save();
 
+        console.log('Password actualizado exitosamente para usuario:', usuarioId);
+
         res.json({
             success: true,
-            message: 'Password actualizado exitosamente'
+            message: 'Contraseña actualizada exitosamente',
+            data: {
+                fechaActualizacion: new Date().toISOString(),
+                usuario: {
+                    id: usuario._id,
+                    email: usuario.email,
+                    nombre: usuario.nombre
+                }
+            }
         });
 
     } catch (error) {
@@ -765,6 +808,81 @@ const obtenerEstadisticasGenerales = async (req, res) => {
     }
 };
 
+// Limpiar usuario duplicado por email (función de utilidad)
+const limpiarUsuarioDuplicado = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email es requerido'
+            });
+        }
+
+        // Buscar usuario por email
+        const usuario = await Usuario.findOne({ email: email.toLowerCase().trim() });
+        
+        if (!usuario) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Limpiar todos los datos relacionados
+        const resultados = {
+            bibliotecas: 0,
+            suscripciones: 0,
+            intercambios: 0,
+            ventas: 0
+        };
+
+        // Eliminar bibliotecas
+        const bibliotecasEliminadas = await Biblioteca.deleteMany({ usuario: usuario._id });
+        resultados.bibliotecas = bibliotecasEliminadas.deletedCount;
+
+        // Eliminar suscripciones
+        const suscripcionesEliminadas = await Suscripcion.deleteMany({ usuario: usuario._id });
+        resultados.suscripciones = suscripcionesEliminadas.deletedCount;
+
+        // Eliminar intercambios
+        const intercambiosEliminados = await Exchange.deleteMany({ 
+            $or: [
+                { emisor: usuario._id }, 
+                { receptor: usuario._id }
+            ]
+        });
+        resultados.intercambios = intercambiosEliminados.deletedCount;
+
+        // Eliminar ventas
+        const ventasEliminadas = await Venta.deleteMany({ usuario: usuario._id });
+        resultados.ventas = ventasEliminadas.deletedCount;
+
+        // Eliminar usuario
+        await Usuario.findByIdAndDelete(usuario._id);
+
+        console.log(`Usuario y datos relacionados eliminados para: ${email}`, resultados);
+
+        res.json({
+            success: true,
+            message: 'Usuario y datos relacionados eliminados exitosamente',
+            data: {
+                email: email,
+                datosEliminados: resultados
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al limpiar usuario duplicado:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     registrarUsuario,
     loginUsuario,
@@ -780,5 +898,6 @@ module.exports = {
     obtenerUsuarios,
     crearUsuario,
     actualizarUsuario,
-    obtenerEstadisticasGenerales
+    obtenerEstadisticasGenerales,
+    limpiarUsuarioDuplicado
 };

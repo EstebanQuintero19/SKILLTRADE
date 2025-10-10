@@ -155,15 +155,24 @@
 
         <!-- Botones de acción -->
         <div class="space-y-3">
-          <form action="/carrito" method="post">
-            <input type="hidden" name="cursoId" value="<%= curso?._id %>">
-            <button 
-              type="submit"
-              class="w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
+          <% if (locals.signedIn) { %>
+            <form action="/carrito" method="post">
+              <input type="hidden" name="cursoId" value="<%= curso?._id %>">
+              <button 
+                type="submit"
+                class="w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
+              >
+                Agregar al Carrito
+              </button>
+            </form>
+          <% } else { %>
+            <a 
+              href="/login"
+              class="block w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold text-center hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
             >
-              Agregar al Carrito
-            </button>
-          </form>
+              Iniciar Sesión para Comprar
+            </a>
+          <% } %>
           <a 
             href="/cursos"
             class="block w-full py-3 px-4 rounded-lg bg-[#eee8f3] text-[#5a1593] font-semibold text-center hover:bg-[#e0d5ed] transition-colors"

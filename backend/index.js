@@ -73,7 +73,7 @@ mongoose.connect(config.MONGODB_URI, {
     socketTimeoutMS: 45000,
     bufferCommands: false
 }).catch(err => {
-    console.error('❌ Error inicial de conexión a MongoDB:', err.message);
+    console.error('Error inicial de conexión a MongoDB:', err.message);
     // No cerrar el servidor, solo mostrar el error
 });
 
@@ -102,18 +102,33 @@ app.locals.upload = upload;
 // Cargar controladores necesarios
 const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
+const bibliotecaController = require('./controller/biblioteca.controller');
+const ventaController = require('./controller/venta.controller');
+
+// Cargar middleware de autenticación
+const { autenticarApiKey } = require('./middleware/auth');
 
 // Rutas de usuario
 app.post('/api/usuarios', usuarioController.registrarUsuario);
 app.post('/api/usuarios/login', usuarioController.loginUsuario);
 app.get('/api/estadisticas', usuarioController.obtenerEstadisticasGenerales);
 
-// Cargar middleware de autenticación
-const { autenticarApiKey } = require('./middleware/auth');
+// Rutas de usuario autenticadas
+app.get('/api/usuarios/perfil', autenticarApiKey, usuarioController.obtenerPerfil);
+app.get('/api/usuarios/:id', autenticarApiKey, usuarioController.obtenerUsuarioPorId);
+app.put('/api/usuarios/:id', autenticarApiKey, usuarioController.editarPerfil);
+app.post('/api/usuarios/password', autenticarApiKey, usuarioController.cambiarPassword);
+app.delete('/api/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuario);
+app.post('/api/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
+app.get('/api/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);
+app.post('/api/usuarios/limpiar-duplicado', usuarioController.limpiarUsuarioDuplicado);
 
 // Rutas de cursos (básicas para el frontend)
 app.get('/api/cursos', cursoController.obtenerCursos);
 app.get('/api/cursos/:id', cursoController.obtenerCursoPorId);
+app.get('/api/cursos/mis-cursos/paginados', autenticarApiKey, cursoController.obtenerMisCursosPaginados);
+app.put('/api/cursos/:id', autenticarApiKey, cursoController.actualizarCurso);
+app.delete('/api/cursos/:id', autenticarApiKey, cursoController.eliminarCurso);
 app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
     const upload = req.app.locals.upload;
     if (upload) {
@@ -127,6 +142,18 @@ app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
         next();
     }
 }, cursoController.crearCurso);
+
+// Rutas de biblioteca
+app.put('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.editarCursoDesdeLibreria);
+app.delete('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.eliminarCursoDesdeLibreria);
+
+// Rutas de ventas y carrito
+app.post('/api/ventas', autenticarApiKey, ventaController.crearVenta);
+app.get('/api/ventas', autenticarApiKey, ventaController.obtenerVentas);
+app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
+app.post('/api/ventas/carrito/agregar', autenticarApiKey, ventaController.agregarAlCarrito);
+app.get('/api/ventas/carrito', autenticarApiKey, ventaController.obtenerCarrito);
+app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCarrito);
 
 app.get('/api', (req, res) => {
     res.json({

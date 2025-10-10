@@ -117,56 +117,131 @@ app.get('/', async (req, res) => {
 app.get('/home', (req, res) => res.render('pages/home', { title: 'Home usuario', API_BASE }));
 app.get('/biblioteca', async (req, res) => {
   if (!req.cookies?.auth_token) {
-    return res.render('pages/biblioteca', { title: 'Biblioteca', API_BASE, needAuth: true, cursosProgreso: [], cursosCompletados: [] });
+    return res.render('pages/biblioteca', { 
+      title: 'Mi Biblioteca', 
+      API_BASE, 
+      needAuth: true, 
+      cursos: [], 
+      paginacion: null,
+      q: '',
+      categoria: '',
+      nivel: ''
+    });
   }
+  
   try {
-    const { data } = await api.get(`/biblioteca`, { __req: req });
-    const biblioteca = data?.data || data || {};
-    // Normalización básica
-    const cursos = biblioteca.cursos || [];
-    const cursosProgreso = cursos.filter(c => c.estado === 'en_progreso' || c.estado === 'activo');
-    const cursosCompletados = cursos.filter(c => c.estado === 'completado');
-    res.render('pages/biblioteca', { title: 'Biblioteca', API_BASE, needAuth: false, cursosProgreso, cursosCompletados });
+    const { page = 1, limit = 6, categoria = '', nivel = '', q = '' } = req.query;
+    
+    // Construir query string para el backend
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+    
+    if (categoria && categoria !== 'todos') queryParams.append('categoria', categoria);
+    if (nivel && nivel !== 'todos') queryParams.append('nivel', nivel);
+    if (q && q.trim() !== '') queryParams.append('q', q.trim());
+    
+    const { data } = await api.get(`/cursos/mis-cursos/paginados?${queryParams.toString()}`, { __req: req });
+    
+    // Normalizar respuesta del backend
+    const cursos = data?.data || [];
+    const paginacion = data?.paginacion || {
+      pagina: 1,
+      totalPaginas: 0,
+      totalElementos: 0,
+      elementosPorPagina: 6
+    };
+    
+    res.render('pages/biblioteca', { 
+      title: 'Mi Biblioteca', 
+      API_BASE, 
+      needAuth: false, 
+      cursos,
+      paginacion,
+      q: q || '',
+      categoria: categoria || '',
+      nivel: nivel || ''
+    });
   } catch (err) {
     console.error('Error fetching biblioteca:', err.message);
-    res.render('pages/biblioteca', { title: 'Biblioteca', API_BASE, needAuth: true, cursosProgreso: [], cursosCompletados: [] });
+    res.render('pages/biblioteca', { 
+      title: 'Mi Biblioteca', 
+      API_BASE, 
+      needAuth: true, 
+      cursos: [], 
+      paginacion: null,
+      q: '',
+      categoria: '',
+      nivel: ''
+    });
   }
 });
 
 app.get('/cursos', async (req, res) => {
   try {
-    const q = req.query.q || ''; // Obtener el parámetro de búsqueda
+    // Obtener parámetros de búsqueda, filtros y paginación
+    const q = req.query.q || '';
+    const categoria = req.query.categoria || '';
+    const nivel = req.query.nivel || '';
+    const precioMin = req.query.precioMin || '';
+    const precioMax = req.query.precioMax || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6; // 6 cursos por página
+    
+    // Construir query string para el backend
+    const queryParams = new URLSearchParams();
+    if (q) queryParams.append('q', q);
+    if (categoria) queryParams.append('categoria', categoria);
+    if (nivel) queryParams.append('nivel', nivel);
+    if (precioMin) queryParams.append('precioMin', precioMin);
+    if (precioMax) queryParams.append('precioMax', precioMax);
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
     
     // Obtener cursos y estadísticas en paralelo
     const [cursosResponse, estadisticasResponse] = await Promise.all([
-      api.get(`/cursos`, { __req: req }),
+      api.get(`/cursos?${queryParams.toString()}`, { __req: req }),
       api.get(`/estadisticas`, { __req: req })
     ]);
     
-    // Normalizar la respuesta para asegurar que cursos sea un array
+    // Normalizar la respuesta del backend
     console.log('Respuesta del backend cursos:', cursosResponse.data);
-    let cursos = [];
     const data = cursosResponse.data;
-    if (Array.isArray(data)) {
-      cursos = data;
-    } else if (data && Array.isArray(data.cursos)) {
+    let cursos = [];
+    let paginacion = {
+      pagina: page,
+      totalPaginas: 1,
+      totalElementos: 0,
+      elementosPorPagina: limit
+    };
+    
+    if (data && data.cursos && Array.isArray(data.cursos)) {
       cursos = data.cursos;
+      paginacion = data.paginacion || paginacion;
+    } else if (Array.isArray(data)) {
+      cursos = data;
     } else if (data && Array.isArray(data.data)) {
       cursos = data.data;
-    } else if (data && data.data && Array.isArray(data.data.cursos)) {
-      cursos = data.data.cursos;
     }
     
     const estadisticas = estadisticasResponse.data?.data?.estadisticas || {};
     
     console.log('Cursos normalizados:', cursos.length, 'cursos encontrados');
+    console.log('Paginación:', paginacion);
     
     res.render('pages/cursos', { 
       title: 'Cursos', 
       cursos: cursos, 
+      paginacion: paginacion,
       estadisticas,
       API_BASE, 
-      q: q 
+      q: q,
+      categoria: categoria,
+      nivel: nivel,
+      precioMin: precioMin,
+      precioMax: precioMax,
+      currentPage: page
     });
   } catch (error) {
     console.error('Error fetching cursos for cursos page:', error.message);
@@ -176,12 +251,24 @@ app.get('/cursos', async (req, res) => {
       totalUsuarios: 0,
       calificacionPromedio: 4.9
     };
+    const paginacionDefault = {
+      pagina: 1,
+      totalPaginas: 1,
+      totalElementos: 0,
+      elementosPorPagina: 6
+    };
     res.render('pages/cursos', { 
       title: 'Cursos', 
       cursos: [], 
+      paginacion: paginacionDefault,
       estadisticas: estadisticasDefault,
       API_BASE, 
-      q: q 
+      q: req.query.q || '',
+      categoria: req.query.categoria || '',
+      nivel: req.query.nivel || '',
+      precioMin: req.query.precioMin || '',
+      precioMax: req.query.precioMax || '',
+      currentPage: parseInt(req.query.page) || 1
     });
   }
 });
@@ -445,7 +532,40 @@ app.post('/curso/:id/eliminar', async (req, res) => {
   try { await api.delete(`/cursos/${id}`, { __req: req }); } catch (_) {}
   res.redirect('/cursos');
 });
-app.get('/carrito', (req, res) => res.render('pages/carrito', { title: 'Carrito' }));
+
+// Rutas proxy para biblioteca
+app.put('/api/biblioteca/cursos/:cursoId', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  
+  try {
+    const { data } = await api.put(`/biblioteca/cursos/${req.params.cursoId}`, req.body, { __req: req });
+    res.json(data);
+  } catch (error) {
+    console.error('Error editando curso desde biblioteca:', error.message);
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.error || 'Error interno del servidor';
+    res.status(status).json({ error: message });
+  }
+});
+
+app.delete('/api/biblioteca/cursos/:cursoId', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  
+  try {
+    const { data } = await api.delete(`/biblioteca/cursos/${req.params.cursoId}`, { __req: req });
+    res.json(data);
+  } catch (error) {
+    console.error('Error eliminando curso desde biblioteca:', error.message);
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.error || 'Error interno del servidor';
+    res.status(status).json({ error: message });
+  }
+});
+
 app.get('/crear-curso', (req, res) => res.render('pages/crear_curso', { title: 'Crear curso' }));
 
 // Admin
@@ -556,6 +676,64 @@ app.get('/carrito', async (req, res) => {
     res.render('pages/carrito', { title: 'Carrito', items: [] });
   }
 });
+
+// Rutas proxy para API del carrito
+app.post('/api/ventas/carrito/agregar', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const response = await api.post(`/ventas/carrito/agregar`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error agregando al carrito:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
+app.get('/api/ventas/carrito', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const response = await api.get(`/ventas/carrito`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo carrito:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
+// Ruta para agregar curso al carrito desde formularios HTML
+app.post('/carrito', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.redirect('/login');
+  }
+  
+  try {
+    const { cursoId } = req.body;
+    await api.post(`/ventas/carrito/agregar`, { cursoId }, { __req: req });
+    res.redirect('/carrito');
+  } catch (error) {
+    console.error('Error agregando al carrito desde formulario:', error.message);
+    // En caso de error, redirigir de vuelta al curso
+    const cursoId = req.body?.cursoId;
+    if (cursoId) {
+      res.redirect(`/curso/${cursoId}`);
+    } else {
+      res.redirect('/cursos');
+    }
+  }
+});
+
 app.post('/carrito/pagar', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   try { await api.post(`/ventas/carrito/pagar`, {}, { __req: req }); } catch (_) {}
@@ -599,18 +777,50 @@ app.post('/perfil/editar', async (req, res) => {
   }
 });
 
-// Perfil: cambiar contraseña
+// Perfil: cambiar contraseña (formulario HTML)
 app.post('/perfil/password', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   try {
-    const { data } = await api.get(`/usuarios/perfil`, { __req: req });
-    const id = (data?.data?.usuario?._id) || (data?.usuario?._id);
     const { actual, nueva } = req.body || {};
-    if (!id || !nueva) return res.redirect('/perfil');
-    await api.post(`/usuarios/${id}/password`, { actual, nueva }, { __req: req });
+    if (!actual || !nueva) return res.redirect('/perfil');
+    await api.post(`/usuarios/password`, { actual, nueva }, { __req: req });
     res.redirect('/perfil');
   } catch (err) {
     res.redirect('/perfil');
+  }
+});
+
+// API Proxy: cambiar contraseña (para AJAX)
+app.post('/api/usuarios/password', async (req, res) => {
+  try {
+    const token = req.cookies?.auth_token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No autenticado'
+      });
+    }
+
+    const { actual, nueva } = req.body || {};
+    console.log('Frontend proxy - Cambiar password:', { actual: !!actual, nueva: !!nueva });
+
+    const response = await axios.post(`${API_BASE}/api/usuarios/password`, {
+      actual,
+      nueva
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error en proxy cambiar password:', error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || 'Error interno del servidor'
+    });
   }
 });
 
