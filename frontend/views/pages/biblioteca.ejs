@@ -324,7 +324,40 @@
   <% } %>
 </main>
 
-<script src="/js/biblioteca.js"></script>
+<!-- JavaScript inline para funcionalidad básica -->
+<script>
+// Función para editar curso - redirige a página de edición
+function editarCurso(cursoId) {
+    window.location.href = `/biblioteca/editar/${cursoId}`;
+}
+
+// Función para eliminar curso
+async function eliminarCurso(cursoId, titulo) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el curso "${titulo}"? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/biblioteca/cursos/${cursoId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            alert('Curso eliminado exitosamente');
+            window.location.reload();
+        } else {
+            const data = await response.json();
+            alert(data.error || 'Error al eliminar el curso');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al eliminar el curso');
+    }
+}
+
+console.log('Biblioteca scripts cargados');
+</script>
 
 </body>
 </html>

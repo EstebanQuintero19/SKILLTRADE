@@ -53,6 +53,7 @@ app.use(async (req, res, next) => {
   const hasToken = Boolean(req.cookies?.auth_token);
   res.locals.signedIn = hasToken;
   res.locals.user = null;
+  res.locals.token = req.cookies?.auth_token || null; // Pasar token a las vistas
   
   console.log(`Middleware auth - Ruta: ${req.path}, Token presente: ${hasToken}`);
   
@@ -69,6 +70,7 @@ app.use(async (req, res, next) => {
         console.log('Token inválido detectado, limpiando cookie');
         res.clearCookie('auth_token');
         res.locals.signedIn = false;
+        res.locals.token = null;
       }
       // Para otros errores (500, timeout, etc.), mantener signedIn = true pero sin datos de usuario
     }
@@ -115,6 +117,78 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/home', (req, res) => res.render('pages/home', { title: 'Home usuario', API_BASE }));
+// Ruta para editar curso desde biblioteca
+app.get('/biblioteca/editar/:cursoId', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.redirect('/login');
+  }
+  
+  try {
+    const { cursoId } = req.params;
+    
+    // Obtener datos del usuario y curso
+    const { data: userData } = await api.get('/usuarios/perfil', { __req: req });
+    const usuario = userData?.data?.usuario || userData?.usuario || userData;
+    
+    const { data } = await api.get(`/cursos/${cursoId}`, { __req: req });
+    const curso = data?.data || data;
+    
+    // Verificar permisos
+    const usuarioId = usuario?._id || usuario?.id;
+    const ownerId = curso?.owner?._id || curso?.owner?.id || curso?.owner;
+    
+    if (ownerId?.toString() !== usuarioId?.toString()) {
+      return res.status(403).send(`
+        <html>
+          <head><title>Acceso Denegado</title></head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h1>Acceso Denegado</h1>
+            <p>No tienes permisos para editar este curso</p>
+            <a href="/biblioteca" style="color: #5a1593; text-decoration: none;">← Volver a Mi Biblioteca</a>
+          </body>
+        </html>
+      `);
+    }
+    
+    res.render('pages/editar_curso', { 
+      title: 'Editar Curso', 
+      curso,
+      API_BASE 
+    });
+  } catch (err) {
+    console.error('Error fetching curso for edit:', err.message);
+    res.status(404).send(`
+      <html>
+        <head><title>Curso no encontrado</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h1>Curso no encontrado</h1>
+          <p>El curso que intentas editar no existe</p>
+          <a href="/biblioteca" style="color: #5a1593; text-decoration: none;">← Volver a Mi Biblioteca</a>
+        </body>
+      </html>
+    `);
+  }
+});
+
+// Ruta POST para procesar la edición del curso
+app.post('/curso/:cursoId/editar', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.redirect('/login');
+  }
+  
+  try {
+    const { cursoId } = req.params;
+    const { data } = await api.put(`/biblioteca/cursos/${cursoId}`, req.body, { __req: req });
+    
+    // Redirigir a la biblioteca con mensaje de éxito
+    res.redirect('/biblioteca?mensaje=Curso actualizado exitosamente');
+  } catch (err) {
+    console.error('Error updating curso:', err.message);
+    const errorMsg = err.response?.data?.error || 'Error al actualizar el curso';
+    res.redirect(`/biblioteca/editar/${cursoId}?error=${encodeURIComponent(errorMsg)}`);
+  }
+});
+
 app.get('/biblioteca', async (req, res) => {
   if (!req.cookies?.auth_token) {
     return res.render('pages/biblioteca', { 
@@ -277,6 +351,34 @@ app.get('/cursos', async (req, res) => {
 app.get('/cursos/crear', (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   res.render('pages/crear_curso', { title: 'Crear Curso' });
+});
+
+// Ruta para mostrar detalle de un curso específico
+app.get('/cursos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await api.get(`/cursos/${id}`, { __req: req });
+    const curso = data?.data?.curso || data?.curso || data;
+    
+    if (!curso) {
+      return res.status(404).render('pages/error', { 
+        title: 'Curso no encontrado',
+        error: 'El curso que buscas no existe o ha sido eliminado.'
+      });
+    }
+    
+    res.render('pages/curso_detalle', { 
+      title: curso.titulo || 'Detalle del Curso',
+      curso,
+      API_BASE
+    });
+  } catch (error) {
+    console.error('Error fetching curso detail:', error.message);
+    res.status(500).render('pages/error', { 
+      title: 'Error',
+      error: 'Error interno del servidor al cargar el curso.'
+    });
+  }
 });
 
 // Configurar multer para subida de archivos
@@ -677,6 +779,23 @@ app.get('/carrito', async (req, res) => {
   }
 });
 
+// Ruta proxy para perfil de usuario
+app.get('/api/usuarios/perfil', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
+  try {
+    const { data } = await api.get('/usuarios/perfil', { __req: req });
+    res.json(data);
+  } catch (error) {
+    console.error('Error en proxy /api/usuarios/perfil:', error.response?.status, error.message);
+    res.status(error.response?.status || 500).json({
+      error: error.response?.data?.message || 'Error interno del servidor'
+    });
+  }
+});
+
 // Rutas proxy para API del carrito
 app.post('/api/ventas/carrito/agregar', async (req, res) => {
   if (!req.cookies?.auth_token) {
@@ -704,6 +823,23 @@ app.get('/api/ventas/carrito', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error obteniendo carrito:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
+app.post('/api/ventas/carrito/remover', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const response = await api.post(`/ventas/carrito/remover`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error removiendo del carrito:', error.message);
     if (error.response) {
       res.status(error.response.status).json(error.response.data);
     } else {
@@ -764,16 +900,44 @@ app.get('/perfil/editar', async (req, res) => {
   }
 });
 app.post('/perfil/editar', async (req, res) => {
-  if (!req.cookies?.auth_token) return res.redirect('/login');
+  if (!req.cookies?.auth_token) {
+    console.log('No hay token de autenticación, redirigiendo a login');
+    return res.redirect('/login');
+  }
+  
   try {
-    const { data } = await api.get(`/usuarios/perfil`, { __req: req });
-    const id = (data?.data?.usuario?._id) || (data?.usuario?._id);
-    if (!id) return res.redirect('/perfil');
-    const { nombre, biografia, telefono } = req.body || {};
-    await api.put(`/usuarios/${id}`, { nombre, biografia, telefono }, { __req: req });
-    res.redirect('/perfil');
+    console.log('=== EDITANDO PERFIL ===');
+    console.log('Token presente:', !!req.cookies?.auth_token);
+    console.log('Datos recibidos del formulario:', req.body);
+    
+    const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos } = req.body || {};
+    const datosActualizar = { 
+      nombre, 
+      biografia, 
+      telefono,
+      notificaciones_email: notificaciones_email === 'on',
+      notificaciones_cursos: notificaciones_cursos === 'on'
+    };
+    
+    console.log('Datos a enviar al backend:', datosActualizar);
+    console.log('URL completa:', `${API_BASE}/api/usuarios/perfil`);
+    
+    // Hacer la petición PUT - usar ruta sin ID ya que el backend usa el usuario autenticado
+    console.log('Enviando petición PUT...');
+    const response = await api.put(`/usuarios/perfil`, datosActualizar, { __req: req });
+    
+    console.log('✅ Respuesta exitosa del backend:', response.data);
+    console.log('Status code:', response.status);
+    
+    res.redirect('/perfil?success=perfil_actualizado');
   } catch (err) {
-    res.redirect('/perfil');
+    console.error('ERROR al editar perfil:');
+    console.error('Status:', err.response?.status);
+    console.error('Data:', err.response?.data);
+    console.error('Message:', err.message);
+    console.error('Stack:', err.stack);
+    
+    res.redirect('/perfil?error=error_actualizacion');
   }
 });
 

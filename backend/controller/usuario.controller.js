@@ -217,7 +217,18 @@ const loginUsuario = async (req, res) => {
 // RF-USU-03: Ver perfil propio
 const obtenerPerfil = async (req, res) => {
     try {
+        console.log('obtenerPerfil - Usuario autenticado:', req.usuario ? req.usuario._id : 'No usuario');
+        console.log('obtenerPerfil - req.usuario completo:', req.usuario);
+        
+        if (!req.usuario || !req.usuario.id) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado'
+            });
+        }
+        
         const usuario = await Usuario.findById(req.usuario.id).select('-password');
+        console.log('obtenerPerfil - Usuario encontrado en DB:', usuario ? 'SÍ' : 'NO');
         
         if (!usuario) {
             return res.status(404).json({
@@ -236,7 +247,11 @@ const obtenerPerfil = async (req, res) => {
                     biografia: usuario.biografia,
                     telefono: usuario.telefono,
                     fechaCreacion: usuario.fechaCreacion,
-                    estadisticas: usuario.estadisticas
+                    estadisticas: usuario.estadisticas,
+                    preferencias: usuario.preferencias || {
+                        notificaciones_email: true,
+                        notificaciones_cursos: true
+                    }
                 }
             }
         });
@@ -302,23 +317,59 @@ const obtenerUsuarioPorId = async (req, res) => {
 // RF-USU-02: Editar perfil (foto, bio, contacto)
 const editarPerfil = async (req, res) => {
     try {
-        const { nombre, biografia, telefono } = req.body;
+        console.log('=== BACKEND: editarPerfil ===');
+        console.log('Method:', req.method);
+        console.log('URL:', req.originalUrl);
+        console.log('Params:', req.params);
+        console.log('Body:', req.body);
+        console.log('Headers X-API-Key:', req.headers['x-api-key'] ? 'PRESENTE' : 'AUSENTE');
+        console.log('Usuario autenticado:', req.usuario);
+        
+        const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos } = req.body;
         const usuarioId = req.usuario.id;
 
         const usuario = await Usuario.findById(usuarioId);
         if (!usuario) {
+            console.log('editarPerfil - Usuario no encontrado:', usuarioId);
             return res.status(404).json({
                 success: false,
                 message: 'Usuario no encontrado'
             });
         }
 
-        // Actualizar campos
-        if (nombre) usuario.nombre = nombre;
-        if (biografia !== undefined) usuario.biografia = biografia;
-        if (telefono !== undefined) usuario.telefono = telefono;
+        console.log('editarPerfil - Usuario encontrado:', usuario.email);
 
+        // Actualizar campos básicos
+        if (nombre !== undefined && nombre.trim() !== '') {
+            usuario.nombre = nombre.trim();
+            console.log('editarPerfil - Actualizando nombre:', nombre);
+        }
+        if (biografia !== undefined) {
+            usuario.biografia = biografia.trim();
+            console.log('editarPerfil - Actualizando biografía');
+        }
+        if (telefono !== undefined) {
+            usuario.telefono = telefono.trim();
+            console.log('editarPerfil - Actualizando teléfono');
+        }
+
+        // Actualizar preferencias de notificaciones
+        if (notificaciones_email !== undefined) {
+            if (!usuario.preferencias) usuario.preferencias = {};
+            usuario.preferencias.notificaciones_email = notificaciones_email;
+            console.log('editarPerfil - Actualizando notificaciones email:', notificaciones_email);
+        }
+        if (notificaciones_cursos !== undefined) {
+            if (!usuario.preferencias) usuario.preferencias = {};
+            usuario.preferencias.notificaciones_cursos = notificaciones_cursos;
+            console.log('editarPerfil - Actualizando notificaciones cursos:', notificaciones_cursos);
+        }
+
+        // Marcar el documento como modificado
+        usuario.markModified('preferencias');
+        
         await usuario.save();
+        console.log('editarPerfil - Usuario guardado exitosamente');
 
         res.json({
             success: true,
@@ -328,7 +379,8 @@ const editarPerfil = async (req, res) => {
                     id: usuario._id,
                     nombre: usuario.nombre,
                     biografia: usuario.biografia,
-                    telefono: usuario.telefono
+                    telefono: usuario.telefono,
+                    preferencias: usuario.preferencias
                 }
             }
         });

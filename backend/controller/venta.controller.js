@@ -397,7 +397,17 @@ const aplicarCupon = async (req, res) => {
 // RF-VEN-07: Carrito
 const agregarAlCarrito = async (req, res) => {
     try {
+        console.log('agregarAlCarrito - Request body:', req.body);
+        console.log('agregarAlCarrito - Usuario autenticado:', req.usuario ? req.usuario._id : 'No usuario');
+        
         const { cursoId, cantidad = 1 } = req.body;
+        
+        if (!req.usuario || !req.usuario._id) {
+            return res.status(401).json({
+                error: 'Usuario no autenticado'
+            });
+        }
+        
         const usuarioId = req.usuario._id;
 
         if (!cursoId) {
@@ -412,24 +422,44 @@ const agregarAlCarrito = async (req, res) => {
             });
         }
 
+        console.log('agregarAlCarrito - Buscando curso:', cursoId);
+        
         // Verificar que el curso existe
         const curso = await Curso.findById(cursoId);
         if (!curso) {
+            console.log('agregarAlCarrito - Curso no encontrado:', cursoId);
             return res.status(404).json({
                 error: 'Curso no encontrado'
             });
         }
 
-        if (curso.estadoCurso !== 'activo') {
+        console.log('agregarAlCarrito - Curso encontrado:', curso.titulo, 'Estado:', curso.estadoCurso);
+        console.log('agregarAlCarrito - Precio del curso:', curso.precio);
+        console.log('agregarAlCarrito - Datos completos del curso:', {
+            id: curso._id,
+            titulo: curso.titulo,
+            estadoCurso: curso.estadoCurso,
+            precio: curso.precio,
+            instructor: curso.instructor
+        });
+
+        // Permitir cursos activos y en borrador para testing
+        if (curso.estadoCurso !== 'activo' && curso.estadoCurso !== 'borrador') {
+            console.log('agregarAlCarrito - ERROR: Curso no disponible. Estado actual:', curso.estadoCurso);
             return res.status(400).json({
                 error: 'El curso no está disponible para compra'
             });
         }
+        
+        console.log('agregarAlCarrito - Curso válido para carrito, continuando...');
 
         // Obtener o crear carrito del usuario
         let carrito = await Carrito.findOne({ usuario: usuarioId });
         if (!carrito) {
+            console.log('agregarAlCarrito - Creando nuevo carrito para usuario:', usuarioId);
             carrito = new Carrito({ usuario: usuarioId });
+        } else {
+            console.log('agregarAlCarrito - Carrito existente encontrado, items actuales:', carrito.items.length);
         }
 
         // Verificar si el curso ya está en el carrito
@@ -438,10 +468,12 @@ const agregarAlCarrito = async (req, res) => {
         );
 
         if (itemExistente) {
+            console.log('agregarAlCarrito - Actualizando cantidad de curso existente');
             // Actualizar cantidad
             itemExistente.cantidad = Math.min(itemExistente.cantidad + cantidad, 10);
             itemExistente.precio = curso.precio;
         } else {
+            console.log('agregarAlCarrito - Agregando nuevo curso al carrito');
             // Agregar nuevo item
             carrito.items.push({
                 curso: cursoId,
@@ -455,6 +487,7 @@ const agregarAlCarrito = async (req, res) => {
             total + (item.precio * item.cantidad), 0
         );
 
+        console.log('agregarAlCarrito - Guardando carrito, total:', carrito.total);
         await carrito.save();
 
         res.json({
@@ -467,18 +500,31 @@ const agregarAlCarrito = async (req, res) => {
 
     } catch (error) {
         console.error('Error al agregar al carrito:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
-            error: 'Error interno del servidor al agregar al carrito'
+            error: 'Error interno del servidor al agregar al carrito',
+            details: error.message
         });
     }
 };
 
 const obtenerCarrito = async (req, res) => {
     try {
+        console.log('obtenerCarrito - Usuario autenticado:', req.usuario ? req.usuario._id : 'No usuario');
+        
+        if (!req.usuario || !req.usuario._id) {
+            return res.status(401).json({
+                error: 'Usuario no autenticado'
+            });
+        }
+
         const usuarioId = req.usuario._id;
+        console.log('obtenerCarrito - Buscando carrito para usuario:', usuarioId);
 
         const carrito = await Carrito.findOne({ usuario: usuarioId })
             .populate('items.curso', 'titulo imagen categoria precio');
+
+        console.log('obtenerCarrito - Carrito encontrado:', carrito ? 'Sí' : 'No');
 
         if (!carrito) {
             return res.json({
@@ -495,8 +541,10 @@ const obtenerCarrito = async (req, res) => {
 
     } catch (error) {
         console.error('Error al obtener carrito:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener carrito'
+            error: 'Error interno del servidor al obtener carrito',
+            details: error.message
         });
     }
 };
@@ -700,6 +748,62 @@ const obtenerVentaPorId = async (req, res) => {
     }
 };
 
+const removerDelCarrito = async (req, res) => {
+    try {
+        const { cursoId } = req.body;
+        const usuarioId = req.usuario._id;
+
+        if (!cursoId) {
+            return res.status(400).json({
+                error: 'ID del curso es obligatorio'
+            });
+        }
+
+        // Obtener carrito del usuario
+        const carrito = await Carrito.findOne({ usuario: usuarioId });
+        if (!carrito) {
+            return res.status(404).json({
+                error: 'Carrito no encontrado'
+            });
+        }
+
+        // Verificar si el curso está en el carrito
+        const itemIndex = carrito.items.findIndex(item => 
+            item.curso.toString() === cursoId
+        );
+
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                error: 'El curso no está en el carrito'
+            });
+        }
+
+        // Remover el item del carrito
+        carrito.items.splice(itemIndex, 1);
+
+        // Recalcular total
+        carrito.total = carrito.items.reduce((total, item) => 
+            total + (item.precio * item.cantidad), 0
+        );
+
+        await carrito.save();
+
+        res.json({
+            mensaje: 'Curso removido del carrito exitosamente',
+            carrito: {
+                items: carrito.items.length,
+                total: carrito.total
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al remover del carrito:', error);
+        res.status(500).json({
+            error: 'Error interno del servidor al remover del carrito'
+        });
+    }
+};
+
 module.exports = {
     crearVenta,
     confirmarVenta,
@@ -709,6 +813,7 @@ module.exports = {
     aplicarCupon,
     agregarAlCarrito,
     obtenerCarrito,
+    removerDelCarrito,
     pagarCarrito,
     solicitarReembolso,
     obtenerVentas,

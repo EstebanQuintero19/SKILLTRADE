@@ -117,6 +117,7 @@ app.get('/api/estadisticas', usuarioController.obtenerEstadisticasGenerales);
 app.get('/api/usuarios/perfil', autenticarApiKey, usuarioController.obtenerPerfil);
 app.get('/api/usuarios/:id', autenticarApiKey, usuarioController.obtenerUsuarioPorId);
 app.put('/api/usuarios/:id', autenticarApiKey, usuarioController.editarPerfil);
+app.put('/api/usuarios/perfil', autenticarApiKey, usuarioController.editarPerfil);
 app.post('/api/usuarios/password', autenticarApiKey, usuarioController.cambiarPassword);
 app.delete('/api/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuario);
 app.post('/api/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
@@ -150,10 +151,15 @@ app.delete('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaContro
 // Rutas de ventas y carrito
 app.post('/api/ventas', autenticarApiKey, ventaController.crearVenta);
 app.get('/api/ventas', autenticarApiKey, ventaController.obtenerVentas);
-app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
+
+// Rutas específicas del carrito (DEBEN ir antes de /api/ventas/:id)
 app.post('/api/ventas/carrito/agregar', autenticarApiKey, ventaController.agregarAlCarrito);
 app.get('/api/ventas/carrito', autenticarApiKey, ventaController.obtenerCarrito);
+app.post('/api/ventas/carrito/remover', autenticarApiKey, ventaController.removerDelCarrito);
 app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCarrito);
+
+// Ruta genérica de ventas (DEBE ir después de las rutas específicas)
+app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
 
 app.get('/api', (req, res) => {
     res.json({
