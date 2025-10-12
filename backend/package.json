@@ -4,31 +4,38 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node index.js",    // (Render)
+    "dev": "nodemon index.js",   // local
     "docs": "jsdoc -c jsdoc.json"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "concurrently": "8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
+    "is-stream": "^4.0.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.0",
+    "mongoose": "8.7.0",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
-    "nodemailer": "^6.10.1",
+    "nodemailer": "^6.9.7",
+    "nodemon": "^3.1.10",
     "validator": "^13.11.0",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^4.7.1"
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "nodemon": "^3.1.10"
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": "18.20.4",
+    "npm": ">=9.0.0"
   }
 }

@@ -6,16 +6,7 @@ const mongoose = require('mongoose');
 
 // Importar configuración y middlewares
 const config = require('./config/environment');
-const routes = require('./routes');
 const logger = require('./services/winston-logger');
-const { 
-    helmetConfig, 
-    corsConfig, 
-    generalLimiter, 
-    sanitizeInputs,
-    securityHeaders 
-} = require('./middleware/security');
-const { globalErrorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -57,34 +48,33 @@ const upload = multer({
     }
 });
 
-// ===== MIDDLEWARE DE SEGURIDAD =====
-app.use(helmetConfig);
-app.use(corsConfig);
-app.use(securityHeaders);
-app.use(sanitizeInputs);
+// ===== CORS BÁSICO =====
+const cors = require('cors');
+app.use(cors({
+    origin: ['http://localhost:4000', 'http://localhost:3001'],
+    credentials: true
+}));
 
 // ===== MIDDLEWARE GENERAL =====
-app.use(morgan('combined', {
-    stream: {
-        write: (message) => logger.info(message.trim())
-    }
-}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// ===== RATE LIMITING =====
-app.use(generalLimiter);
 
 // ===== ARCHIVOS ESTÁTICOS =====
 app.use('/uploads', express.static(config.UPLOAD_PATH));
 
+// ===== CONFIGURACIÓN DE MONGOOSE =====
+mongoose.set('strictQuery', true);
+
 // ===== CONEXIÓN A BASE DE DATOS =====
+
 mongoose.connect(config.MONGODB_URI, {
     maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 45000,
-    bufferCommands: false,
-    bufferMaxEntries: 0
+    bufferCommands: false
+}).catch(err => {
+    console.error('❌ Error inicial de conexión a MongoDB:', err.message);
+    // No cerrar el servidor, solo mostrar el error
 });
 
 mongoose.connection.on('connected', () => {
@@ -109,7 +99,47 @@ mongoose.connection.on('disconnected', () => {
 app.locals.upload = upload;
 
 // ===== RUTAS =====
-app.use('/api', routes);
+// Cargar controladores necesarios
+const usuarioController = require('./controller/usuario.controller');
+const cursoController = require('./controller/curso.controller');
+
+// Rutas de usuario
+app.post('/api/usuarios', usuarioController.registrarUsuario);
+app.post('/api/usuarios/login', usuarioController.loginUsuario);
+
+// Cargar middleware de autenticación
+const { autenticarApiKey } = require('./middleware/auth');
+
+// Rutas de cursos (básicas para el frontend)
+app.get('/api/cursos', cursoController.obtenerCursos);
+app.get('/api/cursos/:id', cursoController.obtenerCursoPorId);
+app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
+    const upload = req.app.locals.upload;
+    if (upload) {
+        upload.single('imagen')(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+}, cursoController.crearCurso);
+
+app.get('/api', (req, res) => {
+    res.json({
+        success: true,
+        message: 'SKILLTRADE API v1.0',
+        version: '1.0.0',
+        endpoints: {
+            health: '/health',
+            register: 'POST /api/usuarios',
+            login: 'POST /api/usuarios/login',
+            cursos: 'GET /api/cursos'
+        }
+    });
+});
 
 app.get('/health', (req, res) => {
     res.json({ 
@@ -122,16 +152,35 @@ app.get('/health', (req, res) => {
 });
 
 // ===== MANEJO DE ERRORES =====
-app.use(notFoundHandler);
-app.use(globalErrorHandler);
+// Manejadores de error comentados temporalmente
 
 // ===== SERVIDOR =====
-const server = app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, "0.0.0.0", () => {
     logger.info('Servidor iniciado', {
         port: config.PORT,
         environment: config.NODE_ENV,
         endpoint: `http://localhost:${config.PORT}/api`
     });
+});
+
+// Manejo de errores del servidor
+server.on('error', (err) => {
+    console.error('Error del servidor:', err.message);
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Puerto ${config.PORT} ya está en uso`);
+    }
+});
+
+// Evitar que el proceso se cierre por errores no manejados
+process.on('uncaughtException', (err) => {
+    console.error('❌ Excepción no capturada:', err.message);
+    console.error('Stack:', err.stack);
+    // No cerrar el proceso, solo loguear el error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Promesa rechazada no manejada:', reason);
+    // No cerrar el proceso, solo loguear el error
 });
 
 // Manejo de cierre graceful

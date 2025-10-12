@@ -1,22 +1,37 @@
-<% layout('layout') %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f3f0fa] to-[#f8f7fc] px-4 py-12">
+<div class="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md">
+    
     <!-- Card principal -->
-    <div class="bg-white rounded-2xl shadow-2xl border border-[#e5e3ea] overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+      
       <!-- Header con gradiente -->
-      <div class="bg-gradient-to-br from-[#5a1593] to-[#8b4dbf] p-8 text-center">
-        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-[#f3f0fa]">
-          <svg class="w-10 h-10 text-[#5a1593]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      <div class="bg-gradient-to-br from-purple-600 to-purple-800 p-8 text-center">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </div>
-        <h1 class="text-3xl font-extrabold text-white mb-1 tracking-tight">¡Bienvenido!</h1>
-        <p class="text-white/90 text-base">Inicia sesión para continuar aprendiendo</p>
+        <h1 class="text-3xl font-bold text-white mb-2">¡Bienvenido!</h1>
+        <p class="text-white/90">Inicia sesión para continuar aprendiendo</p>
       </div>
 
       <!-- Formulario -->
       <div class="p-8">
+        
         <!-- Mensaje de error -->
         <% if (typeof error !== 'undefined' && error) { %>
           <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 flex items-start gap-3">
@@ -24,26 +39,27 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div>
-              <p class="text-sm font-semibold text-red-800">Error al iniciar sesión</p>
+              <p class="text-sm font-medium text-red-800">Error al iniciar sesión</p>
               <p class="text-sm text-red-700 mt-1"><%= error %></p>
             </div>
           </div>
         <% } %>
 
-        <form method="post" action="/login" class="space-y-6">
+        <form method="post" action="/login" class="space-y-5">
+          
           <!-- Email -->
           <div>
-            <label class="block text-sm font-semibold text-[#151117] mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Correo electrónico
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-[#9a92ad]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
               </div>
               <input 
-                class="w-full h-12 rounded-lg border border-[#e5e3ea] bg-[#f8f7fc] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all placeholder-[#b8b3c6] text-[#151117]" 
+                class="w-full h-12 rounded-lg border border-gray-300 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
                 type="email" 
                 name="email" 
                 placeholder="tu@email.com"
@@ -54,39 +70,85 @@
 
           <!-- Contraseña -->
           <div>
-            <label class="block text-sm font-semibold text-[#151117] mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Contraseña
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-[#9a92ad]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
               </div>
               <input 
-                class="w-full h-12 rounded-lg border border-[#e5e3ea] bg-[#f8f7fc] pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all placeholder-[#b8b3c6] text-[#151117]" 
+                id="loginPassword"
+                class="w-full h-12 rounded-lg border border-gray-300 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
                 type="password" 
                 name="password" 
                 placeholder="••••••••"
                 required 
               />
+              <button 
+                type="button" 
+                id="toggleLoginPassword" 
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <svg id="loginEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
             </div>
           </div>
 
           <!-- Recordarme / Olvidé contraseña -->
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" class="w-4 h-4 text-[#5a1593] border-[#e5e3ea] rounded focus:ring-[#5a1593]" />
-              <span class="text-[#6f6880]">Recordarme</span>
+              <input id="rememberMe" name="rememberMe" type="checkbox" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
+              <span class="text-gray-600">Recordarme</span>
             </label>
-            <a href="/recuperar-password" class="text-[#5a1593] font-semibold hover:text-[#4a1275] transition-colors">
+            <a href="/recuperar-password" class="text-purple-600 font-medium hover:text-purple-700 transition-colors">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
 
+          <!-- CAPTCHA -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Verificación de seguridad
+              <span class="text-red-500">*</span>
+            </label>
+            <div class="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-sm font-medium text-gray-700">Resuelve esta operación:</span>
+                </div>
+                <button type="button" id="refreshCaptcha" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                  Cambiar
+                </button>
+              </div>
+              <div class="mt-2">
+                <span id="captchaPregunta" class="text-lg font-mono bg-white px-3 py-2 rounded border inline-block min-w-[120px] text-center">
+                  Cargando...
+                </span>
+              </div>
+            </div>
+            <input 
+              id="captchaRespuesta"
+              class="w-full h-12 rounded-lg border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              type="number" 
+              name="captcha_respuesta" 
+              placeholder="Ingresa tu respuesta"
+              required 
+            />
+            <p class="text-xs text-gray-500 mt-1">Resuelve la operación matemática para continuar</p>
+          </div>
+
           <!-- Botón de envío -->
           <button 
-            class="w-full h-12 rounded-lg bg-[#5a1593] text-white font-bold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base" 
+            class="w-full h-12 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2" 
             type="submit"
           >
             <span>Iniciar Sesión</span>
@@ -99,10 +161,10 @@
         <!-- Divider -->
         <div class="relative my-6">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-[#e5e3ea]"></div>
+            <div class="w-full border-t border-gray-200"></div>
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white text-[#6f6880]">o continúa con</span>
+            <span class="px-4 bg-white text-gray-500">o continúa con</span>
           </div>
         </div>
 
@@ -110,7 +172,7 @@
         <div class="grid grid-cols-2 gap-3">
           <button 
             type="button"
-            class="h-11 rounded-lg border-2 border-[#e5e3ea] text-[#151117] font-semibold hover:bg-[#f3f0fa] transition-colors flex items-center justify-center gap-2"
+            class="h-11 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -123,7 +185,7 @@
           
           <button 
             type="button"
-            class="h-11 rounded-lg border-2 border-[#e5e3ea] text-[#151117] font-semibold hover:bg-[#f3f0fa] transition-colors flex items-center justify-center gap-2"
+            class="h-11 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -133,10 +195,10 @@
         </div>
 
         <!-- Registro -->
-        <div class="mt-8 pt-6 border-t border-[#e5e3ea] text-center">
-          <p class="text-sm text-[#6f6880]">
+        <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+          <p class="text-sm text-gray-600">
             ¿No tienes una cuenta? 
-            <a href="/registro" class="text-[#5a1593] font-bold hover:text-[#4a1275] transition-colors">
+            <a href="/registro" class="text-purple-600 font-semibold hover:text-purple-700 transition-colors">
               Crear cuenta gratis
             </a>
           </p>
@@ -146,7 +208,7 @@
 
     <!-- Footer de seguridad -->
     <div class="mt-6 text-center">
-      <p class="text-xs text-[#6f6880] flex items-center justify-center gap-2">
+      <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
@@ -155,3 +217,113 @@
     </div>
   </div>
 </div>
+
+<script>
+// Funcionalidad para mostrar/ocultar contraseña en login
+function setupLoginPasswordToggle() {
+  const input = document.getElementById('loginPassword');
+  const button = document.getElementById('toggleLoginPassword');
+  const icon = document.getElementById('loginEyeIcon');
+  
+  if (!input || !button || !icon) return;
+  
+  button.addEventListener('click', function() {
+    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    
+    // Cambiar icono
+    if (type === 'text') {
+      icon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+      `;
+    } else {
+      icon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      `;
+    }
+  });
+}
+
+// Funcionalidad "Recordarme"
+function setupRememberMe() {
+  const emailInput = document.querySelector('input[name="email"]');
+  const rememberCheckbox = document.getElementById('rememberMe');
+  
+  if (!emailInput || !rememberCheckbox) return;
+  
+  // Cargar email guardado al cargar la página
+  const savedEmail = localStorage.getItem('rememberedEmail');
+  if (savedEmail) {
+    emailInput.value = savedEmail;
+    rememberCheckbox.checked = true;
+  }
+  
+  // Guardar/eliminar email cuando cambie el checkbox
+  rememberCheckbox.addEventListener('change', function() {
+    if (this.checked && emailInput.value) {
+      localStorage.setItem('rememberedEmail', emailInput.value);
+    } else {
+      localStorage.removeItem('rememberedEmail');
+    }
+  });
+  
+  // Actualizar email guardado cuando el usuario escriba
+  emailInput.addEventListener('input', function() {
+    if (rememberCheckbox.checked) {
+      localStorage.setItem('rememberedEmail', this.value);
+    }
+  });
+}
+
+// Funciones para manejar CAPTCHA
+async function cargarCaptcha() {
+  try {
+    const response = await fetch('/api/captcha');
+    const data = await response.json();
+    
+    if (data.success) {
+      document.getElementById('captchaPregunta').textContent = data.pregunta;
+      document.getElementById('captchaRespuesta').value = '';
+    } else {
+      document.getElementById('captchaPregunta').textContent = 'Error al cargar';
+    }
+  } catch (error) {
+    console.error('Error cargando CAPTCHA:', error);
+    document.getElementById('captchaPregunta').textContent = 'Error al cargar';
+  }
+}
+
+// Validación del formulario antes del envío
+function setupFormValidation() {
+  const form = document.querySelector('form');
+  if (!form) return;
+  
+  form.addEventListener('submit', function(e) {
+    const captchaRespuesta = document.getElementById('captchaRespuesta').value;
+    
+    if (!captchaRespuesta || captchaRespuesta.trim() === '') {
+      e.preventDefault();
+      alert('Por favor, resuelve la operación matemática');
+      return false;
+    }
+  });
+}
+
+// Inicializar funcionalidades cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+  setupLoginPasswordToggle();
+  setupRememberMe();
+  setupFormValidation();
+  cargarCaptcha();
+  
+  // Botón para refrescar CAPTCHA
+  const refreshBtn = document.getElementById('refreshCaptcha');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', cargarCaptcha);
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 const Notificacion = require('../model/notificacion.model');
 const Usuario = require('../model/usuario.model');
-const logger = require('../logger');
+const mongoose = require('mongoose');
+const logger = require('../services/winston-logger');
 
 
 const crearNotificacion = async (req, res) => {

@@ -1,259 +1,371 @@
-<% layout('layout') %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intercambios - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
 
-<div class="min-h-screen bg-gray-50 py-10">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <section class="mb-10">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <div>
-          <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1 tracking-tight">Gestión de Intercambios</h1>
-          <p class="text-gray-500 text-base">Administra todas las solicitudes de intercambio, aprobaciones y rechazos</p>
-        </div>
-        <div class="flex items-center gap-2 px-5 py-2 rounded-xl bg-purple-50 border border-purple-100 shadow-sm">
-          <svg class="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-          </svg>
-          <span class="font-semibold text-gray-900 text-lg"><%= (exchanges || []).length %></span>
-          <span class="text-sm text-gray-500">intercambios</span>
+<%- include('../partials/header') %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header mejorado -->
+  <section class="mb-8">
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          <i class="fas fa-exchange-alt text-teal-600 mr-3"></i>
+          Gestión de Intercambios
+        </h1>
+        <p class="text-gray-600 text-lg">Administra todas las solicitudes de intercambio, aprobaciones y rechazos</p>
+      </div>
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-100">
+        <i class="fas fa-handshake text-teal-600"></i>
+        <span class="font-semibold text-gray-800"><%= (exchanges || []).length %></span>
+        <span class="text-sm text-gray-600">intercambios</span>
+      </div>
+    </div>
+    
+    <!-- Estadísticas rápidas -->
+    <div class="grid md:grid-cols-4 gap-4 mb-8">
+      <% 
+        const pendientes = (exchanges || []).filter(x => x.estado === 'pendiente').length;
+        const aceptados = (exchanges || []).filter(x => x.estado === 'aceptado').length;
+        const rechazados = (exchanges || []).filter(x => x.estado === 'rechazado').length;
+        const total = (exchanges || []).length;
+      %>
+      
+      <div class="bg-white rounded-xl card-shadow p-4 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-600 text-xs font-medium mb-1">Pendientes</h3>
+            <p class="text-2xl font-bold text-gray-800"><%= pendientes %></p>
+          </div>
+          <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-clock text-yellow-600"></i>
+          </div>
         </div>
       </div>
-
-      <!-- Búsqueda y filtros -->
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-        <!-- Búsqueda -->
-        <div class="relative mb-6">
-          <input 
-            id="search" 
-            class="w-full h-12 rounded-lg border border-gray-200 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-gray-900 placeholder-gray-400 shadow-sm"
-            placeholder="Buscar por usuario o curso..." 
-          />
-          <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256">
-            <path fill="currentColor" d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72a72.08 72.08 0 0 1-72-72Z"/>
-          </svg>
-        </div>
-
-        <!-- Filtros -->
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-semibold text-gray-600 mb-1">Estado</label>
-            <select 
-              id="f-status" 
-              class="w-full h-10 rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all bg-gray-50 text-gray-900"
-            >
-              <option value="">Todos los estados</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="aceptado">Aprobado</option>
-              <option value="rechazado">Rechazado</option>
-              <option value="cancelado">Cancelado</option>
-            </select>
+      
+      <div class="bg-white rounded-xl card-shadow p-4 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-600 text-xs font-medium mb-1">Aprobados</h3>
+            <p class="text-2xl font-bold text-gray-800"><%= aceptados %></p>
           </div>
-
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-semibold text-gray-600 mb-1">Curso</label>
-            <select 
-              id="f-curso" 
-              class="w-full h-10 rounded-lg border border-gray-200 px-3 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all bg-gray-50 text-gray-900"
-            >
-              <option value="">Todos los cursos</option>
-              <% if (exchanges && exchanges.length > 0) { %>
-                <% const cursos = new Set(); %>
-                <% exchanges.forEach(x => { %>
-                  <% if (x.cursoEmisor?.titulo) cursos.add(x.cursoEmisor.titulo); %>
-                  <% if (x.cursoReceptor?.titulo) cursos.add(x.cursoReceptor.titulo); %>
-                <% }); %>
-                <% Array.from(cursos).sort().forEach(curso => { %>
-                  <option value="<%= curso %>"><%= curso %></option>
-                <% }); %>
-              <% } %>
-            </select>
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-check text-green-600"></i>
           </div>
-
-          <div class="flex items-end">
-            <button 
-              id="clear-filters"
-              class="h-10 px-5 rounded-lg bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200 transition-colors text-sm shadow"
-            >
-              Limpiar
-            </button>
-          </div>
-        </div>
-
-        <!-- Contador de resultados -->
-        <div class="mt-6 pt-4 border-t border-gray-100">
-          <p class="text-sm text-gray-500">
-            Mostrando <span id="results-count"><%= (exchanges || []).length %></span> de <%= (exchanges || []).length %> intercambios
-          </p>
         </div>
       </div>
-    </section>
+      
+      <div class="bg-white rounded-xl card-shadow p-4 border-l-4 border-red-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-600 text-xs font-medium mb-1">Rechazados</h3>
+            <p class="text-2xl font-bold text-gray-800"><%= rechazados %></p>
+          </div>
+          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-times text-red-600"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl card-shadow p-4 border-l-4 border-teal-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-gray-600 text-xs font-medium mb-1">Total</h3>
+            <p class="text-2xl font-bold text-gray-800"><%= total %></p>
+          </div>
+          <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-exchange-alt text-teal-600"></i>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Tabla de intercambios -->
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mt-8">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Usuario 1</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Curso Ofrecido</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Usuario 2</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Curso Solicitado</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Fecha</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Estado</th>
-              <th class="px-6 py-4 text-left font-bold text-gray-900">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="rows">
+    <!-- Búsqueda y filtros mejorados -->
+    <div class="bg-white rounded-xl card-shadow p-6">
+      <!-- Búsqueda mejorada -->
+      <div class="relative mb-6">
+        <input 
+          id="search" 
+          class="w-full h-12 rounded-lg border border-gray-300 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all" 
+          placeholder="Buscar por usuario, curso o estado..." 
+        />
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <!-- Filtros -->
+      <div class="flex flex-wrap gap-3">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-filter text-gray-500 mr-1"></i>
+            Estado
+          </label>
+          <select 
+            id="f-status" 
+            class="w-full h-10 rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+          >
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="aceptado">Aprobado</option>
+            <option value="rechazado">Rechazado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-book text-gray-500 mr-1"></i>
+            Curso
+          </label>
+          <select 
+            id="f-curso" 
+            class="w-full h-10 rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+          >
+            <option value="">Todos los cursos</option>
             <% if (exchanges && exchanges.length > 0) { %>
-              <% exchanges.forEach((x, index) => { %>
-                <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors" data-status="<%= x.estado || 'pendiente' %>">
-                  <!-- Usuario 1 -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-bold text-base shadow">
-                        <%= (x.emisor?.nombre || 'U').charAt(0).toUpperCase() %>
-                      </div>
-                      <div>
-                        <p class="font-semibold text-gray-900"><%= x.emisor?.nombre || 'Usuario desconocido' %></p>
-                        <p class="text-xs text-gray-500"><%= x.emisor?.email || '-' %></p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <!-- Curso 1 -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                      </svg>
-                      <span class="text-purple-700 font-semibold"><%= x.cursoEmisor?.titulo || 'Curso no especificado' %></span>
-                    </div>
-                  </td>
-
-                  <!-- Usuario 2 -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold text-base shadow">
-                        <%= (x.receptor?.nombre || 'U').charAt(0).toUpperCase() %>
-                      </div>
-                      <div>
-                        <p class="font-semibold text-gray-900"><%= x.receptor?.nombre || 'Usuario desconocido' %></p>
-                        <p class="text-xs text-gray-500"><%= x.receptor?.email || '-' %></p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <!-- Curso 2 -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                      </svg>
-                      <span class="text-purple-700 font-semibold"><%= x.cursoReceptor?.titulo || 'Curso no especificado' %></span>
-                    </div>
-                  </td>
-
-                  <!-- Fecha -->
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2 text-gray-500">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                      </svg>
-                      <%= new Date(x.fechaSolicitud || x.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %>
-                    </div>
-                  </td>
-
-                  <!-- Estado -->
-                  <td class="px-6 py-4">
-                    <% 
-                      const estado = x.estado || 'pendiente';
-                      let colorClass = 'bg-yellow-100 text-yellow-800';
-                      let icon = '⏳';
-                      if (estado === 'aceptado') {
-                        colorClass = 'bg-green-100 text-green-800';
-                        icon = '✓';
-                      } else if (estado === 'rechazado') {
-                        colorClass = 'bg-red-100 text-red-800';
-                        icon = '✕';
-                      } else if (estado === 'cancelado') {
-                        colorClass = 'bg-gray-100 text-gray-800';
-                        icon = '⊘';
-                      }
-                    %>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold <%= colorClass %> shadow-sm">
-                      <span><%= icon %></span>
-                      <span class="capitalize"><%= estado %></span>
-                    </span>
-                  </td>
-
-                  <!-- Acciones -->
-                  <td class="px-6 py-4">
-                    <% if (estado === 'pendiente') { %>
-                      <div class="flex items-center gap-2">
-                        <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/aceptar" class="inline">
-                          <button 
-                            type="submit"
-                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors border border-green-200 shadow"
-                            title="Aprobar intercambio"
-                          >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            Aprobar
-                          </button>
-                        </form>
-                        <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/rechazar" class="inline">
-                          <button 
-                            type="submit"
-                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 transition-colors border border-red-200 shadow"
-                            title="Rechazar intercambio"
-                          >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            Rechazar
-                          </button>
-                        </form>
-                      </div>
-                    <% } else { %>
-                      <span class="text-xs text-gray-400 italic">Sin acciones</span>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
+              <% const cursos = new Set(); %>
+              <% exchanges.forEach(x => { %>
+                <% if (x.cursoEmisor?.titulo) cursos.add(x.cursoEmisor.titulo); %>
+                <% if (x.cursoReceptor?.titulo) cursos.add(x.cursoReceptor.titulo); %>
+              <% }); %>
+              <% Array.from(cursos).sort().forEach(curso => { %>
+                <option value="<%= curso %>"><%= curso %></option>
+              <% }); %>
             <% } %>
-          </tbody>
-        </table>
+          </select>
+        </div>
+
+        <div class="flex items-end">
+          <button 
+            id="clear-filters"
+            class="h-10 px-4 rounded-lg bg-teal-100 text-teal-700 font-medium hover:bg-teal-200 transition-colors text-sm flex items-center gap-2"
+          >
+            <i class="fas fa-eraser"></i>
+            Limpiar
+          </button>
+        </div>
       </div>
 
-      <!-- Sin resultados -->
-      <% if (!exchanges || exchanges.length === 0) { %>
-        <div class="p-16 text-center bg-gray-50">
-          <div class="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-            </svg>
+      <!-- Contador de resultados mejorado -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-gray-600 flex items-center gap-2">
+            <i class="fas fa-list text-gray-400"></i>
+            Mostrando <span id="results-count" class="font-semibold text-teal-600"><%= (exchanges || []).length %></span> de <%= (exchanges || []).length %> intercambios
+          </p>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500">Última actualización:</span>
+            <span class="text-xs text-gray-600 font-medium"><%= new Date().toLocaleDateString('es-ES') %></span>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-3">No hay intercambios</h3>
-          <p class="text-gray-500">No se han realizado solicitudes de intercambio aún</p>
         </div>
-      <% } %>
-
-      <!-- Sin resultados de búsqueda -->
-      <div id="no-results" class="hidden p-16 text-center bg-gray-50">
-        <div class="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-3">No se encontraron resultados</h3>
-        <p class="text-gray-500 mb-6">Intenta ajustar los filtros de búsqueda</p>
-        <button 
-          id="clear-filters-empty"
-          class="inline-block py-3 px-8 rounded-lg bg-purple-700 text-white font-semibold hover:bg-purple-800 transition-colors shadow"
-        >
-          Limpiar Filtros
-        </button>
       </div>
+    </div>
+  </section>
+
+  <!-- Tabla de intercambios mejorada -->
+  <div class="bg-white rounded-xl card-shadow overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gradient-to-r from-teal-50 to-blue-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-user text-gray-500 mr-2"></i>
+              Usuario 1
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-book text-gray-500 mr-2"></i>
+              Curso Ofrecido
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-user text-gray-500 mr-2"></i>
+              Usuario 2
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-book text-gray-500 mr-2"></i>
+              Curso Solicitado
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-calendar text-gray-500 mr-2"></i>
+              Fecha
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-info-circle text-gray-500 mr-2"></i>
+              Estado
+            </th>
+            <th class="px-6 py-4 text-left font-semibold text-gray-800">
+              <i class="fas fa-cogs text-gray-500 mr-2"></i>
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <% if (exchanges && exchanges.length > 0) { %>
+            <% exchanges.forEach((x, index) => { %>
+              <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors" data-status="<%= x.estado || 'pendiente' %>">
+                <!-- Usuario 1 -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-semibold text-sm">
+                      <%= (x.emisor?.nombre || 'U').charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-800"><%= x.emisor?.nombre || 'Usuario desconocido' %></p>
+                      <p class="text-xs text-gray-500"><%= x.emisor?.email || '-' %></p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Curso 1 -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-graduation-cap text-teal-600 text-sm"></i>
+                    </div>
+                    <div>
+                      <p class="font-medium text-teal-600"><%= x.cursoEmisor?.titulo || 'Curso no especificado' %></p>
+                      <p class="text-xs text-gray-500"><%= x.cursoEmisor?.categoria || '-' %></p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Usuario 2 -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-semibold text-sm">
+                      <%= (x.receptor?.nombre || 'U').charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-800"><%= x.receptor?.nombre || 'Usuario desconocido' %></p>
+                      <p class="text-xs text-gray-500"><%= x.receptor?.email || '-' %></p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Curso 2 -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-graduation-cap text-purple-600 text-sm"></i>
+                    </div>
+                    <div>
+                      <p class="font-medium text-purple-600"><%= x.cursoReceptor?.titulo || 'Curso no especificado' %></p>
+                      <p class="text-xs text-gray-500"><%= x.cursoReceptor?.categoria || '-' %></p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Fecha -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2 text-gray-600">
+                    <i class="fas fa-clock text-gray-400"></i>
+                    <span class="text-sm"><%= new Date(x.fechaSolicitud || x.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+                  </div>
+                </td>
+
+                <!-- Estado -->
+                <td class="px-6 py-4">
+                  <% 
+                    const estado = x.estado || 'pendiente';
+                    let colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                    let icon = 'fas fa-clock';
+                    if (estado === 'aceptado') {
+                      colorClass = 'bg-green-100 text-green-800 border-green-200';
+                      icon = 'fas fa-check';
+                    } else if (estado === 'rechazado') {
+                      colorClass = 'bg-red-100 text-red-800 border-red-200';
+                      icon = 'fas fa-times';
+                    } else if (estado === 'cancelado') {
+                      colorClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                      icon = 'fas fa-ban';
+                    }
+                  %>
+                  <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border <%= colorClass %>">
+                    <i class="<%= icon %>"></i>
+                    <span class="capitalize"><%= estado %></span>
+                  </span>
+                </td>
+
+                <!-- Acciones -->
+                <td class="px-6 py-4">
+                  <% if (estado === 'pendiente') { %>
+                    <div class="flex items-center gap-2">
+                      <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/aceptar" class="inline">
+                        <button 
+                          type="submit"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors border border-green-200"
+                          title="Aprobar intercambio"
+                        >
+                          <i class="fas fa-check"></i>
+                          Aprobar
+                        </button>
+                      </form>
+                      <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/rechazar" class="inline">
+                        <button 
+                          type="submit"
+                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-medium hover:bg-red-100 transition-colors border border-red-200"
+                          title="Rechazar intercambio"
+                        >
+                          <i class="fas fa-times"></i>
+                          Rechazar
+                        </button>
+                      </form>
+                    </div>
+                  <% } else { %>
+                    <span class="text-xs text-gray-500 italic flex items-center gap-1">
+                      <i class="fas fa-info-circle"></i>
+                      Sin acciones
+                    </span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sin resultados -->
+    <% if (!exchanges || exchanges.length === 0) { %>
+      <div class="p-12 text-center">
+        <div class="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-exchange-alt text-teal-600 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-3">No hay intercambios</h3>
+        <p class="text-gray-600 mb-6">No se han realizado solicitudes de intercambio aún</p>
+        <div class="inline-flex items-center px-4 py-2 bg-teal-100 text-teal-700 rounded-lg text-sm font-medium">
+          <i class="fas fa-info-circle mr-2"></i>
+          Los intercambios aparecerán aquí cuando se creen
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Sin resultados de búsqueda -->
+    <div id="no-results" class="hidden p-12 text-center">
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-search text-gray-400 text-3xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-3">No se encontraron resultados</h3>
+      <p class="text-gray-600 mb-6">Intenta ajustar los filtros de búsqueda</p>
+      <button 
+        id="clear-filters-empty"
+        class="inline-flex items-center gap-2 py-3 px-8 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors"
+      >
+        <i class="fas fa-eraser"></i>
+        Limpiar Filtros
+      </button>
     </div>
   </div>
 </div>
@@ -305,6 +417,7 @@
     filter();
   }
 
+  // Event listeners
   q.addEventListener('input', filter);
   status.addEventListener('change', filter);
   curso.addEventListener('change', filter);
@@ -312,4 +425,10 @@
   if (clearBtnEmpty) {
     clearBtnEmpty.addEventListener('click', clearFilters);
   }
+
+  // Inicializar filtros
+  filter();
 </script>
+
+</body>
+</html>
