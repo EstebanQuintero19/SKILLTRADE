@@ -675,42 +675,16 @@ app.delete('/api/biblioteca/cursos/:cursoId', async (req, res) => {
 
 app.get('/crear-curso', (req, res) => res.render('pages/crear_curso', { title: 'Crear curso' }));
 
-// Admin
+// Admin routes (old - commented out, replaced by new admin panel below)
+/*
 app.get('/admin', async (req, res) => {
-  try {
-    const [usuariosRes, cursosRes, exchangesRes, ventasRes] = await Promise.all([
-      api.get(`/usuarios`, { __req: req }).catch(() => ({ data: { data: { usuarios: [] } } })),
-      api.get(`/cursos`, { __req: req }).catch(() => ({ data: { data: { cursos: [] } } })),
-      api.get(`/exchanges`, { __req: req }).catch(() => ({ data: { data: { exchanges: [] } } })),
-      api.get(`/ventas`, { __req: req }).catch(() => ({ data: { data: { ventas: [] } } })),
-    ]);
-
-    const usuarios = usuariosRes?.data?.data?.usuarios || usuariosRes?.data?.usuarios || usuariosRes?.data || [];
-    const cursos = cursosRes?.data?.data?.cursos || cursosRes?.data?.cursos || cursosRes?.data || [];
-    const exchanges = exchangesRes?.data?.data?.exchanges || exchangesRes?.data?.exchanges || exchangesRes?.data || [];
-    const ventas = ventasRes?.data?.data?.ventas || ventasRes?.data?.ventas || ventasRes?.data || [];
-
-    const ventasTotal = Array.isArray(ventas)
-      ? ventas.reduce((sum, v) => sum + (Number(v?.monto || v?.precio || 0)), 0)
-      : 0;
-
-    const stats = {
-      usuarios: Array.isArray(usuarios) ? usuarios.length : 0,
-      cursos: Array.isArray(cursos) ? cursos.length : 0,
-      exchanges: Array.isArray(exchanges) ? exchanges.length : 0,
-      ventasTotal
-    };
-
-    res.render('pages/dashboard_admin', { title: 'Panel de Administración', stats });
-  } catch (err) {
-    console.error('Admin stats error:', err.message);
-    res.render('pages/dashboard_admin', { title: 'Panel de Administración', stats: { usuarios: 0, cursos: 0, exchanges: 0, ventasTotal: 0 } });
-  }
+  // Old admin route - replaced by new admin panel
 });
 app.get('/admin/config', (req, res) => res.render('pages/config_admin', { title: 'Configuración' }));
 app.get('/admin/cursos', (req, res) => res.render('pages/gestion_cursos_admin', { title: 'Gestión de cursos' }));
 app.get('/admin/intercambios', (req, res) => res.render('pages/gestion_intercambios_admin', { title: 'Gestión de intercambios' }));
 app.get('/admin/usuarios', (req, res) => res.render('pages/gestion_usuarios_admin', { title: 'Gestión de usuarios' }));
+*/
 
 // Auth: Login/Logout
 app.get('/login', (req, res) => {
@@ -785,22 +759,9 @@ app.get('/carrito', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   try {
     const { data } = await api.get(`/ventas/carrito`, { __req: req });
-    console.log('Respuesta del carrito:', data);
-    
-    // Manejar diferentes estructuras de respuesta
-    let items = [];
-    if (data?.carrito?.items) {
-      items = data.carrito.items;
-    } else if (data?.items) {
-      items = data.items;
-    } else if (Array.isArray(data)) {
-      items = data;
-    }
-    
-    console.log('Items procesados:', items);
+    const items = data?.data?.items || data?.items || data || [];
     res.render('pages/carrito', { title: 'Carrito', items });
   } catch (err) {
-    console.error('Error al obtener carrito:', err);
     res.render('pages/carrito', { title: 'Carrito', items: [] });
   }
 });
@@ -1106,6 +1067,141 @@ app.post('/perfil/eliminar', async (req, res) => {
   } catch (_) {}
   res.clearCookie('auth_token');
   res.redirect('/');
+});
+
+// ===== RUTAS DEL PANEL DE ADMINISTRADOR =====
+// Verificar si el usuario es administrador
+const verificarAdminFrontend = (req, res, next) => {
+  if (!res.locals.signedIn || !res.locals.user) {
+    return res.redirect('/login');
+  }
+  
+  if (res.locals.user.email !== 'skilltrade_admin@gmail.com') {
+    return res.status(403).render('pages/error', { 
+      title: 'Acceso Denegado',
+      mensaje: 'No tienes permisos para acceder al panel de administrador',
+      codigo: 403
+    });
+  }
+  
+  next();
+};
+
+// Panel de administrador principal
+app.get('/admin', verificarAdminFrontend, async (req, res) => {
+  try {
+    console.log('=== ACCESO AL PANEL ADMIN ===');
+    console.log('Usuario autenticado:', res.locals.signedIn);
+    console.log('Email del usuario:', res.locals.user?.email);
+    console.log('Token disponible:', !!res.locals.token);
+    console.log('Token value:', res.locals.token);
+    
+    console.log('Haciendo petición a /admin/estadisticas...');
+    const { data } = await api.get('/admin/estadisticas', { __req: req });
+    console.log('Respuesta del backend:', data);
+    
+    const estadisticas = data?.estadisticas || {};
+    console.log('Estadísticas procesadas:', estadisticas);
+    
+    res.render('pages/admin_panel', {
+      title: 'Panel de Administrador',
+      estadisticas
+    });
+  } catch (error) {
+    console.error('Error al cargar panel admin:', error.message);
+    console.error('Error status:', error.response?.status);
+    console.error('Error data:', error.response?.data);
+    console.error('Error completo:', error);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar el panel de administrador: ' + error.message,
+      codigo: 500
+    });
+  }
+});
+
+// Panel de cursos (admin)
+app.get('/admin_cursos', verificarAdminFrontend, async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const { data } = await api.get(`/admin/cursos?page=${page}`, { __req: req });
+    
+    res.render('pages/admin_cursos', {
+      title: 'Gestión de Cursos - Admin',
+      cursos: data?.cursos || [],
+      paginacion: data?.paginacion || {}
+    });
+  } catch (error) {
+    console.error('Error al cargar cursos admin:', error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar los cursos',
+      codigo: 500
+    });
+  }
+});
+
+// Panel de usuarios (admin)
+app.get('/admin_usuarios', verificarAdminFrontend, async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const { data } = await api.get(`/admin/usuarios?page=${page}`, { __req: req });
+    
+    res.render('pages/admin_usuarios', {
+      title: 'Gestión de Usuarios - Admin',
+      usuarios: data?.usuarios || [],
+      paginacion: data?.paginacion || {}
+    });
+  } catch (error) {
+    console.error('Error al cargar usuarios admin:', error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar los usuarios',
+      codigo: 500
+    });
+  }
+});
+
+// Panel de ventas (admin)
+app.get('/admin_ventas', verificarAdminFrontend, async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const { data } = await api.get(`/admin/ventas?page=${page}`, { __req: req });
+    
+    res.render('pages/admin_ventas', {
+      title: 'Gestión de Ventas - Admin',
+      ventas: data?.ventas || [],
+      paginacion: data?.paginacion || {}
+    });
+  } catch (error) {
+    console.error('Error al cargar ventas admin:', error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar las ventas',
+      codigo: 500
+    });
+  }
+});
+
+// Panel de intercambios (admin)
+app.get('/admin_intercambios', verificarAdminFrontend, async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const { data } = await api.get(`/admin/intercambios?page=${page}`, { __req: req });
+    
+    res.render('pages/admin_intercambios', {
+      title: 'Gestión de Intercambios - Admin',
+      intercambios: data?.intercambios || [],
+      paginacion: data?.paginacion || {}
+    });
+  } catch (error) {
+    console.error('Error al cargar intercambios admin:', error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar los intercambios',
+      codigo: 500
+    });
+  }
 });
 
 // Healthcheck del front

@@ -19,6 +19,12 @@
         <i class="fas fa-chart-line"></i>
         Ventas
       </a>
+      <% if (signedIn && user && user.email === 'skilltrade_admin@gmail.com') { %>
+        <a href="/admin" class="text-gray-600 hover:text-red-600 font-medium flex items-center gap-2">
+          <i class="fas fa-cog"></i>
+          Admin
+        </a>
+      <% } %>
     </nav>
     <div class="flex items-center gap-3">
       <% if (signedIn) { %>

@@ -126,9 +126,11 @@ const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
 const bibliotecaController = require('./controller/biblioteca.controller');
 const ventaController = require('./controller/venta.controller');
+const adminController = require('./controller/admin.controller');
 
 // Cargar middleware de autenticación
 const { autenticarApiKey } = require('./middleware/auth');
+const { verificarAdmin } = require('./middleware/admin.middleware');
 const { generarCaptcha } = require('./middleware/captcha');
 
 // Ruta para generar CAPTCHA
@@ -223,6 +225,15 @@ app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCar
 
 // Ruta genérica de ventas (DEBE ir después de las rutas específicas)
 app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
+
+// ===== RUTAS DE ADMINISTRADOR =====
+app.get('/api/admin/estadisticas', verificarAdmin, adminController.obtenerEstadisticas);
+app.get('/api/admin/cursos', verificarAdmin, adminController.obtenerCursosPaginados);
+app.get('/api/admin/usuarios', verificarAdmin, adminController.obtenerUsuariosPaginados);
+app.get('/api/admin/ventas', verificarAdmin, adminController.obtenerVentasPaginadas);
+app.get('/api/admin/intercambios', verificarAdmin, adminController.obtenerIntercambiosPaginados);
+app.delete('/api/admin/cursos/:id', verificarAdmin, adminController.eliminarCurso);
+app.delete('/api/admin/usuarios/:id', verificarAdmin, adminController.eliminarUsuario);
 
 app.get('/api', (req, res) => {
     res.json({
