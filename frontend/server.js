@@ -785,9 +785,22 @@ app.get('/carrito', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   try {
     const { data } = await api.get(`/ventas/carrito`, { __req: req });
-    const items = data?.data?.items || data?.items || data || [];
+    console.log('Respuesta del carrito:', data);
+    
+    // Manejar diferentes estructuras de respuesta
+    let items = [];
+    if (data?.carrito?.items) {
+      items = data.carrito.items;
+    } else if (data?.items) {
+      items = data.items;
+    } else if (Array.isArray(data)) {
+      items = data;
+    }
+    
+    console.log('Items procesados:', items);
     res.render('pages/carrito', { title: 'Carrito', items });
   } catch (err) {
+    console.error('Error al obtener carrito:', err);
     res.render('pages/carrito', { title: 'Carrito', items: [] });
   }
 });

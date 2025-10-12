@@ -55,12 +55,12 @@
       <!-- Stats rápidas -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 fade-in-delay">
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-          <div class="text-3xl font-bold text-white"><%= items ? items.length : 0 %></div>
+          <div class="text-3xl font-bold text-white"><%= (items && Array.isArray(items)) ? items.length : 0 %></div>
           <div class="text-white/80 text-sm">Cursos en carrito</div>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
           <div class="text-3xl font-bold text-white">
-            $<%= items ? items.reduce((sum, i) => sum + Number(i.curso?.precio || 0), 0).toFixed(2) : '0.00' %>
+            $<%= (items && Array.isArray(items)) ? items.reduce((sum, i) => sum + Number(i.curso?.precio || 0), 0).toFixed(2) : '0.00' %>
           </div>
           <div class="text-white/80 text-sm">Total a pagar</div>
         </div>
@@ -77,7 +77,7 @@
 
 <!-- Contenido principal -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <% if (items && items.length > 0) { %>
+  <% if (items && Array.isArray(items) && items.length > 0) { %>
     <div class="grid lg:grid-cols-3 gap-8">
       <!-- Lista de cursos -->
       <div class="lg:col-span-2">
