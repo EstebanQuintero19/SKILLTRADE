@@ -4,20 +4,25 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",    // (Render)
-    "dev": "nodemon index.js",   // local
-    "docs": "jsdoc -c jsdoc.json"
+    "start": "node index.js && node frontend/server.js",
+    "dev": "nodemon index.js",
+    "docs": "jsdoc -c jsdoc.json",
+    "build": "npm install",
+    "postinstall": "npm ls mongoose",
+    "clean": "rm -rf node_modules package-lock.json && npm install"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "concurrently": "8.2.2",
+    "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.2",
     "helmet": "^7.1.0",
     "is-stream": "^4.0.1",
     "jsonwebtoken": "^9.0.2",

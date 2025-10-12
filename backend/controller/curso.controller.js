@@ -9,6 +9,7 @@ const crearCurso = async (req, res) => {
     try {
         console.log('=== CREAR CURSO DEBUG ===');
         console.log('Body:', req.body);
+        console.log('Nivel recibido:', req.body.nivel);
         console.log('Usuario:', req.usuario);
         console.log('File:', req.file);
         
@@ -30,6 +31,10 @@ const crearCurso = async (req, res) => {
 
         // Validar precio
         const precioNumerico = precio ? parseFloat(precio) : 0;
+
+        // Normalizar nivel (convertir a minúsculas para evitar problemas)
+        const nivelNormalizado = nivel ? nivel.toLowerCase() : 'principiante';
+        console.log('Nivel normalizado:', nivelNormalizado);
 
         /* Validar nivel - permitir cualquier valor
          if (nivel && !['basico', 'intermedio', 'avanzado', 'Principiante', 'Intermedio', 'Avanzado'].includes(nivel)) {
@@ -57,7 +62,7 @@ const crearCurso = async (req, res) => {
             descripcion: descripcion.trim(),
             categoria: Array.isArray(categoria) ? categoria : [categoria],
             precio: precioNumerico,
-            nivel: nivel || 'basico',
+            nivel: nivelNormalizado,
             visibilidad: visibilidad || 'publico',
             owner: ownerId,
             imagen: req.file ? `/uploads/${req.file.filename}` : '/images/placeholder-course.jpg',
@@ -137,9 +142,9 @@ const actualizarCurso = async (req, res) => {
             }
         }
 
-        if (camposActualizados.nivel && !['basico', 'intermedio', 'avanzado'].includes(camposActualizados.nivel)) {
+        if (camposActualizados.nivel && !['principiante', 'intermedio', 'avanzado'].includes(camposActualizados.nivel)) {
             return res.status(400).json({
-                error: 'El nivel debe ser básico, intermedio o avanzado'
+                error: 'El nivel debe ser principiante, intermedio o avanzado'
             });
         }
 
@@ -444,6 +449,7 @@ const agregarComentario = async (req, res) => {
 const obtenerCursos = async (req, res) => {
     try {
         const { 
+            q,
             categoria, 
             nivel, 
             precioMin, 
@@ -457,6 +463,15 @@ const obtenerCursos = async (req, res) => {
 
         // Construir filtros
         const filtros = {};
+        
+        // Búsqueda por texto en título y descripción
+        if (q && q.trim()) {
+            filtros.$or = [
+                { titulo: { $regex: q.trim(), $options: 'i' } },
+                { descripcion: { $regex: q.trim(), $options: 'i' } }
+            ];
+        }
+        
         if (categoria) filtros.categoria = { $in: [categoria] };
         if (nivel) filtros.nivel = nivel;
         if (visibilidad) filtros.visibilidad = visibilidad;
@@ -539,6 +554,56 @@ const obtenerMisCursos = async (req, res) => {
     }
 };
 
+// RF-CUR-07: Obtener mis cursos con paginación para biblioteca
+const obtenerMisCursosPaginados = async (req, res) => {
+    try {
+        const usuarioId = req.usuario._id;
+        const { page = 1, limit = 6, categoria, nivel, q } = req.query;
+
+        // Construir filtros
+        const filtros = { owner: usuarioId };
+        
+        if (categoria && categoria !== 'todos') {
+            filtros.categoria = { $in: [categoria] };
+        }
+        
+        if (nivel && nivel !== 'todos') {
+            filtros.nivel = nivel;
+        }
+        
+        if (q && q.trim() !== '') {
+            filtros.$or = [
+                { titulo: { $regex: q.trim(), $options: 'i' } },
+                { descripcion: { $regex: q.trim(), $options: 'i' } }
+            ];
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const cursos = await Curso.find(filtros)
+            .populate('owner', 'nombre email')
+            .sort({ fechaCreacion: -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        const total = await Curso.countDocuments(filtros);
+
+        res.json({
+            success: true,
+            data: cursos,
+            paginacion: {
+                pagina: parseInt(page),
+                totalPaginas: Math.ceil(total / parseInt(limit)),
+                totalElementos: total,
+                elementosPorPagina: parseInt(limit)
+            }
+        });
+    } catch (error) {
+        console.error('Error al obtener mis cursos paginados:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
 // Función auxiliar para verificar acceso al curso
 const verificarAccesoCurso = async (usuarioId, cursoId) => {
     try {
@@ -603,5 +668,6 @@ module.exports = {
     agregarComentario,
     obtenerCursos,
     obtenerCursoPorId,
-    obtenerMisCursos
+    obtenerMisCursos,
+    obtenerMisCursosPaginados
 };

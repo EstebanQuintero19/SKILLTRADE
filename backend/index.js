@@ -51,13 +51,35 @@ const upload = multer({
 // ===== CORS BÁSICO =====
 const cors = require('cors');
 app.use(cors({
-    origin: ['http://localhost:4000', 'http://localhost:3001'],
-    credentials: true
+    origin: ['http://localhost:4000', 'http://localhost:3001', 'http://localhost:3000'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 // ===== MIDDLEWARE GENERAL =====
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ===== CONFIGURACIÓN DE SESIONES =====
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'skilltrade-session-secret-key',
+    resave: false,
+    saveUninitialized: true, // Cambiar a true para crear sesión inmediatamente
+    store: MongoStore.create({
+        mongoUrl: config.MONGODB_URI,
+        touchAfter: 24 * 3600 // lazy session update
+    }),
+    cookie: {
+        secure: false, // false para desarrollo local
+        httpOnly: false, // false para permitir acceso desde JavaScript si es necesario
+        maxAge: 1000 * 60 * 60 * 24, // 24 horas
+        sameSite: 'lax'
+    },
+    name: 'skilltrade.sid' // Nombre personalizado para la cookie de sesión
+}));
 
 // ===== ARCHIVOS ESTÁTICOS =====
 app.use('/uploads', express.static(config.UPLOAD_PATH));
@@ -73,7 +95,7 @@ mongoose.connect(config.MONGODB_URI, {
     socketTimeoutMS: 45000,
     bufferCommands: false
 }).catch(err => {
-    console.error('❌ Error inicial de conexión a MongoDB:', err.message);
+    console.error('Error inicial de conexión a MongoDB:', err.message);
     // No cerrar el servidor, solo mostrar el error
 });
 
@@ -102,17 +124,75 @@ app.locals.upload = upload;
 // Cargar controladores necesarios
 const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
+const bibliotecaController = require('./controller/biblioteca.controller');
+const ventaController = require('./controller/venta.controller');
+
+// Cargar middleware de autenticación
+const { autenticarApiKey } = require('./middleware/auth');
+const { generarCaptcha } = require('./middleware/captcha');
+
+// Ruta para generar CAPTCHA
+app.get('/api/captcha', (req, res) => {
+    try {
+        console.log('=== GENERANDO CAPTCHA ===');
+        console.log('Session exists:', !!req.session);
+        console.log('Session ID:', req.session?.id);
+        
+        const captcha = generarCaptcha();
+        
+        // Verificar que la sesión esté disponible
+        if (!req.session) {
+            console.error('ERROR: Sesión no disponible');
+            return res.status(500).json({
+                success: false,
+                message: 'Sesión no disponible'
+            });
+        }
+        
+        // Guardar hash en sesión
+        req.session.captchaHash = captcha.hash;
+        
+        console.log('CAPTCHA generado exitosamente:', {
+            pregunta: captcha.pregunta,
+            hashGuardado: !!req.session.captchaHash
+        });
+        
+        res.json({
+            success: true,
+            pregunta: captcha.pregunta
+        });
+        
+    } catch (error) {
+        console.error('ERROR al generar CAPTCHA:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al generar CAPTCHA'
+        });
+    }
+});
 
 // Rutas de usuario
 app.post('/api/usuarios', usuarioController.registrarUsuario);
 app.post('/api/usuarios/login', usuarioController.loginUsuario);
+app.get('/api/estadisticas', usuarioController.obtenerEstadisticasGenerales);
 
-// Cargar middleware de autenticación
-const { autenticarApiKey } = require('./middleware/auth');
+// Rutas de usuario autenticadas
+app.get('/api/usuarios/perfil', autenticarApiKey, usuarioController.obtenerPerfil);
+app.get('/api/usuarios/:id', autenticarApiKey, usuarioController.obtenerUsuarioPorId);
+app.put('/api/usuarios/:id', autenticarApiKey, usuarioController.editarPerfil);
+app.put('/api/usuarios/perfil', autenticarApiKey, usuarioController.editarPerfil);
+app.post('/api/usuarios/password', autenticarApiKey, usuarioController.cambiarPassword);
+app.delete('/api/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuario);
+app.post('/api/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
+app.get('/api/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);
+app.post('/api/usuarios/limpiar-duplicado', usuarioController.limpiarUsuarioDuplicado);
 
 // Rutas de cursos (básicas para el frontend)
 app.get('/api/cursos', cursoController.obtenerCursos);
 app.get('/api/cursos/:id', cursoController.obtenerCursoPorId);
+app.get('/api/cursos/mis-cursos/paginados', autenticarApiKey, cursoController.obtenerMisCursosPaginados);
+app.put('/api/cursos/:id', autenticarApiKey, cursoController.actualizarCurso);
+app.delete('/api/cursos/:id', autenticarApiKey, cursoController.eliminarCurso);
 app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
     const upload = req.app.locals.upload;
     if (upload) {
@@ -126,6 +206,23 @@ app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
         next();
     }
 }, cursoController.crearCurso);
+
+// Rutas de biblioteca
+app.put('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.editarCursoDesdeLibreria);
+app.delete('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.eliminarCursoDesdeLibreria);
+
+// Rutas de ventas y carrito
+app.post('/api/ventas', autenticarApiKey, ventaController.crearVenta);
+app.get('/api/ventas', autenticarApiKey, ventaController.obtenerVentas);
+
+// Rutas específicas del carrito (DEBEN ir antes de /api/ventas/:id)
+app.post('/api/ventas/carrito/agregar', autenticarApiKey, ventaController.agregarAlCarrito);
+app.get('/api/ventas/carrito', autenticarApiKey, ventaController.obtenerCarrito);
+app.post('/api/ventas/carrito/remover', autenticarApiKey, ventaController.removerDelCarrito);
+app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCarrito);
+
+// Ruta genérica de ventas (DEBE ir después de las rutas específicas)
+app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
 
 app.get('/api', (req, res) => {
     res.json({

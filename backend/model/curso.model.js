@@ -88,8 +88,8 @@ const cursoSchema = new Schema({
     nivel: {
         type: String,
         enum: {
-            values: ['basico', 'intermedio', 'avanzado'],
-            message: 'El nivel debe ser básico, intermedio o avanzado'
+            values: ['principiante', 'intermedio', 'avanzado'],
+            message: 'El nivel debe ser principiante, intermedio o avanzado'
         },
         required: [true, 'El nivel del curso es obligatorio']
     },
@@ -103,7 +103,7 @@ const cursoSchema = new Schema({
         type: Number,
         default: 0,
         min: [0, 'El precio no puede ser negativo'],
-        max: [9999.99, 'El precio máximo es 9999.99'],
+        max: [100000, 'El precio máximo es 100000'],
         validate: {
             validator: function(v) {
                 return Number.isFinite(v) && v >= 0;

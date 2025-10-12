@@ -756,6 +756,175 @@ const obtenerBiblioteca = async(req, res) => {
     }
 };
 
+// RF-BIB-09: Editar curso desde biblioteca
+const editarCursoDesdeLibreria = async (req, res) => {
+    try {
+        const usuarioId = req.usuario._id;
+        const { cursoId } = req.params;
+        const { titulo, descripcion, categoria, precio, nivel, visibilidad } = req.body;
+
+        // Verificar que el curso existe y pertenece al usuario
+        const curso = await Curso.findById(cursoId);
+        if (!curso) {
+            return res.status(404).json({
+                error: 'Curso no encontrado'
+            });
+        }
+
+        if (curso.owner.toString() !== usuarioId.toString()) {
+            return res.status(403).json({
+                error: 'No tienes permisos para editar este curso'
+            });
+        }
+
+        // Validaciones básicas
+        if (!titulo || titulo.trim() === '') {
+            return res.status(400).json({
+                error: 'El título es obligatorio'
+            });
+        }
+
+        if (!descripcion || descripcion.trim() === '') {
+            return res.status(400).json({
+                error: 'La descripción es obligatoria'
+            });
+        }
+
+        // Actualizar curso
+        const datosActualizados = {
+            titulo: titulo.trim(),
+            descripcion: descripcion.trim(),
+            fechaActualizacion: new Date()
+        };
+
+        if (categoria) {
+            datosActualizados.categoria = Array.isArray(categoria) ? categoria : [categoria];
+        }
+
+        if (precio !== undefined) {
+            const precioNumerico = parseFloat(precio);
+            if (precioNumerico >= 0 && precioNumerico <= 100000) {
+                datosActualizados.precio = precioNumerico;
+            }
+        }
+
+        if (nivel && ['Principiante', 'intermedio', 'avanzado'].includes(nivel)) {
+            datosActualizados.nivel = nivel;
+        }
+
+        if (visibilidad && ['publico', 'privado', 'soloSuscriptores'].includes(visibilidad)) {
+            datosActualizados.visibilidad = visibilidad;
+        }
+
+        const cursoActualizado = await Curso.findByIdAndUpdate(
+            cursoId,
+            datosActualizados,
+            { new: true, runValidators: true }
+        );
+
+        res.json({
+            success: true,
+            mensaje: 'Curso actualizado exitosamente',
+            data: cursoActualizado
+        });
+
+    } catch (error) {
+        console.error('Error al editar curso desde biblioteca:', error);
+        
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                error: 'Error de validación',
+                detalles: validationErrors
+            });
+        }
+
+        res.status(500).json({
+            error: 'Error interno del servidor al editar curso'
+        });
+    }
+};
+
+// RF-BIB-10: Eliminar curso desde biblioteca
+const eliminarCursoDesdeLibreria = async (req, res) => {
+    try {
+        const usuarioId = req.usuario._id;
+        const { cursoId } = req.params;
+
+        // Verificar que el curso existe y pertenece al usuario
+        const curso = await Curso.findById(cursoId);
+        if (!curso) {
+            return res.status(404).json({
+                error: 'Curso no encontrado'
+            });
+        }
+
+        if (curso.owner.toString() !== usuarioId.toString()) {
+            return res.status(403).json({
+                error: 'No tienes permisos para eliminar este curso'
+            });
+        }
+
+        // Verificar si el curso tiene ventas activas
+        const ventasActivas = await Venta.findOne({
+            'items.curso': cursoId,
+            estado: 'completada'
+        });
+
+        if (ventasActivas) {
+            return res.status(400).json({
+                error: 'No se puede eliminar un curso que ya ha sido vendido'
+            });
+        }
+
+        // Verificar si el curso tiene intercambios activos
+        const intercambiosActivos = await Exchange.findOne({
+            $or: [
+                { cursoEmisor: cursoId },
+                { cursoReceptor: cursoId }
+            ],
+            estado: 'activo'
+        });
+
+        if (intercambiosActivos) {
+            return res.status(400).json({
+                error: 'No se puede eliminar un curso que tiene intercambios activos'
+            });
+        }
+
+        // Eliminar el curso
+        await Curso.findByIdAndDelete(cursoId);
+
+        // Actualizar estadísticas del owner
+        await Owner.findOneAndUpdate(
+            { usuario: usuarioId },
+            { $pull: { cursosCreados: cursoId } }
+        );
+
+        // Actualizar estadísticas del usuario
+        await Usuario.findByIdAndUpdate(usuarioId, {
+            $inc: { 'estadisticas.cursosCreados': -1 }
+        });
+
+        // Remover de bibliotecas donde esté como favorito
+        await Biblioteca.updateMany(
+            { favoritos: cursoId },
+            { $pull: { favoritos: cursoId } }
+        );
+
+        res.json({
+            success: true,
+            mensaje: 'Curso eliminado exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error al eliminar curso desde biblioteca:', error);
+        res.status(500).json({
+            error: 'Error interno del servidor al eliminar curso'
+        });
+    }
+};
+
 module.exports = {
     obtenerCursosPropios,
     obtenerCursosPorSuscripcion,
@@ -767,5 +936,7 @@ module.exports = {
     removerFavorito,
     obtenerFavoritos,
     verificarAccesoCurso,
-    obtenerBiblioteca
+    obtenerBiblioteca,
+    editarCursoDesdeLibreria,
+    eliminarCursoDesdeLibreria
 };
