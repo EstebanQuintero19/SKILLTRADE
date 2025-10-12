@@ -315,6 +315,46 @@
           </div>
         </div>
 
+        <!-- Privacidad -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <i class="fas fa-shield-alt text-white"></i>
+            </div>
+            Privacidad del Perfil
+          </h2>
+
+          <div class="space-y-4">
+            <p class="text-sm text-[#6f6880] mb-4">
+              Controla quién puede ver tu perfil y información personal
+            </p>
+            
+            <div class="space-y-3">
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+                <input type="radio" name="visibilidad" value="publico" class="mt-1 w-5 h-5 text-[#5a1593] focus:ring-[#5a1593]" <%= (usuario?.visibilidad === 'publico' || !usuario?.visibilidad) ? 'checked' : '' %>>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-globe text-green-600"></i>
+                    <p class="font-medium text-[#151117]">Perfil Público</p>
+                  </div>
+                  <p class="text-xs text-[#6f6880]">Cualquier usuario puede ver tu perfil, biografía y estadísticas</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+                <input type="radio" name="visibilidad" value="privado" class="mt-1 w-5 h-5 text-[#5a1593] focus:ring-[#5a1593]" <%= (usuario?.visibilidad === 'privado') ? 'checked' : '' %>>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-lock text-orange-600"></i>
+                    <p class="font-medium text-[#151117]">Perfil Privado</p>
+                  </div>
+                  <p class="text-xs text-[#6f6880]">Solo tú puedes ver tu información personal. Otros usuarios verán un mensaje de perfil privado</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <!-- Botones de acción -->
         <div class="bg-white rounded-2xl card-shadow p-6">
           <div class="flex flex-wrap gap-3">

@@ -463,9 +463,9 @@ app.get('/registro', (req, res) => {
 });
 app.post('/registro', async (req, res) => {
   try {
-    const { email, nombre, password, confirmPassword, biografia, telefono } = req.body || {};
+    const { email, nombre, password, confirmPassword, biografia, telefono, captcha_respuesta } = req.body || {};
     
-    console.log('Datos de registro recibidos:', { email, nombre, password: '***', confirmPassword: '***', biografia, telefono });
+    console.log('Datos de registro recibidos:', { email, nombre, password: '***', confirmPassword: '***', biografia, telefono, captcha_respuesta });
     
     const { data } = await axios.post(`${API_BASE}/api/usuarios`, { 
       email, 
@@ -473,7 +473,12 @@ app.post('/registro', async (req, res) => {
       password, 
       confirmPassword, 
       biografia, 
-      telefono 
+      telefono,
+      captcha_respuesta
+    }, {
+      headers: {
+        'Cookie': req.headers.cookie || ''
+      }
     });
     
     const apiKey = data?.apiKey || data?.data?.apiKey || data?.data?.usuario?.apiKey || data?.usuario?.apiKey;
@@ -715,8 +720,16 @@ app.get('/login', (req, res) => {
 
 app.post('/login', async (req, res) => {
   try {
-    const { email, password, rememberMe } = req.body || {};
-    const { data } = await axios.post(`${API_BASE}/api/usuarios/login`, { email, password });
+    const { email, password, rememberMe, captcha_respuesta } = req.body || {};
+    const { data } = await axios.post(`${API_BASE}/api/usuarios/login`, { 
+      email, 
+      password, 
+      captcha_respuesta 
+    }, {
+      headers: {
+        'Cookie': req.headers.cookie || ''
+      }
+    });
     const apiKey = data?.apiKey || data?.data?.apiKey || data?.data?.usuario?.apiKey || data?.usuario?.apiKey;
     if (!apiKey) return res.status(401).render('pages/login', { title: 'Iniciar sesión', error: 'Credenciales inválidas' });
     
@@ -792,6 +805,44 @@ app.get('/api/usuarios/perfil', async (req, res) => {
     console.error('Error en proxy /api/usuarios/perfil:', error.response?.status, error.message);
     res.status(error.response?.status || 500).json({
       error: error.response?.data?.message || 'Error interno del servidor'
+    });
+  }
+});
+
+// Ruta proxy para CAPTCHA
+app.get('/api/captcha', async (req, res) => {
+  try {
+    console.log('=== PROXY CAPTCHA ===');
+    console.log('Frontend session ID:', req.sessionID);
+    console.log('Cookies enviadas al backend:', req.headers.cookie);
+    
+    const response = await axios.get(`${API_BASE}/api/captcha`, {
+      headers: {
+        'Cookie': req.headers.cookie || '',
+        'User-Agent': req.headers['user-agent'] || 'SkillTrade-Frontend'
+      },
+      withCredentials: true
+    });
+    
+    console.log('Respuesta del backend CAPTCHA:', response.data);
+    
+    // Reenviar cookies del backend al frontend si las hay
+    if (response.headers['set-cookie']) {
+      response.headers['set-cookie'].forEach(cookie => {
+        res.append('Set-Cookie', cookie);
+      });
+    }
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error en proxy /api/captcha:', {
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: 'Error al generar CAPTCHA'
     });
   }
 });
@@ -882,9 +933,52 @@ app.get('/perfil', async (req, res) => {
   try {
     const { data } = await api.get(`/usuarios/perfil`, { __req: req });
     const usuario = data?.data?.usuario || data?.usuario || data || null;
-    res.render('pages/perfil', { title: 'Mi perfil', usuario });
+    res.render('pages/perfil', { title: 'Mi perfil', usuario, esPropio: true });
   } catch (err) {
-    res.render('pages/perfil', { title: 'Mi perfil', usuario: null });
+    res.render('pages/perfil', { title: 'Mi perfil', usuario: null, esPropio: true });
+  }
+});
+
+// Perfil: ver perfil de otro usuario
+app.get('/usuario/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const { data } = await api.get(`/usuarios/${id}`, { __req: req });
+    const usuario = data?.data?.usuario || data?.usuario || data || null;
+    
+    if (!usuario) {
+      return res.status(404).render('pages/error', { 
+        title: 'Usuario no encontrado', 
+        error: 'El usuario que buscas no existe' 
+      });
+    }
+    
+    res.render('pages/perfil', { 
+      title: `Perfil de ${usuario.nombre}`, 
+      usuario, 
+      esPropio: false 
+    });
+  } catch (err) {
+    console.error('Error al obtener perfil de usuario:', err.response?.status, err.message);
+    
+    if (err.response?.status === 403) {
+      // Perfil privado
+      res.render('pages/perfil_privado', { 
+        title: 'Perfil Privado',
+        usuarioId: id
+      });
+    } else if (err.response?.status === 404) {
+      res.status(404).render('pages/error', { 
+        title: 'Usuario no encontrado', 
+        error: 'El usuario que buscas no existe' 
+      });
+    } else {
+      res.status(500).render('pages/error', { 
+        title: 'Error del servidor', 
+        error: 'Error interno del servidor' 
+      });
+    }
   }
 });
 
@@ -910,11 +1004,12 @@ app.post('/perfil/editar', async (req, res) => {
     console.log('Token presente:', !!req.cookies?.auth_token);
     console.log('Datos recibidos del formulario:', req.body);
     
-    const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos } = req.body || {};
+    const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos, visibilidad } = req.body || {};
     const datosActualizar = { 
       nombre, 
       biografia, 
       telefono,
+      visibilidad,
       notificaciones_email: notificaciones_email === 'on',
       notificaciones_cursos: notificaciones_cursos === 'on'
     };
@@ -926,7 +1021,7 @@ app.post('/perfil/editar', async (req, res) => {
     console.log('Enviando petición PUT...');
     const response = await api.put(`/usuarios/perfil`, datosActualizar, { __req: req });
     
-    console.log('✅ Respuesta exitosa del backend:', response.data);
+    console.log('Respuesta exitosa del backend:', response.data);
     console.log('Status code:', response.status);
     
     res.redirect('/perfil?success=perfil_actualizado');

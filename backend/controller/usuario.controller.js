@@ -5,6 +5,7 @@ const Exchange = require('../model/exchange.model');
 const Venta = require('../model/venta.model');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { validarCaptcha } = require('../middleware/captcha');
 
 // Generar API Key única
 const generarApiKey = () => {
@@ -55,6 +56,22 @@ const registrarUsuario = async (req, res) => {
                 success: false,
                 message: 'El nombre debe tener al menos 2 caracteres'
             });
+        }
+
+        // Validar CAPTCHA
+        const { captcha_respuesta } = req.body;
+        const captchaHash = req.session?.captchaHash;
+        
+        if (!validarCaptcha(captcha_respuesta, captchaHash)) {
+            return res.status(400).json({
+                success: false,
+                message: 'CAPTCHA incorrecto. Por favor, resuelve la operación matemática correctamente.'
+            });
+        }
+
+        // Limpiar CAPTCHA de la sesión después de validar
+        if (req.session) {
+            delete req.session.captchaHash;
         }
 
         // Verificar si el usuario ya existe y limpiar datos residuales
@@ -158,13 +175,28 @@ const loginUsuario = async (req, res) => {
             });
         }
 
-        const { email, password } = req.body;
+        const { email, password, captcha_respuesta } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
                 message: 'Email y password son requeridos'
             });
+        }
+
+        // Validar CAPTCHA
+        const captchaHash = req.session?.captchaHash;
+        
+        if (!validarCaptcha(captcha_respuesta, captchaHash)) {
+            return res.status(400).json({
+                success: false,
+                message: 'CAPTCHA incorrecto. Por favor, resuelve la operación matemática correctamente.'
+            });
+        }
+
+        // Limpiar CAPTCHA de la sesión después de validar
+        if (req.session) {
+            delete req.session.captchaHash;
         }
 
         // Buscar usuario por email
@@ -246,6 +278,7 @@ const obtenerPerfil = async (req, res) => {
                     nombre: usuario.nombre,
                     biografia: usuario.biografia,
                     telefono: usuario.telefono,
+                    visibilidad: usuario.visibilidad,
                     fechaCreacion: usuario.fechaCreacion,
                     estadisticas: usuario.estadisticas,
                     preferencias: usuario.preferencias || {
@@ -325,7 +358,7 @@ const editarPerfil = async (req, res) => {
         console.log('Headers X-API-Key:', req.headers['x-api-key'] ? 'PRESENTE' : 'AUSENTE');
         console.log('Usuario autenticado:', req.usuario);
         
-        const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos } = req.body;
+        const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos, visibilidad } = req.body;
         const usuarioId = req.usuario.id;
 
         const usuario = await Usuario.findById(usuarioId);
@@ -351,6 +384,12 @@ const editarPerfil = async (req, res) => {
         if (telefono !== undefined) {
             usuario.telefono = telefono.trim();
             console.log('editarPerfil - Actualizando teléfono');
+        }
+
+        // Actualizar visibilidad del perfil
+        if (visibilidad !== undefined && ['publico', 'privado'].includes(visibilidad)) {
+            usuario.visibilidad = visibilidad;
+            console.log('editarPerfil - Actualizando visibilidad:', visibilidad);
         }
 
         // Actualizar preferencias de notificaciones
@@ -380,6 +419,7 @@ const editarPerfil = async (req, res) => {
                     nombre: usuario.nombre,
                     biografia: usuario.biografia,
                     telefono: usuario.telefono,
+                    visibilidad: usuario.visibilidad,
                     preferencias: usuario.preferencias
                 }
             }

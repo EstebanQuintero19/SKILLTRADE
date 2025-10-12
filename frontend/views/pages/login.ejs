@@ -111,6 +111,41 @@
             </a>
           </div>
 
+          <!-- CAPTCHA -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Verificación de seguridad
+              <span class="text-red-500">*</span>
+            </label>
+            <div class="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-sm font-medium text-gray-700">Resuelve esta operación:</span>
+                </div>
+                <button type="button" id="refreshCaptcha" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                  Cambiar
+                </button>
+              </div>
+              <div class="mt-2">
+                <span id="captchaPregunta" class="text-lg font-mono bg-white px-3 py-2 rounded border inline-block min-w-[120px] text-center">
+                  Cargando...
+                </span>
+              </div>
+            </div>
+            <input 
+              id="captchaRespuesta"
+              class="w-full h-12 rounded-lg border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              type="number" 
+              name="captcha_respuesta" 
+              placeholder="Ingresa tu respuesta"
+              required 
+            />
+            <p class="text-xs text-gray-500 mt-1">Resuelve la operación matemática para continuar</p>
+          </div>
+
           <!-- Botón de envío -->
           <button 
             class="w-full h-12 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2" 
@@ -241,10 +276,52 @@ function setupRememberMe() {
   });
 }
 
+// Funciones para manejar CAPTCHA
+async function cargarCaptcha() {
+  try {
+    const response = await fetch('/api/captcha');
+    const data = await response.json();
+    
+    if (data.success) {
+      document.getElementById('captchaPregunta').textContent = data.pregunta;
+      document.getElementById('captchaRespuesta').value = '';
+    } else {
+      document.getElementById('captchaPregunta').textContent = 'Error al cargar';
+    }
+  } catch (error) {
+    console.error('Error cargando CAPTCHA:', error);
+    document.getElementById('captchaPregunta').textContent = 'Error al cargar';
+  }
+}
+
+// Validación del formulario antes del envío
+function setupFormValidation() {
+  const form = document.querySelector('form');
+  if (!form) return;
+  
+  form.addEventListener('submit', function(e) {
+    const captchaRespuesta = document.getElementById('captchaRespuesta').value;
+    
+    if (!captchaRespuesta || captchaRespuesta.trim() === '') {
+      e.preventDefault();
+      alert('Por favor, resuelve la operación matemática');
+      return false;
+    }
+  });
+}
+
 // Inicializar funcionalidades cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
   setupLoginPasswordToggle();
   setupRememberMe();
+  setupFormValidation();
+  cargarCaptcha();
+  
+  // Botón para refrescar CAPTCHA
+  const refreshBtn = document.getElementById('refreshCaptcha');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', cargarCaptcha);
+  }
 });
 </script>
 

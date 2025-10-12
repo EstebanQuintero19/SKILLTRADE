@@ -143,7 +143,8 @@
     <!-- Sidebar con acciones rápidas -->
     <aside class="lg:col-span-1 space-y-6">
       
-      <!-- Tarjeta de acciones -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Tarjeta de acciones (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-cogs text-purple-600 mr-2"></i>
@@ -170,8 +171,35 @@
           </a>
         </div>
       </div>
+      <% } else { %>
+      <!-- Tarjeta de información (para perfiles de otros usuarios) -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+          Información del Usuario
+        </h3>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Miembro desde</span>
+            <span class="font-semibold text-gray-800">
+              <%= usuario?.fechaCreacion ? new Date(usuario.fechaCreacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A' %>
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Visibilidad</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold <%= usuario?.visibilidad === 'publico' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+              <i class="fas <%= usuario?.visibilidad === 'publico' ? 'fa-globe' : 'fa-lock' %> mr-1"></i>
+              <%= usuario?.visibilidad === 'publico' ? 'Público' : 'Privado' %>
+            </span>
+          </div>
+        </div>
+      </div>
+      <% } %>
       
-      <!-- Progreso del perfil -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Progreso del perfil (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.1s">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-chart-pie text-green-600 mr-2"></i>
@@ -209,7 +237,7 @@
         </div>
       </div>
       
-      <!-- Configuración de cuenta -->
+      <!-- Configuración de cuenta (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.2s">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-shield-alt text-red-600 mr-2"></i>
@@ -225,6 +253,7 @@
           </button>
         </form>
       </div>
+      <% } %>
     </aside>
     
     <!-- Contenido principal -->
@@ -263,7 +292,8 @@
         <% } %>
       </section>
       
-      <!-- Seguridad -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Seguridad (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.4s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
@@ -325,7 +355,7 @@
         </div>
       </section>
       
-      <!-- Actividad reciente -->
+      <!-- Actividad reciente (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.5s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
@@ -388,7 +418,7 @@
         </div>
       </section>
       
-      <!-- Logros y badges -->
+      <!-- Logros y badges (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
@@ -423,11 +453,13 @@
           </div>
         </div>
       </section>
+      <% } %>
     </div>
   </div>
 </main>
 
-<!-- Modal de confirmación para cambio de contraseña -->
+<% if (typeof esPropio !== 'undefined' && esPropio) { %>
+<!-- Modal de confirmación para cambio de contraseña (solo para perfil propio) -->
 <div id="password-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
     <div class="text-center mb-6">
@@ -727,6 +759,7 @@
     return true;
   }
 </script>
+<% } %>
 
 </body>
 </html>

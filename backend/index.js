@@ -51,13 +51,35 @@ const upload = multer({
 // ===== CORS BÁSICO =====
 const cors = require('cors');
 app.use(cors({
-    origin: ['http://localhost:4000', 'http://localhost:3001'],
-    credentials: true
+    origin: ['http://localhost:4000', 'http://localhost:3001', 'http://localhost:3000'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 // ===== MIDDLEWARE GENERAL =====
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ===== CONFIGURACIÓN DE SESIONES =====
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'skilltrade-session-secret-key',
+    resave: false,
+    saveUninitialized: true, // Cambiar a true para crear sesión inmediatamente
+    store: MongoStore.create({
+        mongoUrl: config.MONGODB_URI,
+        touchAfter: 24 * 3600 // lazy session update
+    }),
+    cookie: {
+        secure: false, // false para desarrollo local
+        httpOnly: false, // false para permitir acceso desde JavaScript si es necesario
+        maxAge: 1000 * 60 * 60 * 24, // 24 horas
+        sameSite: 'lax'
+    },
+    name: 'skilltrade.sid' // Nombre personalizado para la cookie de sesión
+}));
 
 // ===== ARCHIVOS ESTÁTICOS =====
 app.use('/uploads', express.static(config.UPLOAD_PATH));
@@ -107,6 +129,47 @@ const ventaController = require('./controller/venta.controller');
 
 // Cargar middleware de autenticación
 const { autenticarApiKey } = require('./middleware/auth');
+const { generarCaptcha } = require('./middleware/captcha');
+
+// Ruta para generar CAPTCHA
+app.get('/api/captcha', (req, res) => {
+    try {
+        console.log('=== GENERANDO CAPTCHA ===');
+        console.log('Session exists:', !!req.session);
+        console.log('Session ID:', req.session?.id);
+        
+        const captcha = generarCaptcha();
+        
+        // Verificar que la sesión esté disponible
+        if (!req.session) {
+            console.error('ERROR: Sesión no disponible');
+            return res.status(500).json({
+                success: false,
+                message: 'Sesión no disponible'
+            });
+        }
+        
+        // Guardar hash en sesión
+        req.session.captchaHash = captcha.hash;
+        
+        console.log('CAPTCHA generado exitosamente:', {
+            pregunta: captcha.pregunta,
+            hashGuardado: !!req.session.captchaHash
+        });
+        
+        res.json({
+            success: true,
+            pregunta: captcha.pregunta
+        });
+        
+    } catch (error) {
+        console.error('ERROR al generar CAPTCHA:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al generar CAPTCHA'
+        });
+    }
+});
 
 // Rutas de usuario
 app.post('/api/usuarios', usuarioController.registrarUsuario);
