@@ -6,8 +6,48 @@
   <title><%= curso?.titulo || 'Curso' %> - SkillTrade</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      min-width: 300px;
+      padding: 16px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      transform: translateX(400px);
+      transition: transform 0.3s ease-in-out;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+    }
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      margin: auto;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -15,9 +55,10 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-2 text-sm text-[#6f6880] mb-6">
-    <a href="/cursos" class="hover:text-[#5a1593] transition-colors">Cursos</a>
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    </svg>
+    <a href="/cursos" class="hover:text-[#5a1593] transition-colors">
+      <i class="fas fa-arrow-left mr-2"></i>Volver a Cursos
+    </a>
+    <span class="mx-2">/</span>
     <span class="text-[#151117] font-medium"><%= curso?.titulo %></span>
   </nav>
 
@@ -28,7 +69,7 @@
       <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-6">
         <div 
           class="w-full h-full bg-cover bg-center"
-          style="background-image:url('<%= curso?.imagen || 'https://via.placeholder.com/640x360' %>')"
+          style="background-image: url('<%= curso?.imagen || 'https://via.placeholder.com/640x360' %>');"
         ></div>
         <div class="absolute top-4 left-4">
           <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-[#5a1593]">
@@ -155,19 +196,45 @@
 
         <!-- Botones de acción -->
         <div class="space-y-3">
-          <form action="/carrito" method="post">
-            <input type="hidden" name="cursoId" value="<%= curso?._id %>">
-            <button 
-              type="submit"
-              class="w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
+          <% if (locals.signedIn) { %>
+            <% if (curso?.precio > 0) { %>
+              <button 
+                id="btnAgregarCarrito"
+                onclick="agregarAlCarrito('<%= curso?._id %>')"
+                class="w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                <i class="fas fa-shopping-cart mr-2"></i>
+                <span id="btnText">Agregar al Carrito</span>
+              </button>
+            <% } else { %>
+              <div class="w-full py-3 px-4 rounded-lg bg-green-500 text-white font-semibold text-center">
+                <i class="fas fa-gift mr-2"></i>
+                Curso Gratuito
+              </div>
+            <% } %>
+          <% } else { %>
+            <a 
+              href="/login"
+              class="block w-full py-3 px-4 rounded-lg bg-[#5a1593] text-white font-semibold text-center hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg"
             >
-              Agregar al Carrito
-            </button>
-          </form>
+              <i class="fas fa-sign-in-alt mr-2"></i>
+              Iniciar Sesión para Comprar
+            </a>
+          <% } %>
+          
+          <a 
+            href="/carrito"
+            class="block w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold text-center hover:from-purple-600 hover:to-blue-600 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <i class="fas fa-shopping-bag mr-2"></i>
+            Ver Carrito
+          </a>
+          
           <a 
             href="/cursos"
             class="block w-full py-3 px-4 rounded-lg bg-[#eee8f3] text-[#5a1593] font-semibold text-center hover:bg-[#e0d5ed] transition-colors"
           >
+            <i class="fas fa-search mr-2"></i>
             Explorar Más Cursos
           </a>
         </div>
@@ -182,6 +249,213 @@
     </div>
   </div>
 </div>
+
+<!-- JavaScript para funcionalidad del carrito -->
+<script>
+// Hacer datos de sesión disponibles para JavaScript
+window.sessionData = {
+  signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
+  token: '<%= locals.token || '' %>',
+  user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
+};
+
+// Función para obtener token de autenticación
+function getAuthToken() {
+  // Priorizar token de sesión del servidor
+  if (window.sessionData && window.sessionData.token) {
+    return window.sessionData.token;
+  }
+  // Fallback a localStorage (compatibilidad)
+  return localStorage.getItem('authToken') || '';
+}
+
+// Función para mostrar notificaciones toast
+function mostrarToast(mensaje, tipo = 'info') {
+  // Remover toast existente si hay uno
+  const toastExistente = document.querySelector('.toast');
+  if (toastExistente) {
+    toastExistente.remove();
+  }
+
+  // Crear nuevo toast
+  const toast = document.createElement('div');
+  toast.className = `toast ${tipo}`;
+  toast.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+        <span>${mensaje}</span>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  // Mostrar toast
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 100);
+
+  // Auto-remover después de 5 segundos
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 300);
+    }
+  }, 5000);
+}
+
+// Función para agregar curso al carrito
+async function agregarAlCarrito(cursoId) {
+  const btn = document.getElementById('btnAgregarCarrito');
+  const btnText = document.getElementById('btnText');
+  
+  if (!btn || !btnText) return;
+
+  // Estado de carga
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  btnText.textContent = 'Agregando...';
+
+  try {
+    console.log('agregarAlCarrito - Enviando request para curso:', cursoId);
+    
+    const response = await fetch('/api/ventas/carrito/agregar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Incluir cookies
+      body: JSON.stringify({ cursoId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      mostrarToast('Curso agregado al carrito exitosamente', 'success');
+      
+      // Cambiar botón temporalmente
+      btnText.textContent = 'Agregado!';
+      btn.classList.remove('bg-[#5a1593]', 'hover:bg-[#4a1275]');
+      btn.classList.add('bg-green-500', 'hover:bg-green-600');
+      
+      // Actualizar contador del carrito si existe
+      actualizarContadorCarrito();
+      
+      // Restaurar botón después de 2 segundos
+      setTimeout(() => {
+        btnText.textContent = 'Agregar al Carrito';
+        btn.classList.remove('bg-green-500', 'hover:bg-green-600');
+        btn.classList.add('bg-[#5a1593]', 'hover:bg-[#4a1275]');
+      }, 2000);
+      
+    } else if (response.status === 401) {
+      mostrarToast('Debes iniciar sesión para agregar cursos al carrito', 'error');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else {
+      const errorMsg = data.error || data.message || 'Error al agregar al carrito';
+      mostrarToast(errorMsg, 'error');
+      console.error('Error del servidor:', data);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarToast('Error de conexión. Intenta nuevamente.', 'error');
+  } finally {
+    // Remover estado de carga
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+  }
+}
+
+// Función para actualizar contador del carrito
+async function actualizarContadorCarrito() {
+  try {
+    const response = await fetch('/api/ventas/carrito', {
+      method: 'GET',
+      credentials: 'include' // Incluir cookies
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const contador = document.querySelector('#carrito-contador');
+      if (contador) {
+        // Manejar diferentes estructuras de respuesta
+        let itemsCount = 0;
+        if (data.carrito && data.carrito.items) {
+          itemsCount = Array.isArray(data.carrito.items) ? data.carrito.items.length : 0;
+        } else if (Array.isArray(data.items)) {
+          itemsCount = data.items.length;
+        }
+        
+        contador.textContent = itemsCount;
+        contador.style.display = itemsCount > 0 ? 'inline-block' : 'none';
+      }
+    } else if (response.status === 401) {
+      console.log('Usuario no autenticado para obtener carrito');
+      // No mostrar error si el usuario no está autenticado
+    } else {
+      console.error('Error obteniendo carrito:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('Error actualizando contador del carrito:', error);
+  }
+}
+
+// Función para verificar estado de autenticación
+async function verificarAuth() {
+  try {
+    const response = await fetch('/api/usuarios/perfil', {
+      method: 'GET',
+      credentials: 'include' // Incluir cookies
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Usuario autenticado:', data);
+      mostrarToast('Usuario autenticado correctamente', 'success');
+    } else {
+      console.log('Usuario no autenticado:', response.status);
+      mostrarToast('Usuario no autenticado', 'error');
+    }
+  } catch (error) {
+    console.error('Error verificando autenticación:', error);
+    mostrarToast('Error verificando autenticación', 'error');
+  }
+}
+
+// Actualizar contador al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  // Debug: Mostrar información de sesión
+  console.log('=== DEBUG SESSION DATA ===');
+  console.log('window.sessionData:', window.sessionData);
+  console.log('Token disponible:', window.sessionData?.token ? 'SÍ' : 'NO');
+  console.log('Token length:', window.sessionData?.token?.length || 0);
+  console.log('SignedIn:', window.sessionData?.signedIn);
+  console.log('User:', window.sessionData?.user);
+  console.log('========================');
+  
+  actualizarContadorCarrito();
+  
+  // Solo para debugging - verificar autenticación si el usuario está logueado
+  <% if (locals.signedIn) { %>
+    console.log('Usuario reportado como autenticado por el servidor');
+    console.log('Token del servidor disponible:', '<%= locals.token ? "SÍ" : "NO" %>');
+    // Verificar autenticación después de 1 segundo
+    setTimeout(verificarAuth, 1000);
+  <% } else { %>
+    console.log('Usuario no autenticado según el servidor');
+  <% } %>
+});
+</script>
 
 </body>
 </html>

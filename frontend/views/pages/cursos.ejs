@@ -72,7 +72,17 @@
                   <i class="fas fa-users text-sm"></i>
                 </div>
                 <div>
-                  <div class="font-semibold">500+</div>
+                  <div class="font-semibold">
+                    <% if (estadisticas?.totalUsuarios) { %>
+                      <% if (estadisticas.totalUsuarios >= 1000) { %>
+                        <%= (estadisticas.totalUsuarios / 1000).toFixed(1) %>K+
+                      <% } else { %>
+                        <%= estadisticas.totalUsuarios %>
+                      <% } %>
+                    <% } else { %>
+                      0
+                    <% } %>
+                  </div>
                   <div class="text-xs text-purple-200">Estudiantes</div>
                 </div>
               </div>
@@ -81,7 +91,7 @@
                   <i class="fas fa-star text-sm"></i>
                 </div>
                 <div>
-                  <div class="font-semibold">4.8</div>
+                  <div class="font-semibold"><%= estadisticas?.calificacionPromedio || '4.9' %></div>
                   <div class="text-xs text-purple-200">Calificación</div>
                 </div>
               </div>
@@ -105,62 +115,81 @@
   <!-- Filtros y Búsqueda -->
   <section class="mb-8">
     <div class="bg-white rounded-2xl card-shadow p-6">
-      <!-- Búsqueda -->
-      <div class="relative mb-6">
-        <input 
-          id="searchInput" 
-          name="q" 
-          value="<%= q || '' %>" 
-          class="w-full h-14 rounded-xl border border-gray-300 pl-14 pr-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
-          placeholder="Buscar cursos por título, categoría o instructor..." 
-        />
-        <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-      </div>
+      <!-- Formulario de búsqueda -->
+      <form method="GET" action="/cursos" class="mb-6">
+        <div class="relative">
+          <input 
+            name="q" 
+            value="<%= q || '' %>" 
+            class="w-full h-14 rounded-xl border border-gray-300 pl-14 pr-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+            placeholder="Buscar cursos por título, categoría o instructor..." 
+          />
+          <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+          <!-- Mantener otros filtros en la búsqueda -->
+          <% if (categoria) { %><input type="hidden" name="categoria" value="<%= categoria %>"><% } %>
+          <% if (nivel) { %><input type="hidden" name="nivel" value="<%= nivel %>"><% } %>
+          <% if (precioMin) { %><input type="hidden" name="precioMin" value="<%= precioMin %>"><% } %>
+          <% if (precioMax) { %><input type="hidden" name="precioMax" value="<%= precioMax %>"><% } %>
+        </div>
+      </form>
 
       <!-- Filtros rápidos -->
       <div class="flex flex-wrap gap-3">
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="all">
+        <a href="/cursos<%= q ? '?q=' + encodeURIComponent(q) : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= !categoria ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-th-large mr-2"></i>
           Todos
-        </button>
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="programacion">
+        </a>
+        <a href="/cursos?categoria=programacion<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'programacion' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-code mr-2"></i>
           Programación
-        </button>
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="diseno">
+        </a>
+        <a href="/cursos?categoria=diseno<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'diseno' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-palette mr-2"></i>
           Diseño
-        </button>
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="marketing">
+        </a>
+        <a href="/cursos?categoria=marketing<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'marketing' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-bullhorn mr-2"></i>
           Marketing
-        </button>
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="negocios">
+        </a>
+        <a href="/cursos?categoria=negocios<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'negocios' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-briefcase mr-2"></i>
           Negocios
-        </button>
-        <button class="filter-btn px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all" data-filter="gratis">
+        </a>
+        <a href="/cursos?precioMax=0<%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %>" 
+           class="px-4 py-2 rounded-lg border transition-all <%= precioMax === '0' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-gift mr-2"></i>
           Gratis
-        </button>
+        </a>
       </div>
 
-      <!-- Contador de resultados -->
-      <div class="mt-4 pt-4 border-t border-gray-200">
+      <!-- Contador de resultados y paginación info -->
+      <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
         <p class="text-sm text-gray-600">
-          Mostrando <span id="results-count" class="font-semibold text-purple-600"><%= (cursos || []).length %></span> cursos
+          Mostrando <span class="font-semibold text-purple-600"><%= paginacion.elementosPorPagina * (paginacion.pagina - 1) + 1 %></span> - 
+          <span class="font-semibold text-purple-600"><%= Math.min(paginacion.elementosPorPagina * paginacion.pagina, paginacion.totalElementos) %></span> 
+          de <span class="font-semibold text-purple-600"><%= paginacion.totalElementos %></span> cursos
         </p>
+        <% if (paginacion.totalPaginas > 1) { %>
+        <p class="text-sm text-gray-500">
+          Página <%= paginacion.pagina %> de <%= paginacion.totalPaginas %>
+        </p>
+        <% } %>
       </div>
     </div>
   </section>
 
   <!-- Lista de cursos -->
   <section>
-    <div id="courses-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       <% if (cursos && cursos.length > 0) { %>
         <% cursos.forEach((curso, index) => { %>
           <div class="course-card bg-white rounded-2xl card-shadow overflow-hidden animate-fade-in" 
-               style="animation-delay: <%= index * 0.1 %>s"
+               style="animation-delay: <%= (index * 0.1) %>s;"
                data-categories="<%= (curso.categoria || []).join(',').toLowerCase() %>"
                data-price="<%= curso.precio || 0 %>"
                data-title="<%= curso.titulo.toLowerCase() %>">
@@ -250,13 +279,31 @@
                 </div>
               </div>
 
-              <!-- Botón de acción -->
+              <!-- Botones de acción -->
               <div class="flex gap-3">
-                <a href="/curso/<%= curso._id %>" 
+                <a href="/cursos/<%= curso._id %>" 
                    class="flex-1 inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                   <i class="fas fa-play mr-2"></i>
                   Ver Curso
                 </a>
+                
+                <!-- Botón agregar al carrito (solo para cursos de pago) -->
+                <% if (curso.precio && curso.precio > 0) { %>
+                  <% if (locals.signedIn) { %>
+                  <button onclick="agregarAlCarrito('<%= curso._id %>')" 
+                          class="px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                          title="Agregar al carrito">
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                  <% } else { %>
+                  <a href="/login" 
+                     class="px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                     title="Iniciar sesión para comprar">
+                    <i class="fas fa-sign-in-alt"></i>
+                  </a>
+                  <% } %>
+                <% } %>
+                
                 <button class="px-4 py-3 border border-gray-300 text-gray-600 rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all">
                   <i class="fas fa-heart"></i>
                 </button>
@@ -293,128 +340,236 @@
       </div>
     <% } %>
 
-    <!-- Sin resultados de búsqueda -->
-    <div id="no-results" class="hidden text-center py-16">
-      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        <i class="fas fa-search text-gray-400 text-3xl"></i>
-      </div>
-      <h3 class="text-2xl font-bold text-gray-800 mb-3">No se encontraron cursos</h3>
-      <p class="text-gray-600 mb-6">Intenta con otros términos de búsqueda o filtros</p>
-      <button id="clear-search" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all">
-        <i class="fas fa-eraser mr-2"></i>
-        Limpiar Búsqueda
-      </button>
+    <!-- Paginación -->
+    <% if (paginacion.totalPaginas > 1) { %>
+    <div class="mt-12 flex justify-center">
+      <nav class="bg-white rounded-2xl card-shadow p-4">
+        <div class="flex items-center space-x-2">
+          <!-- Botón anterior -->
+          <% if (paginacion.pagina > 1) { %>
+            <% 
+              const prevParams = new URLSearchParams();
+              if (q) prevParams.append('q', q);
+              if (categoria) prevParams.append('categoria', categoria);
+              if (nivel) prevParams.append('nivel', nivel);
+              if (precioMin) prevParams.append('precioMin', precioMin);
+              if (precioMax) prevParams.append('precioMax', precioMax);
+              prevParams.append('page', (paginacion.pagina - 1).toString());
+            %>
+            <a href="/cursos?<%= prevParams.toString() %>" 
+               class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all flex items-center">
+              <i class="fas fa-chevron-left mr-2"></i>
+              Anterior
+            </a>
+          <% } else { %>
+            <span class="px-4 py-2 rounded-lg border border-gray-200 text-gray-400 cursor-not-allowed flex items-center">
+              <i class="fas fa-chevron-left mr-2"></i>
+              Anterior
+            </span>
+          <% } %>
+          
+          <!-- Números de página -->
+          <% 
+            const startPage = Math.max(1, paginacion.pagina - 2);
+            const endPage = Math.min(paginacion.totalPaginas, paginacion.pagina + 2);
+          %>
+          
+          <% if (startPage > 1) { %>
+            <% 
+              const firstParams = new URLSearchParams();
+              if (q) firstParams.append('q', q);
+              if (categoria) firstParams.append('categoria', categoria);
+              if (nivel) firstParams.append('nivel', nivel);
+              if (precioMin) firstParams.append('precioMin', precioMin);
+              if (precioMax) firstParams.append('precioMax', precioMax);
+              firstParams.append('page', '1');
+            %>
+            <a href="/cursos?<%= firstParams.toString() %>" 
+               class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all">1</a>
+            <% if (startPage > 2) { %>
+              <span class="px-2 text-gray-400">...</span>
+            <% } %>
+          <% } %>
+          
+          <% for (let i = startPage; i <= endPage; i++) { %>
+            <% if (i === paginacion.pagina) { %>
+              <span class="px-3 py-2 rounded-lg filter-active font-semibold"><%= i %></span>
+            <% } else { %>
+              <% 
+                const pageParams = new URLSearchParams();
+                if (q) pageParams.append('q', q);
+                if (categoria) pageParams.append('categoria', categoria);
+                if (nivel) pageParams.append('nivel', nivel);
+                if (precioMin) pageParams.append('precioMin', precioMin);
+                if (precioMax) pageParams.append('precioMax', precioMax);
+                pageParams.append('page', i.toString());
+              %>
+              <a href="/cursos?<%= pageParams.toString() %>" 
+                 class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all"><%= i %></a>
+            <% } %>
+          <% } %>
+          
+          <% if (endPage < paginacion.totalPaginas) { %>
+            <% if (endPage < paginacion.totalPaginas - 1) { %>
+              <span class="px-2 text-gray-400">...</span>
+            <% } %>
+            <% 
+              const lastParams = new URLSearchParams();
+              if (q) lastParams.append('q', q);
+              if (categoria) lastParams.append('categoria', categoria);
+              if (nivel) lastParams.append('nivel', nivel);
+              if (precioMin) lastParams.append('precioMin', precioMin);
+              if (precioMax) lastParams.append('precioMax', precioMax);
+              lastParams.append('page', paginacion.totalPaginas.toString());
+            %>
+            <a href="/cursos?<%= lastParams.toString() %>" 
+               class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all"><%= paginacion.totalPaginas %></a>
+          <% } %>
+          
+          <!-- Botón siguiente -->
+          <% if (paginacion.pagina < paginacion.totalPaginas) { %>
+            <% 
+              const nextParams = new URLSearchParams();
+              if (q) nextParams.append('q', q);
+              if (categoria) nextParams.append('categoria', categoria);
+              if (nivel) nextParams.append('nivel', nivel);
+              if (precioMin) nextParams.append('precioMin', precioMin);
+              if (precioMax) nextParams.append('precioMax', precioMax);
+              nextParams.append('page', (paginacion.pagina + 1).toString());
+            %>
+            <a href="/cursos?<%= nextParams.toString() %>" 
+               class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600 transition-all flex items-center">
+              Siguiente
+              <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+          <% } else { %>
+            <span class="px-4 py-2 rounded-lg border border-gray-200 text-gray-400 cursor-not-allowed flex items-center">
+              Siguiente
+              <i class="fas fa-chevron-right ml-2"></i>
+            </span>
+          <% } %>
+        </div>
+      </nav>
     </div>
+    <% } %>
   </section>
 </div>
 
 <script>
-  // Variables globales
-  const searchInput = document.getElementById('searchInput');
-  const coursesGrid = document.getElementById('courses-grid');
-  const noResults = document.getElementById('no-results');
-  const resultsCount = document.getElementById('results-count');
-  const filterButtons = document.querySelectorAll('.filter-btn');
-  const clearSearchBtn = document.getElementById('clear-search');
-  
-  let currentFilter = 'all';
-  let currentSearch = '';
+  // Función para agregar curso al carrito
+  async function agregarAlCarrito(cursoId) {
+    // Verificar si el usuario está autenticado
+    const isSignedIn = <%= locals.signedIn ? 'true' : 'false' %>;
+    
+    if (!isSignedIn) {
+      // Redirigir al login si no está autenticado
+      window.location.href = '/login';
+      return;
+    }
 
-  // Función para filtrar cursos
-  function filterCourses() {
-    const courses = document.querySelectorAll('.course-card');
-    let visibleCount = 0;
+    try {
+      const response = await fetch('/api/ventas/carrito/agregar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cursoId: cursoId })
+      });
 
-    courses.forEach(course => {
-      const title = course.dataset.title || '';
-      const categories = course.dataset.categories || '';
-      const price = parseFloat(course.dataset.price) || 0;
-      
-      // Filtro por búsqueda
-      const matchesSearch = !currentSearch || 
-        title.includes(currentSearch.toLowerCase()) || 
-        categories.includes(currentSearch.toLowerCase());
-      
-      // Filtro por categoría
-      let matchesFilter = true;
-      if (currentFilter !== 'all') {
-        if (currentFilter === 'gratis') {
-          matchesFilter = price === 0;
-        } else {
-          matchesFilter = categories.includes(currentFilter);
+      const data = await response.json();
+
+      if (response.status === 401) {
+        // Token expirado o inválido, redirigir al login
+        window.location.href = '/login';
+        return;
+      }
+
+      if (response.ok) {
+        mostrarNotificacion('Curso agregado al carrito exitosamente', 'success');
+        actualizarContadorCarrito();
+      } else {
+        mostrarNotificacion(data.error || 'Error al agregar al carrito', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarNotificacion('Error de conexión', 'error');
+    }
+  }
+
+  // Función para mostrar notificaciones
+  function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear elemento de notificación
+    const notificacion = document.createElement('div');
+    notificacion.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform translate-x-full transition-all duration-300 ${
+      tipo === 'success' ? 'bg-green-500 text-white' :
+      tipo === 'error' ? 'bg-red-500 text-white' :
+      'bg-blue-500 text-white'
+    }`;
+    
+    notificacion.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fas ${
+          tipo === 'success' ? 'fa-check-circle' :
+          tipo === 'error' ? 'fa-exclamation-circle' :
+          'fa-info-circle'
+        }"></i>
+        <span>${mensaje}</span>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(notificacion);
+
+    // Animar entrada
+    setTimeout(() => {
+      notificacion.style.transform = 'translateX(0)';
+    }, 100);
+
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+      notificacion.style.transform = 'translateX(full)';
+      setTimeout(() => {
+        if (notificacion.parentElement) {
+          notificacion.remove();
+        }
+      }, 300);
+    }, 5000);
+  }
+
+  // Función para actualizar contador del carrito
+  async function actualizarContadorCarrito() {
+    try {
+      const response = await fetch('/api/ventas/carrito');
+      if (response.ok) {
+        const data = await response.json();
+        const items = data.items || data.data?.items || [];
+        const contador = document.querySelector('#carrito-contador');
+        if (contador) {
+          contador.textContent = items.length;
+          contador.style.display = items.length > 0 ? 'inline' : 'none';
         }
       }
-      
-      const isVisible = matchesSearch && matchesFilter;
-      course.style.display = isVisible ? 'block' : 'none';
-      
-      if (isVisible) {
-        visibleCount++;
-        // Animación de entrada
-        course.style.animation = 'none';
-        course.offsetHeight; // Trigger reflow
-        course.style.animation = 'fadeIn 0.6s ease-out forwards';
-      }
-    });
-
-    // Actualizar contador y mostrar/ocultar mensaje de sin resultados
-    resultsCount.textContent = visibleCount;
-    
-    if (visibleCount === 0 && courses.length > 0) {
-      coursesGrid.classList.add('hidden');
-      noResults.classList.remove('hidden');
-    } else {
-      coursesGrid.classList.remove('hidden');
-      noResults.classList.add('hidden');
+    } catch (error) {
+      console.error('Error actualizando contador del carrito:', error);
     }
   }
 
-  // Event listeners para búsqueda
-  searchInput.addEventListener('input', (e) => {
-    currentSearch = e.target.value.trim();
-    filterCourses();
-  });
-
-  // Event listeners para filtros
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Remover clase activa de todos los botones
-      filterButtons.forEach(b => b.classList.remove('filter-active'));
-      
-      // Agregar clase activa al botón clickeado
-      btn.classList.add('filter-active');
-      
-      currentFilter = btn.dataset.filter;
-      filterCourses();
-    });
-  });
-
-  // Limpiar búsqueda
-  if (clearSearchBtn) {
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      currentSearch = '';
-      currentFilter = 'all';
-      
-      // Resetear filtros
-      filterButtons.forEach(b => b.classList.remove('filter-active'));
-      filterButtons[0].classList.add('filter-active');
-      
-      filterCourses();
-    });
-  }
-
-  // Inicializar
+  // Envío automático del formulario de búsqueda al presionar Enter
   document.addEventListener('DOMContentLoaded', () => {
-    // Activar primer filtro
-    if (filterButtons.length > 0) {
-      filterButtons[0].classList.add('filter-active');
-    }
+    const searchForm = document.querySelector('form[action="/cursos"]');
+    const searchInput = searchForm?.querySelector('input[name="q"]');
     
-    // Si hay búsqueda inicial
-    if (searchInput.value) {
-      currentSearch = searchInput.value.trim();
-      filterCourses();
+    if (searchInput) {
+      // Envío automático después de una pausa en la escritura
+      let searchTimeout;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchForm.submit();
+        }, 1000); // Esperar 1 segundo después de dejar de escribir
+      });
     }
     
     // Animación inicial de las tarjetas
@@ -422,6 +577,9 @@
     cards.forEach((card, index) => {
       card.style.animationDelay = `${index * 0.1}s`;
     });
+
+    // Actualizar contador del carrito al cargar la página
+    actualizarContadorCarrito();
   });
 
   // Efecto parallax sutil en el hero

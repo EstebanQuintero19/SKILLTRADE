@@ -143,7 +143,8 @@
     <!-- Sidebar con acciones rápidas -->
     <aside class="lg:col-span-1 space-y-6">
       
-      <!-- Tarjeta de acciones -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Tarjeta de acciones (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-cogs text-purple-600 mr-2"></i>
@@ -163,15 +164,42 @@
             Crear Curso
           </a>
           
-          <a href="/mis-cursos" 
+          <a href="/biblioteca" 
              class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-            <i class="fas fa-book mr-2"></i>
-            Mis Cursos
+            <i class="fas fa-book-open mr-2"></i>
+            Mi Biblioteca
           </a>
         </div>
       </div>
+      <% } else { %>
+      <!-- Tarjeta de información (para perfiles de otros usuarios) -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+          Información del Usuario
+        </h3>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Miembro desde</span>
+            <span class="font-semibold text-gray-800">
+              <%= usuario?.fechaCreacion ? new Date(usuario.fechaCreacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A' %>
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Visibilidad</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold <%= usuario?.visibilidad === 'publico' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+              <i class="fas <%= usuario?.visibilidad === 'publico' ? 'fa-globe' : 'fa-lock' %> mr-1"></i>
+              <%= usuario?.visibilidad === 'publico' ? 'Público' : 'Privado' %>
+            </span>
+          </div>
+        </div>
+      </div>
+      <% } %>
       
-      <!-- Progreso del perfil -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Progreso del perfil (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.1s">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-chart-pie text-green-600 mr-2"></i>
@@ -209,14 +237,15 @@
         </div>
       </div>
       
-      <!-- Configuración de cuenta -->
+      <!-- Configuración de cuenta (solo para perfil propio) -->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.2s">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-shield-alt text-red-600 mr-2"></i>
           Zona Peligrosa
         </h3>
         
-        <form method="post" action="/perfil/eliminar" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
+        <form method="post" action="/perfil/eliminar" onsubmit="return confirmarEliminacion();">
+          <input type="hidden" name="confirmacion" value="ELIMINAR_CUENTA">
           <button type="submit" 
                   class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg">
             <i class="fas fa-trash-alt mr-2"></i>
@@ -224,6 +253,7 @@
           </button>
         </form>
       </div>
+      <% } %>
     </aside>
     
     <!-- Contenido principal -->
@@ -262,7 +292,8 @@
         <% } %>
       </section>
       
-      <!-- Seguridad -->
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Seguridad (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.4s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
@@ -277,12 +308,12 @@
             Cambiar Contraseña
           </h4>
           
-          <form method="post" action="/perfil/password" class="space-y-6">
+          <form id="password-form" class="space-y-6">
             <div class="grid md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña Actual</label>
                 <div class="relative">
-                  <input class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                  <input id="current-password" class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
                          type="password" name="actual" placeholder="••••••••" required />
                   <i class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                   <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
@@ -294,8 +325,8 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
                 <div class="relative">
-                  <input class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
-                         type="password" name="nueva" placeholder="••••••••" required />
+                  <input id="new-password" class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                         type="password" name="nueva" placeholder="••••••••" required minlength="6" />
                   <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                   <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
                     <i class="fas fa-eye"></i>
@@ -324,7 +355,7 @@
         </div>
       </section>
       
-      <!-- Actividad reciente -->
+      <!-- Actividad reciente (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.5s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
@@ -387,7 +418,7 @@
         </div>
       </section>
       
-      <!-- Logros y badges -->
+      <!-- Logros y badges (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
@@ -422,9 +453,61 @@
           </div>
         </div>
       </section>
+      <% } %>
     </div>
   </div>
 </main>
+
+<% if (typeof esPropio !== 'undefined' && esPropio) { %>
+<!-- Modal de confirmación para cambio de contraseña (solo para perfil propio) -->
+<div id="password-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Confirmar Cambio de Contraseña</h3>
+      <p class="text-gray-600">¿Estás seguro de que deseas cambiar tu contraseña?</p>
+    </div>
+    
+    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+      <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+        <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+        Cambios que se realizarán:
+      </h4>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Se actualizará tu contraseña actual
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Se cerrará tu sesión en otros dispositivos
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Recibirás una notificación de confirmación
+        </li>
+      </ul>
+    </div>
+    
+    <div class="flex gap-3">
+      <button type="button" id="cancel-password-change" 
+              class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all">
+        <i class="fas fa-times mr-2"></i>
+        Cancelar
+      </button>
+      <button type="button" id="confirm-password-change" 
+              class="flex-1 px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all">
+        <i class="fas fa-check mr-2"></i>
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast de notificaciones -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
 <script>
   // Función para mostrar/ocultar contraseña
@@ -486,12 +569,48 @@
     return { feedback, color, width };
   }
   
+  // Función para mostrar toast de notificación
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    
+    const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.className = `${bgColor} text-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 transform translate-x-full transition-transform duration-300`;
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span class="font-medium">${message}</span>
+      <button onclick="this.parentElement.remove()" class="ml-2 hover:bg-white/20 rounded p-1">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
+  }
+
   // Event listener para evaluación de contraseña
   document.addEventListener('DOMContentLoaded', function() {
     const newPasswordInput = document.querySelector('input[name="nueva"]');
     const strengthText = document.getElementById('password-strength');
     const strengthBar = document.getElementById('password-strength-bar');
+    const passwordForm = document.getElementById('password-form');
+    const modal = document.getElementById('password-confirmation-modal');
+    const cancelBtn = document.getElementById('cancel-password-change');
+    const confirmBtn = document.getElementById('confirm-password-change');
     
+    // Evaluación de fortaleza de contraseña
     if (newPasswordInput && strengthText && strengthBar) {
       newPasswordInput.addEventListener('input', function() {
         const password = this.value;
@@ -519,6 +638,91 @@
         strengthBar.style.width = width;
       });
     }
+
+    // Manejo del formulario de cambio de contraseña
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        if (!currentPassword || !newPassword) {
+          showToast('Por favor completa todos los campos', 'error');
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showToast('La nueva contraseña debe tener al menos 6 caracteres', 'error');
+          return;
+        }
+        
+        // Mostrar modal de confirmación
+        modal.classList.remove('hidden');
+      });
+    }
+
+    // Cancelar cambio de contraseña
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+      });
+    }
+
+    // Confirmar cambio de contraseña
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', async function() {
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        try {
+          confirmBtn.disabled = true;
+          confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cambiando...';
+          
+          const response = await fetch('/api/usuarios/password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              actual: currentPassword,
+              nueva: newPassword
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('Contraseña actualizada exitosamente', 'success');
+            passwordForm.reset();
+            modal.classList.add('hidden');
+            
+            // Resetear indicador de fortaleza
+            if (strengthText && strengthBar) {
+              strengthText.textContent = 'Sin evaluar';
+              strengthText.className = 'font-semibold text-gray-400';
+              strengthBar.className = 'bg-gray-300 h-2 rounded-full transition-all';
+              strengthBar.style.width = '0%';
+            }
+          } else {
+            showToast(data.message || 'Error al cambiar la contraseña', 'error');
+          }
+        } catch (error) {
+          console.error('Error al cambiar contraseña:', error);
+          showToast('Error de conexión. Inténtalo de nuevo.', 'error');
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirmar';
+        }
+      });
+    }
+
+    // Cerrar modal al hacer clic fuera
+    modal?.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    });
   });
   
   // Animaciones de entrada
@@ -538,7 +742,24 @@
   document.querySelectorAll('section, aside > div').forEach(el => {
     observer.observe(el);
   });
+  
+  // Función para confirmar eliminación de cuenta
+  function confirmarEliminacion() {
+    const confirmacion = confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');
+    if (!confirmacion) {
+      return false;
+    }
+    
+    const segundaConfirmacion = prompt('Para confirmar la eliminación, escribe "ELIMINAR" (en mayúsculas):');
+    if (segundaConfirmacion !== 'ELIMINAR') {
+      alert('Confirmación incorrecta. La cuenta no será eliminada.');
+      return false;
+    }
+    
+    return true;
+  }
 </script>
+<% } %>
 
 </body>
 </html>

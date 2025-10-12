@@ -6,88 +6,358 @@
   <title>Mi Biblioteca - SkillTrade</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .filter-active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .course-card { transition: all 0.3s ease; }
+    .course-card:hover { transform: translateY(-4px); }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <h1 class="text-4xl font-bold text-[#151117] mb-8">Mi Biblioteca</h1>
+<%- include('../partials/header') %>
+
+<!-- Hero Section -->
+<section class="gradient-bg relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center text-white">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        <i class="fas fa-book-open mr-3"></i>
+        Mi Biblioteca
+      </h1>
+      <p class="text-xl text-purple-100 mb-8">Gestiona todos tus cursos creados</p>
+      
+      <% if (paginacion && paginacion.totalElementos > 0) { %>
+        <div class="bg-white/20 backdrop-blur rounded-xl p-4 inline-block">
+          <div class="text-2xl font-bold"><%= paginacion.totalElementos %></div>
+          <div class="text-sm text-purple-100">Cursos creados</div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
   <% if (needAuth) { %>
-    <div class="rounded-xl border border-[#edeaf0] bg-white p-6 text-center shadow-sm">
-      <a href="/login" class="inline-block bg-[#5a1593] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#4a1275] transition-colors">
+    <div class="bg-white rounded-2xl card-shadow p-12 text-center">
+      <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-lock text-purple-600 text-2xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-4">Acceso Requerido</h3>
+      <p class="text-gray-600 mb-8">Inicia sesión para ver tu biblioteca de cursos</p>
+      <a href="/login" class="inline-flex items-center px-8 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+        <i class="fas fa-sign-in-alt mr-2"></i>
         Iniciar Sesión
       </a>
     </div>
   <% } else { %>
     
-    <!-- Mis Cursos (En progreso) -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold text-[#151117] mb-6">Mis Cursos</h2>
-      <% if (cursosProgreso && cursosProgreso.length) { %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <% cursosProgreso.forEach(c => { %>
-            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
-              <div class="aspect-video bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                <span class="text-white text-sm font-medium px-4 text-center"><%= c.titulo.substring(0, 30) %></span>
+    <!-- Filtros y búsqueda -->
+    <div class="bg-white rounded-2xl card-shadow p-6 mb-8">
+      <form method="GET" action="/biblioteca" class="space-y-4 md:space-y-0 md:flex md:items-center md:space-x-4">
+        
+        <!-- Búsqueda -->
+        <div class="flex-1">
+          <div class="relative">
+            <input type="text" 
+                   name="q" 
+                   value="<%= q %>" 
+                   placeholder="Buscar en mis cursos..." 
+                   class="w-full h-12 pl-12 pr-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <!-- Filtro por categoría -->
+        <div class="md:w-48">
+          <select name="categoria" class="w-full h-12 px-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+            <option value="">Todas las categorías</option>
+            <option value="programacion" <%= categoria === 'programacion' ? 'selected' : '' %>>Programación</option>
+            <option value="diseno" <%= categoria === 'diseno' ? 'selected' : '' %>>Diseño</option>
+            <option value="marketing" <%= categoria === 'marketing' ? 'selected' : '' %>>Marketing</option>
+            <option value="negocios" <%= categoria === 'negocios' ? 'selected' : '' %>>Negocios</option>
+          </select>
+        </div>
+        
+        <!-- Filtro por nivel -->
+        <div class="md:w-48">
+          <select name="nivel" class="w-full h-12 px-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+            <option value="">Todos los niveles</option>
+            <option value="Principiante" <%= nivel === 'Principiante' ? 'selected' : '' %>>Principiante</option>
+            <option value="intermedio" <%= nivel === 'intermedio' ? 'selected' : '' %>>Intermedio</option>
+            <option value="avanzado" <%= nivel === 'avanzado' ? 'selected' : '' %>>Avanzado</option>
+          </select>
+        </div>
+        
+        <!-- Botones -->
+        <div class="flex space-x-2">
+          <button type="submit" class="h-12 px-6 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+            <i class="fas fa-search mr-2"></i>
+            Buscar
+          </button>
+          <a href="/biblioteca" class="h-12 px-4 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition-all flex items-center">
+            <i class="fas fa-times"></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Resultados -->
+    <% if (paginacion && paginacion.totalElementos > 0) { %>
+      <div class="mb-6">
+        <p class="text-gray-600">
+          Mostrando <%= ((paginacion.pagina - 1) * paginacion.elementosPorPagina) + 1 %>-<%= Math.min(paginacion.pagina * paginacion.elementosPorPagina, paginacion.totalElementos) %> 
+          de <%= paginacion.totalElementos %> cursos
+        </p>
+      </div>
+    <% } %>
+
+    <!-- Grid de cursos -->
+    <% if (cursos && cursos.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <% cursos.forEach((curso, index) => { %>
+          <div class="course-card bg-white rounded-2xl card-shadow overflow-hidden animate-fade-in" style="animation-delay: <%= index * 0.1 %>s">
+            
+            <!-- Imagen del curso -->
+            <div class="relative h-48 bg-gradient-to-br from-purple-400 to-blue-500 overflow-hidden">
+              <% if (curso.imagen && curso.imagen !== '/images/placeholder-course.jpg') { %>
+                <img src="<%= curso.imagen %>" alt="<%= curso.titulo %>" class="w-full h-full object-cover">
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center">
+                  <i class="fas fa-graduation-cap text-white text-4xl"></i>
+                </div>
+              <% } %>
+              
+              <!-- Badge de precio -->
+              <div class="absolute top-3 right-3">
+                <% if (curso.precio > 0) { %>
+                  <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    $<%= curso.precio.toLocaleString() %>
+                  </span>
+                <% } else { %>
+                  <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    Gratis
+                  </span>
+                <% } %>
               </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-[#151117] mb-1 group-hover:text-[#5a1593] transition-colors line-clamp-2">
-                  <%= c.titulo %>
+              
+              <!-- Badge de nivel -->
+              <div class="absolute top-3 left-3">
+                <span class="bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <%= curso.nivel || 'Principiante' %>
+                </span>
+              </div>
+            </div>
+            
+            <!-- Contenido -->
+            <div class="p-6">
+              <div class="mb-4">
+                <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
+                  <%= curso.titulo %>
                 </h3>
-                <p class="text-sm text-[#6f6880]">
-                  <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                  En progreso
+                <p class="text-gray-600 text-sm line-clamp-3">
+                  <%= curso.descripcion %>
                 </p>
               </div>
-            </a>
-          <% }) %>
-        </div>
-      <% } else { %>
-        <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <p class="text-[#6f6880]">No tienes cursos en progreso.</p>
-        </div>
-      <% } %>
-    </section>
-
-    <!-- Cursos Completados -->
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold text-[#151117] mb-6">Completados</h2>
-      <% if (cursosCompletados && cursosCompletados.length) { %>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <% cursosCompletados.forEach(c => { %>
-            <a href="/curso/<%= c._id %>" class="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
-              <div class="aspect-video bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center relative">
-                <span class="text-white text-sm font-medium px-4 text-center"><%= c.titulo.substring(0, 30) %></span>
-                <div class="absolute top-2 right-2 bg-white rounded-full p-1">
-                  <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
+              
+              <!-- Categorías -->
+              <div class="mb-4">
+                <% if (curso.categoria && curso.categoria.length > 0) { %>
+                  <div class="flex flex-wrap gap-2">
+                    <% curso.categoria.slice(0, 2).forEach(cat => { %>
+                      <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-lg text-xs font-medium">
+                        <%= cat %>
+                      </span>
+                    <% }) %>
+                    <% if (curso.categoria.length > 2) { %>
+                      <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-lg text-xs">
+                        +<%= curso.categoria.length - 2 %>
+                      </span>
+                    <% } %>
+                  </div>
+                <% } %>
+              </div>
+              
+              <!-- Información adicional -->
+              <div class="mb-6 text-sm text-gray-500">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center">
+                    <i class="fas fa-calendar mr-1"></i>
+                    <%= new Date(curso.fechaCreacion).toLocaleDateString() %>
+                  </span>
+                  <span class="flex items-center">
+                    <i class="fas fa-eye mr-1"></i>
+                    <%= curso.visibilidad || 'público' %>
+                  </span>
                 </div>
               </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-[#151117] mb-1 group-hover:text-[#5a1593] transition-colors line-clamp-2">
-                  <%= c.titulo %>
-                </h3>
-                <p class="text-sm text-[#6f6880]">
-                  <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-                  Completado
-                </p>
+              
+              <!-- Botones de acción -->
+              <div class="flex space-x-2">
+                <a href="/curso/<%= curso._id %>" 
+                   class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-all text-center">
+                  <i class="fas fa-eye mr-2"></i>
+                  Ver
+                </a>
+                <button onclick="editarCurso('<%= curso._id %>')" 
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-xl transition-all">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="eliminarCurso('<%= curso._id %>', '<%= curso.titulo %>')" 
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl transition-all">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
-            </a>
-          <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <!-- Estado vacío -->
+      <div class="bg-white rounded-2xl card-shadow p-12 text-center">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-book-open text-gray-400 text-2xl"></i>
         </div>
-      <% } else { %>
-        <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <p class="text-[#6f6880]">No tienes cursos completados aún.</p>
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">No tienes cursos aún</h3>
+        <p class="text-gray-600 mb-8">Comienza creando tu primer curso y comparte tu conocimiento</p>
+        <a href="/cursos/crear" class="inline-flex items-center px-8 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+          <i class="fas fa-plus mr-2"></i>
+          Crear Primer Curso
+        </a>
+      </div>
+    <% } %>
+
+    <!-- Paginación -->
+    <% if (paginacion && paginacion.totalPaginas > 1) { %>
+      <div class="bg-white rounded-2xl card-shadow p-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+          
+          <!-- Información de página -->
+          <div class="text-sm text-gray-600">
+            Página <%= paginacion.pagina %> de <%= paginacion.totalPaginas %>
+          </div>
+          
+          <!-- Controles de navegación -->
+          <div class="flex items-center space-x-2">
+            
+            <!-- Botón Anterior -->
+            <% if (paginacion.pagina > 1) { %>
+              <a href="?page=<%= paginacion.pagina - 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %><%= nivel ? '&nivel=' + nivel : '' %>" 
+                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="fas fa-chevron-left mr-1"></i>
+                Anterior
+              </a>
+            <% } else { %>
+              <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                <i class="fas fa-chevron-left mr-1"></i>
+                Anterior
+              </span>
+            <% } %>
+            
+            <!-- Números de página -->
+            <div class="flex items-center space-x-1">
+              <% 
+                const currentPage = paginacion.pagina;
+                const totalPages = paginacion.totalPaginas;
+                const maxVisible = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                
+                if (endPage - startPage + 1 < maxVisible) {
+                  startPage = Math.max(1, endPage - maxVisible + 1);
+                }
+              %>
+              
+              <% if (startPage > 1) { %>
+                <a href="?page=1<%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %><%= nivel ? '&nivel=' + nivel : '' %>" 
+                   class="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">1</a>
+                <% if (startPage > 2) { %>
+                  <span class="px-2 text-gray-400">...</span>
+                <% } %>
+              <% } %>
+              
+              <% for (let i = startPage; i <= endPage; i++) { %>
+                <% if (i === currentPage) { %>
+                  <span class="px-3 py-2 filter-active rounded-lg font-semibold"><%= i %></span>
+                <% } else { %>
+                  <a href="?page=<%= i %><%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %><%= nivel ? '&nivel=' + nivel : '' %>" 
+                     class="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"><%= i %></a>
+                <% } %>
+              <% } %>
+              
+              <% if (endPage < totalPages) { %>
+                <% if (endPage < totalPages - 1) { %>
+                  <span class="px-2 text-gray-400">...</span>
+                <% } %>
+                <a href="?page=<%= totalPages %><%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %><%= nivel ? '&nivel=' + nivel : '' %>" 
+                   class="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"><%= totalPages %></a>
+              <% } %>
+            </div>
+            
+            <!-- Botón Siguiente -->
+            <% if (paginacion.pagina < paginacion.totalPaginas) { %>
+              <a href="?page=<%= paginacion.pagina + 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %><%= nivel ? '&nivel=' + nivel : '' %>" 
+                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                Siguiente
+                <i class="fas fa-chevron-right ml-1"></i>
+              </a>
+            <% } else { %>
+              <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                Siguiente
+                <i class="fas fa-chevron-right ml-1"></i>
+              </span>
+            <% } %>
+          </div>
         </div>
-      <% } %>
-    </section>
+      </div>
+    <% } %>
 
   <% } %>
-</div>
+</main>
+
+<!-- JavaScript inline para funcionalidad básica -->
+<script>
+// Función para editar curso - redirige a página de edición
+function editarCurso(cursoId) {
+    window.location.href = `/biblioteca/editar/${cursoId}`;
+}
+
+// Función para eliminar curso
+async function eliminarCurso(cursoId, titulo) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el curso "${titulo}"? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/biblioteca/cursos/${cursoId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            alert('Curso eliminado exitosamente');
+            window.location.reload();
+        } else {
+            const data = await response.json();
+            alert(data.error || 'Error al eliminar el curso');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión al eliminar el curso');
+    }
+}
+
+console.log('Biblioteca scripts cargados');
+</script>
 
 </body>
 </html>

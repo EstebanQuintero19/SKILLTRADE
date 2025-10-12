@@ -67,15 +67,34 @@
           <!-- Estadísticas destacadas -->
           <div class="grid grid-cols-3 gap-6 mb-10">
             <div class="text-center">
-              <div class="text-3xl font-bold mb-1"><%= (cursos || []).length %></div>
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-graduation-cap text-yellow-300 text-xl"></i>
+                <div class="text-3xl font-bold"><%= estadisticas?.totalCursos || (cursos || []).length %></div>
+              </div>
               <div class="text-sm text-purple-200">Cursos Activos</div>
             </div>
             <div class="text-center">
-              <div class="text-3xl font-bold mb-1">2.5K+</div>
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-users text-green-300 text-xl"></i>
+                <div class="text-3xl font-bold">
+                  <% if (estadisticas?.totalUsuarios) { %>
+                    <% if (estadisticas.totalUsuarios >= 1000) { %>
+                      <%= (estadisticas.totalUsuarios / 1000).toFixed(1) %>K+
+                    <% } else { %>
+                      <%= estadisticas.totalUsuarios %>
+                    <% } %>
+                  <% } else { %>
+                    0
+                  <% } %>
+                </div>
+              </div>
               <div class="text-sm text-purple-200">Estudiantes</div>
             </div>
             <div class="text-center">
-              <div class="text-3xl font-bold mb-1">4.9</div>
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-star text-yellow-400 text-xl"></i>
+                <div class="text-3xl font-bold"><%= estadisticas?.calificacionPromedio || '4.9' %></div>
+              </div>
               <div class="text-sm text-purple-200">Calificación</div>
             </div>
           </div>

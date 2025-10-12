@@ -134,6 +134,16 @@ const usuarioSchema = new Schema({
             default: 0,
             min: [0, 'Las suscripciones no pueden ser negativas']
         }
+    },
+    preferencias: {
+        notificaciones_email: {
+            type: Boolean,
+            default: true
+        },
+        notificaciones_cursos: {
+            type: Boolean,
+            default: true
+        }
     }
 }, {
     collection: 'usuarios',
