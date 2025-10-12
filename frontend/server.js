@@ -901,6 +901,68 @@ app.post('/carrito/pagar', async (req, res) => {
   res.redirect('/ventas');
 });
 
+// ===== RUTAS DE MERCADOPAGO =====
+
+// Crear preferencia de pago
+app.post('/api/mercadopago/crear-preferencia', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const response = await api.post(`/mercadopago/crear-preferencia`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error creando preferencia MercadoPago:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
+// Obtener estado del pago
+app.get('/api/mercadopago/pago/:paymentId', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const { paymentId } = req.params;
+    const response = await api.get(`/mercadopago/pago/${paymentId}`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo estado del pago:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
+// Páginas de resultado de pago
+app.get('/pago/exito', (req, res) => {
+  const { payment_id } = req.query;
+  res.render('pages/pago_exito', { 
+    title: 'Pago Exitoso', 
+    payment_id 
+  });
+});
+
+app.get('/pago/fallo', (req, res) => {
+  res.render('pages/pago_fallo', { 
+    title: 'Pago Fallido' 
+  });
+});
+
+app.get('/pago/pendiente', (req, res) => {
+  const { payment_id } = req.query;
+  res.render('pages/pago_pendiente', { 
+    title: 'Pago Pendiente', 
+    payment_id 
+  });
+});
+
 // Perfil: ver
 app.get('/perfil', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');

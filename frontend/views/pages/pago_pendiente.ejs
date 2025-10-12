@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago Pendiente - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .fade-in { animation: fadeIn 0.8s ease-out; }
+    .pulse-slow { animation: pulse 2s infinite; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .bg-custom { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 30%, #fde68a 60%, #fffbeb 100%); }
+  </style>
+</head>
+<body class="bg-custom min-h-screen">
+
+<!-- Header -->
+<%- include('../partials/header') %>
+
+<!-- Contenido principal -->
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full">
+    <!-- Tarjeta principal -->
+    <div class="bg-white rounded-2xl card-shadow p-8 text-center fade-in">
+      <!-- Icono de pendiente -->
+      <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6 pulse-slow">
+        <i class="fas fa-clock text-4xl text-yellow-600"></i>
+      </div>
+
+      <!-- Título -->
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        Pago Pendiente
+      </h1>
+      
+      <!-- Mensaje -->
+      <p class="text-lg text-gray-600 mb-8">
+        Tu pago está siendo procesado. Te notificaremos cuando se complete la transacción.
+      </p>
+
+      <!-- Información del pago -->
+      <% if (typeof payment_id !== 'undefined' && payment_id) { %>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+          <div class="flex items-center justify-center mb-2">
+            <i class="fas fa-receipt text-yellow-600 mr-2"></i>
+            <span class="font-semibold text-yellow-800">ID de Transacción</span>
+          </div>
+          <p class="text-yellow-700 font-mono text-sm"><%= payment_id %></p>
+        </div>
+      <% } %>
+
+      <!-- Estados del proceso -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <h3 class="font-semibold text-blue-800 mb-4 flex items-center justify-center">
+          <i class="fas fa-info-circle mr-2"></i>
+          Estado del Proceso
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-blue-700">Solicitud enviada</span>
+            <i class="fas fa-check-circle text-green-500"></i>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-blue-700">Procesando pago</span>
+            <div class="flex items-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-400">Confirmación</span>
+            <i class="fas fa-circle text-gray-300"></i>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-400">Acceso a cursos</span>
+            <i class="fas fa-circle text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tiempo estimado -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-8">
+        <div class="flex items-center justify-center mb-2">
+          <i class="fas fa-hourglass-half text-gray-600 mr-2"></i>
+          <span class="font-semibold text-gray-800">Tiempo Estimado</span>
+        </div>
+        <p class="text-gray-600 text-sm">El procesamiento puede tomar entre 5 minutos y 24 horas</p>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="space-y-4">
+        <button 
+          onclick="verificarEstadoPago()"
+          class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          <i class="fas fa-sync-alt mr-2"></i>
+          Verificar Estado
+        </button>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a 
+            href="/cursos"
+            class="block py-3 px-6 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+          >
+            <i class="fas fa-search mr-2"></i>
+            Explorar Cursos
+          </a>
+          <a 
+            href="/perfil"
+            class="block py-3 px-6 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+          >
+            <i class="fas fa-user mr-2"></i>
+            Mi Perfil
+          </a>
+        </div>
+      </div>
+
+      <!-- Mensaje de notificación -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <p class="text-sm text-gray-500">
+          <i class="fas fa-bell mr-1"></i>
+          Te enviaremos una notificación por email cuando el pago se complete
+        </p>
+      </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="mt-8 bg-white rounded-xl card-shadow p-6 fade-in">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+        ¿Qué significa "Pago Pendiente"?
+      </h3>
+      <div class="space-y-3 text-sm text-gray-600">
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+          <span>Tu pago está siendo verificado por el banco o entidad financiera</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+          <span>Algunos métodos de pago requieren confirmación adicional</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+          <span>Una vez aprobado, tendrás acceso inmediato a tus cursos</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+          <span>Si hay algún problema, te notificaremos de inmediato</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacto de soporte -->
+    <div class="mt-8 bg-white rounded-xl card-shadow p-6 fade-in">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-headset text-green-500 mr-2"></i>
+        ¿Necesitas Ayuda?
+      </h3>
+      <p class="text-sm text-gray-600 mb-4">
+        Si tu pago no se procesa en las próximas 24 horas, no dudes en contactarnos.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a 
+          href="mailto:soporte@skilltrade.com"
+          class="flex items-center justify-center py-2 px-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+        >
+          <i class="fas fa-envelope mr-2"></i>
+          Email
+        </a>
+        <a 
+          href="tel:+573001234567"
+          class="flex items-center justify-center py-2 px-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+        >
+          <i class="fas fa-phone mr-2"></i>
+          Teléfono
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<%- include('../partials/footer') %>
+
+<script>
+function verificarEstadoPago() {
+  const paymentId = '<%= typeof payment_id !== "undefined" ? payment_id : "" %>';
+  
+  if (!paymentId) {
+    alert('No se encontró ID de pago para verificar');
+    return;
+  }
+
+  // Mostrar loading
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verificando...';
+  button.disabled = true;
+
+  // Hacer petición para verificar estado
+  fetch(`/api/mercadopago/pago/${paymentId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': window.sessionData?.token || localStorage.getItem('authToken') || '',
+      'Authorization': `Bearer ${window.sessionData?.token || localStorage.getItem('authToken') || ''}`
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'approved') {
+      window.location.href = '/pago/exito?payment_id=' + paymentId;
+    } else if (data.status === 'rejected') {
+      window.location.href = '/pago/fallo';
+    } else {
+      alert('El pago sigue pendiente. Te notificaremos cuando se complete.');
+    }
+  })
+  .catch(error => {
+    console.error('Error al verificar estado:', error);
+    alert('Error al verificar el estado del pago. Intenta nuevamente.');
+  })
+  .finally(() => {
+    button.innerHTML = originalText;
+    button.disabled = false;
+  });
+}
+
+// Auto-verificar cada 30 segundos
+setInterval(() => {
+  const paymentId = '<%= typeof payment_id !== "undefined" ? payment_id : "" %>';
+  if (paymentId) {
+    fetch(`/api/mercadopago/pago/${paymentId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': window.sessionData?.token || localStorage.getItem('authToken') || '',
+        'Authorization': `Bearer ${window.sessionData?.token || localStorage.getItem('authToken') || ''}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'approved') {
+        window.location.href = '/pago/exito?payment_id=' + paymentId;
+      } else if (data.status === 'rejected') {
+        window.location.href = '/pago/fallo';
+      }
+    })
+    .catch(error => {
+      console.log('Auto-verificación falló:', error);
+    });
+  }
+}, 30000);
+</script>
+
+</body>
+</html>

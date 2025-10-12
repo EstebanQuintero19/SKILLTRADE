@@ -62,6 +62,10 @@ const carritoSchema = new Schema({
         default: function() {
             return new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 días
         }
+    },
+    mercadopago_preference_id: {
+        type: String,
+        default: null
     }
 }, {
     collection: 'carritos',

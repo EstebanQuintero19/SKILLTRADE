@@ -488,13 +488,17 @@ const agregarAlCarrito = async (req, res) => {
         );
 
         console.log('agregarAlCarrito - Guardando carrito, total:', carrito.total);
-        await carrito.save();
+        console.log('agregarAlCarrito - Items en carrito antes de guardar:', carrito.items.length);
+        
+        const carritoGuardado = await carrito.save();
+        console.log('agregarAlCarrito - Carrito guardado exitosamente, ID:', carritoGuardado._id);
+        console.log('agregarAlCarrito - Items después de guardar:', carritoGuardado.items.length);
 
         res.json({
             mensaje: 'Curso agregado al carrito exitosamente',
             carrito: {
-                items: carrito.items.length,
-                total: carrito.total
+                items: carritoGuardado.items.length,
+                total: carritoGuardado.total
             }
         });
 
@@ -525,17 +529,56 @@ const obtenerCarrito = async (req, res) => {
             .populate('items.curso', 'titulo imagen categoria precio');
 
         console.log('obtenerCarrito - Carrito encontrado:', carrito ? 'Sí' : 'No');
+        
+        if (carrito) {
+            console.log('obtenerCarrito - Items en carrito antes de filtrar:', carrito.items.length);
+            
+            // Filtrar items con cursos válidos (no null)
+            const itemsOriginales = carrito.items.length;
+            carrito.items = carrito.items.filter(item => item.curso && item.curso._id);
+            
+            // Si se eliminaron items inválidos, recalcular total y guardar
+            if (carrito.items.length !== itemsOriginales) {
+                console.log('obtenerCarrito - Eliminando items inválidos:', itemsOriginales - carrito.items.length);
+                carrito.total = carrito.items.reduce((total, item) => 
+                    total + (item.precio * item.cantidad), 0
+                );
+                await carrito.save();
+                console.log('obtenerCarrito - Carrito limpiado y guardado');
+            }
+            
+            console.log('obtenerCarrito - Items válidos en carrito:', carrito.items.length);
+            console.log('obtenerCarrito - Total del carrito:', carrito.total);
+            console.log('obtenerCarrito - Estado del carrito:', carrito.estado);
+            if (carrito.items.length > 0) {
+                console.log('obtenerCarrito - Primer item:', {
+                    curso: carrito.items[0].curso,
+                    precio: carrito.items[0].precio,
+                    cantidad: carrito.items[0].cantidad
+                });
+            }
+        }
 
         if (!carrito) {
+            console.log('obtenerCarrito - Devolviendo carrito vacío');
             return res.json({
-                items: [],
-                total: 0,
+                data: {
+                    items: [],
+                    total: 0
+                },
                 mensaje: 'Carrito vacío'
             });
         }
 
+        console.log('obtenerCarrito - Devolviendo carrito con items:', carrito.items.length);
         res.json({
-            carrito,
+            data: {
+                items: carrito.items,
+                total: carrito.total,
+                usuario: carrito.usuario,
+                estado: carrito.estado,
+                expiraEn: carrito.expiraEn
+            },
             mensaje: 'Carrito obtenido exitosamente'
         });
 

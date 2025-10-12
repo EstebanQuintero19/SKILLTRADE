@@ -226,6 +226,13 @@ app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCar
 // Ruta genérica de ventas (DEBE ir después de las rutas específicas)
 app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
 
+// ===== RUTAS DE MERCADOPAGO =====
+const mercadopagoController = require('./controller/mercadopago.controller');
+app.post('/api/mercadopago/crear-preferencia', autenticarApiKey, mercadopagoController.crearPreferenciaPago);
+app.post('/api/mercadopago/webhook', mercadopagoController.procesarWebhook);
+app.get('/api/mercadopago/pago/:paymentId', autenticarApiKey, mercadopagoController.obtenerEstadoPago);
+app.get('/api/mercadopago/success', mercadopagoController.procesarPagoExitoso);
+
 // ===== RUTAS DE ADMINISTRADOR =====
 app.get('/api/admin/estadisticas', verificarAdmin, adminController.obtenerEstadisticas);
 app.get('/api/admin/cursos', verificarAdmin, adminController.obtenerCursosPaginados);
