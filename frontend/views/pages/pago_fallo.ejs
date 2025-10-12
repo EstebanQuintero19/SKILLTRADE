@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago Fallido - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .fade-in { animation: fadeIn 0.8s ease-out; }
+    .shake { animation: shake 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .bg-custom { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 30%, #fecaca 60%, #fef2f2 100%); }
+  </style>
+</head>
+<body class="bg-custom min-h-screen">
+
+<!-- Header -->
+<%- include('../partials/header') %>
+
+<!-- Contenido principal -->
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full">
+    <!-- Tarjeta principal -->
+    <div class="bg-white rounded-2xl card-shadow p-8 text-center fade-in">
+      <!-- Icono de error -->
+      <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 shake">
+        <i class="fas fa-times text-4xl text-red-600"></i>
+      </div>
+
+      <!-- Título -->
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        Pago No Procesado
+      </h1>
+      
+      <!-- Mensaje -->
+      <p class="text-lg text-gray-600 mb-8">
+        Hubo un problema al procesar tu pago. No te preocupes, no se realizó ningún cargo.
+      </p>
+
+      <!-- Posibles causas -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8 text-left">
+        <h3 class="font-semibold text-yellow-800 mb-3 flex items-center">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          Posibles causas:
+        </h3>
+        <ul class="space-y-2 text-sm text-yellow-700">
+          <li class="flex items-start">
+            <i class="fas fa-circle text-xs mt-2 mr-2"></i>
+            <span>Fondos insuficientes en tu cuenta</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-circle text-xs mt-2 mr-2"></i>
+            <span>Datos de la tarjeta incorrectos</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-circle text-xs mt-2 mr-2"></i>
+            <span>Problemas de conectividad</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-circle text-xs mt-2 mr-2"></i>
+            <span>Límites de transacción excedidos</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="space-y-4">
+        <a 
+          href="/carrito"
+          class="block w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          <i class="fas fa-redo mr-2"></i>
+          Intentar Nuevamente
+        </a>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a 
+            href="/cursos"
+            class="block py-3 px-6 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+          >
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver a Cursos
+          </a>
+          <a 
+            href="/contacto"
+            class="block py-3 px-6 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+          >
+            <i class="fas fa-headset mr-2"></i>
+            Contactar Soporte
+          </a>
+        </div>
+      </div>
+
+      <!-- Mensaje de seguridad -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <p class="text-sm text-gray-500">
+          <i class="fas fa-shield-alt mr-1 text-green-500"></i>
+          Tu información está segura. No se realizó ningún cargo a tu cuenta.
+        </p>
+      </div>
+    </div>
+
+    <!-- Métodos de pago alternativos -->
+    <div class="mt-8 bg-white rounded-xl card-shadow p-6 fade-in">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-credit-card text-blue-500 mr-2"></i>
+        Métodos de Pago Disponibles
+      </h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <i class="fab fa-cc-visa text-2xl text-blue-600 mb-1"></i>
+          <p class="text-xs text-gray-600">Visa</p>
+        </div>
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <i class="fab fa-cc-mastercard text-2xl text-red-600 mb-1"></i>
+          <p class="text-xs text-gray-600">Mastercard</p>
+        </div>
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <i class="fas fa-university text-2xl text-green-600 mb-1"></i>
+          <p class="text-xs text-gray-600">PSE</p>
+        </div>
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <i class="fas fa-mobile-alt text-2xl text-purple-600 mb-1"></i>
+          <p class="text-xs text-gray-600">Nequi</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consejos para el próximo intento -->
+    <div class="mt-8 bg-white rounded-xl card-shadow p-6 fade-in">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+        Consejos para tu próximo intento
+      </h3>
+      <div class="space-y-3 text-sm text-gray-600">
+        <div class="flex items-start">
+          <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+          <span>Verifica que los datos de tu tarjeta sean correctos</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+          <span>Asegúrate de tener fondos suficientes</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+          <span>Intenta con una conexión a internet estable</span>
+        </div>
+        <div class="flex items-start">
+          <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
+          <span>Contacta a tu banco si el problema persiste</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<%- include('../partials/footer') %>
+
+</body>
+</html>

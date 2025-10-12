@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SkillTrade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow { box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1); }
+        .admin-gradient { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('../partials/header') %>
+    
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <div class="admin-gradient text-white py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <nav class="flex items-center space-x-2 text-red-200 mb-4">
+                            <a href="/admin" class="hover:text-white">Admin</a>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                            <span class="text-white">Cursos</span>
+                        </nav>
+                        <h1 class="text-3xl font-bold flex items-center">
+                            <i class="fas fa-graduation-cap mr-3"></i>
+                            Gestión de Cursos
+                        </h1>
+                        <p class="text-red-100 mt-2">Administra todos los cursos de la plataforma</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold"><%= paginacion.totalElementos || 0 %></div>
+                        <div class="text-red-200">Total Cursos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+            <!-- Tabla de Cursos -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Lista de Cursos
+                        <span class="ml-auto text-blue-100">
+                            Página <%= paginacion.paginaActual || 1 %> de <%= paginacion.totalPaginas || 1 %>
+                        </span>
+                    </h2>
+                </div>
+
+                <% if (cursos && cursos.length > 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-book mr-1"></i> Curso
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-user mr-1"></i> Propietario
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-tag mr-1"></i> Categoría
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-signal mr-1"></i> Nivel
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-dollar-sign mr-1"></i> Precio
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-calendar mr-1"></i> Fecha
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-cogs mr-1"></i> Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% cursos.forEach((curso, index) => { %>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-12 w-12">
+                                                    <% if (curso.imagen) { %>
+                                                        <img class="h-12 w-12 rounded-lg object-cover" src="<%= curso.imagen %>" alt="<%= curso.titulo %>">
+                                                    <% } else { %>
+                                                        <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                                            <i class="fas fa-graduation-cap text-white"></i>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900 max-w-xs truncate">
+                                                        <%= curso.titulo %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500 max-w-xs truncate">
+                                                        <%= curso.descripcion %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                                    <span class="text-white text-xs font-medium">
+                                                        <%= (curso.owner?.nombre || 'Usuario').charAt(0).toUpperCase() %>
+                                                    </span>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <%= curso.owner?.nombre || 'Sin nombre' %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        <%= curso.owner?.email || 'Sin email' %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <%= curso.categoria || 'Sin categoría' %>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                <% if (curso.nivel === 'Principiante') { %>bg-green-100 text-green-800<% } 
+                                                   else if (curso.nivel === 'intermedio') { %>bg-yellow-100 text-yellow-800<% } 
+                                                   else { %>bg-red-100 text-red-800<% } %>">
+                                                <%= curso.nivel || 'Sin nivel' %>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <% if (curso.precio > 0) { %>
+                                                <span class="text-sm font-medium text-green-600">
+                                                    $<%= curso.precio.toLocaleString() %>
+                                                </span>
+                                            <% } else { %>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    Gratis
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= new Date(curso.fechaCreacion).toLocaleDateString('es-ES') %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <a href="/curso/<%= curso._id %>" 
+                                                   class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors"
+                                                   title="Ver curso">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="/editar-curso/<%= curso._id %>" 
+                                                   class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-yellow-600 bg-yellow-100 hover:bg-yellow-200 transition-colors"
+                                                   title="Editar curso">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button onclick="eliminarCurso('<%= curso._id %>', '<%= curso.titulo %>')"
+                                                        class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-red-600 bg-red-100 hover:bg-red-200 transition-colors"
+                                                        title="Eliminar curso">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <% if (paginacion.totalPaginas > 1) { %>
+                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <% if (paginacion.paginaActual > 1) { %>
+                                        <a href="?page=<%= paginacion.paginaActual - 1 %>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Anterior
+                                        </a>
+                                    <% } %>
+                                    <% if (paginacion.paginaActual < paginacion.totalPaginas) { %>
+                                        <a href="?page=<%= paginacion.paginaActual + 1 %>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Siguiente
+                                        </a>
+                                    <% } %>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Mostrando
+                                            <span class="font-medium"><%= ((paginacion.paginaActual - 1) * 5) + 1 %></span>
+                                            a
+                                            <span class="font-medium"><%= Math.min(paginacion.paginaActual * 5, paginacion.totalElementos) %></span>
+                                            de
+                                            <span class="font-medium"><%= paginacion.totalElementos %></span>
+                                            cursos
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                            <% if (paginacion.paginaActual > 1) { %>
+                                                <a href="?page=<%= paginacion.paginaActual - 1 %>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
+                                            <% } %>
+                                            
+                                            <% for (let i = 1; i <= paginacion.totalPaginas; i++) { %>
+                                                <% if (i === paginacion.paginaActual) { %>
+                                                    <span class="relative inline-flex items-center px-4 py-2 border border-red-500 bg-red-50 text-sm font-medium text-red-600">
+                                                        <%= i %>
+                                                    </span>
+                                                <% } else { %>
+                                                    <a href="?page=<%= i %>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                        <%= i %>
+                                                    </a>
+                                                <% } %>
+                                            <% } %>
+                                            
+                                            <% if (paginacion.paginaActual < paginacion.totalPaginas) { %>
+                                                <a href="?page=<%= paginacion.paginaActual + 1 %>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            <% } %>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="text-center py-12">
+                        <i class="fas fa-graduation-cap text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No hay cursos</h3>
+                        <p class="text-gray-500">No se encontraron cursos en la plataforma.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-8"></div>
+
+    <script>
+        function eliminarCurso(cursoId, cursoTitulo) {
+            if (confirm(`¿Estás seguro de que deseas eliminar el curso "${cursoTitulo}"? Esta acción no se puede deshacer.`)) {
+                fetch(`/api/admin/cursos/${cursoId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': '<%= locals.token || "" %>',
+                        'Authorization': 'Bearer <%= locals.token || "" %>'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Curso eliminado exitosamente');
+                        window.location.reload();
+                    } else {
+                        alert('Error al eliminar curso: ' + (data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar curso');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
