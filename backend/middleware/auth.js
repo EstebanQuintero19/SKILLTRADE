@@ -50,15 +50,8 @@ const autenticarApiKey = async (req, res, next) => {
             });
         }
         
-        const TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
-        const referencia = usuario.updatedAt || usuario.fechaCreacion || new Date(0);
-        const expiraEn = new Date(referencia.getTime() + TTL_MS);
-        if (Date.now() > expiraEn.getTime()) {
-            return res.status(401).json({
-                success: false,
-                message: 'API Key expirada'
-            });
-        }
+        // Nota: TTL removido - las API Keys son persistentes hasta logout explícito
+        // Esto evita que los usuarios sean deslogueados automáticamente
 
         // Agregar usuario al request
         req.usuario = {

@@ -65,12 +65,18 @@ app.use(async (req, res, next) => {
       console.log(`Usuario autenticado: ${res.locals.user?.nombre || 'Sin nombre'}`);
     } catch (error) {
       console.log('Error validando token en middleware:', error.response?.status, error.message);
-      // Solo limpiar cookie si es un error 401 (token inválido) y no estamos en rutas críticas
+      
+      // Solo limpiar cookie si es específicamente "API Key inválida" o "API Key expirada"
       if (error.response?.status === 401 && !req.path.includes('/logout')) {
-        console.log('Token inválido detectado, limpiando cookie');
-        res.clearCookie('auth_token');
-        res.locals.signedIn = false;
-        res.locals.token = null;
+        const errorMessage = error.response?.data?.message || '';
+        if (errorMessage.includes('API Key inválida') || errorMessage.includes('API Key expirada')) {
+          console.log('API Key inválida/expirada detectada, limpiando cookie');
+          res.clearCookie('auth_token');
+          res.locals.signedIn = false;
+          res.locals.token = null;
+        } else {
+          console.log('Error 401 temporal, manteniendo sesión');
+        }
       }
       // Para otros errores (500, timeout, etc.), mantener signedIn = true pero sin datos de usuario
     }
@@ -525,15 +531,200 @@ app.post('/registro', async (req, res) => {
   }
 });
 
-// Intercambios (tabla estilo mockup)
+// Intercambios - Página principal de gestión
 app.get('/intercambios', async (req, res) => {
   if (!req.cookies?.auth_token) return res.redirect('/login');
   try {
-    const { data } = await api.get(`/exchanges`, { __req: req });
+    const { data } = await api.get(`/intercambios`, { __req: req });
     const exchanges = data?.data?.exchanges || data?.exchanges || data || [];
     res.render('pages/intercambios', { title: 'Intercambios', exchanges, API_BASE });
   } catch (err) {
+    console.error('Error cargando intercambios:', err.message);
     res.render('pages/intercambios', { title: 'Intercambios', exchanges: [], API_BASE });
+  }
+});
+
+// Rutas API proxy para intercambios
+app.post('/api/intercambios', async (req, res) => {
+  try {
+    const response = await api.post('/intercambios', req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error creando intercambio:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/intercambios', async (req, res) => {
+  try {
+    const response = await api.get('/intercambios', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo intercambios:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.put('/api/intercambios/:id/aceptar', async (req, res) => {
+  try {
+    const response = await api.put(`/intercambios/${req.params.id}/aceptar`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error aceptando intercambio:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.put('/api/intercambios/:id/rechazar', async (req, res) => {
+  try {
+    const response = await api.put(`/intercambios/${req.params.id}/rechazar`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error rechazando intercambio:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+// Rutas proxy para biblioteca
+app.get('/api/biblioteca/cursos-propios', async (req, res) => {
+  try {
+    const response = await api.get('/biblioteca/cursos-propios', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo cursos propios:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/biblioteca/cursos-usuario/:usuarioId', async (req, res) => {
+  try {
+    const response = await api.get(`/biblioteca/cursos-usuario/${req.params.usuarioId}`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo cursos de usuario:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/biblioteca/cursos-intercambio', async (req, res) => {
+  try {
+    const response = await api.get('/biblioteca/cursos-intercambio', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo cursos por intercambio:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/biblioteca/cursos-comprados', async (req, res) => {
+  try {
+    const response = await api.get('/biblioteca/cursos-comprados', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo cursos comprados:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/biblioteca/favoritos', async (req, res) => {
+  try {
+    const response = await api.get('/biblioteca/favoritos', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo favoritos:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.post('/api/biblioteca/favoritos/:cursoId', async (req, res) => {
+  try {
+    const response = await api.post(`/biblioteca/favoritos/${req.params.cursoId}`, {}, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error agregando favorito:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.delete('/api/biblioteca/favoritos/:cursoId', async (req, res) => {
+  try {
+    const response = await api.delete(`/biblioteca/favoritos/${req.params.cursoId}`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error removiendo favorito:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/usuarios/buscar', async (req, res) => {
+  try {
+    const response = await api.get(`/usuarios/buscar?q=${encodeURIComponent(req.query.q)}`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error buscando usuarios:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/usuarios', async (req, res) => {
+  try {
+    const response = await api.get('/usuarios', { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo usuarios:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.get('/api/biblioteca/verificar-acceso/:cursoId', async (req, res) => {
+  try {
+    const response = await api.get(`/biblioteca/verificar-acceso/${req.params.cursoId}`, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error verificando acceso a curso:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
   }
 });
 
@@ -749,7 +940,10 @@ app.post('/logout', async (req, res) => {
         }
       }).catch(() => {});
     }
-  } catch (_) { /* ignore */ }
+  } catch (err) {
+    console.error('Logout error:', err.message);
+  }
+  
   res.clearCookie('auth_token');
   res.redirect('/');
 });
@@ -764,6 +958,24 @@ app.get('/carrito', async (req, res) => {
   } catch (err) {
     res.render('pages/carrito', { title: 'Carrito', items: [] });
   }
+});
+
+// Mis cursos
+app.get('/mis-cursos', async (req, res) => {
+  if (!req.cookies?.auth_token) return res.redirect('/login');
+  try {
+    const { data } = await api.get(`/biblioteca/cursos-propios`, { __req: req });
+    const cursos = data?.cursos || data?.data || data || [];
+    res.render('pages/mis_cursos', { title: 'Mis cursos', cursos });
+  } catch (err) {
+    res.render('pages/mis_cursos', { title: 'Mis cursos', cursos: [] });
+  }
+});
+
+// Biblioteca
+app.get('/biblioteca', async (req, res) => {
+  if (!req.cookies?.auth_token) return res.redirect('/login');
+  res.render('pages/biblioteca', { title: 'Mi Biblioteca' });
 });
 
 // Ruta proxy para perfil de usuario

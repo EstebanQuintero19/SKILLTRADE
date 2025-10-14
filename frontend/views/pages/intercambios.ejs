@@ -302,26 +302,22 @@
                 <td class="px-6 py-4">
                   <% if (estado === 'pendiente') { %>
                     <div class="flex items-center gap-2">
-                      <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/aceptar" class="inline">
-                        <button 
-                          type="submit"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors border border-green-200"
-                          title="Aprobar intercambio"
-                        >
-                          <i class="fas fa-check"></i>
-                          Aprobar
-                        </button>
-                      </form>
-                      <form method="post" action="<%= API_BASE %>/api/exchanges/<%= x._id %>/rechazar" class="inline">
-                        <button 
-                          type="submit"
-                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-medium hover:bg-red-100 transition-colors border border-red-200"
-                          title="Rechazar intercambio"
-                        >
-                          <i class="fas fa-times"></i>
-                          Rechazar
-                        </button>
-                      </form>
+                      <button 
+                        onclick="aceptarIntercambio('<%= x._id %>')"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors border border-green-200"
+                        title="Aprobar intercambio"
+                      >
+                        <i class="fas fa-check"></i>
+                        Aprobar
+                      </button>
+                      <button 
+                        onclick="rechazarIntercambio('<%= x._id %>')"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-700 text-xs font-medium hover:bg-red-100 transition-colors border border-red-200"
+                        title="Rechazar intercambio"
+                      >
+                        <i class="fas fa-times"></i>
+                        Rechazar
+                      </button>
                     </div>
                   <% } else { %>
                     <span class="text-xs text-gray-500 italic flex items-center gap-1">
@@ -428,6 +424,148 @@
 
   // Inicializar filtros
   filter();
+
+  // Datos de sesión disponibles para JavaScript
+  window.sessionData = {
+    signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
+    token: '<%= locals.token || '' %>',
+    user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
+  };
+
+  // Función para obtener token de autenticación
+  function getAuthToken() {
+    if (window.sessionData && window.sessionData.token) {
+      return window.sessionData.token;
+    }
+    return localStorage.getItem('authToken') || '';
+  }
+
+  // Función para aceptar intercambio
+  async function aceptarIntercambio(intercambioId) {
+    if (!confirm('¿Estás seguro de que quieres aceptar este intercambio?')) {
+      return;
+    }
+
+    try {
+      console.log('🔄 Intentando aceptar intercambio:', intercambioId);
+      const token = getAuthToken();
+      console.log('🔑 Token enviado:', token ? 'SÍ' : 'NO');
+      
+      const response = await fetch(`/api/intercambios/${intercambioId}/aceptar`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': token,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fechaInicio: new Date().toISOString()
+        })
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Intercambio aceptado:', result);
+        mostrarNotificacion('Intercambio aceptado exitosamente', 'success');
+        // Recargar la página para mostrar los cambios
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const error = await response.json();
+        console.error('❌ Error del servidor:', error);
+        mostrarNotificacion(error.message || error.error || 'Error al aceptar intercambio', 'error');
+      }
+    } catch (error) {
+      console.error('💥 Error aceptando intercambio:', error);
+      mostrarNotificacion('Error al aceptar intercambio', 'error');
+    }
+  }
+
+  // Función para rechazar intercambio
+  async function rechazarIntercambio(intercambioId) {
+    const motivo = prompt('¿Por qué rechazas este intercambio? (opcional)');
+    if (motivo === null) return; // Usuario canceló
+
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`/api/intercambios/${intercambioId}/rechazar`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': token,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          motivo: motivo || 'Sin motivo especificado'
+        })
+      });
+
+      if (response.ok) {
+        mostrarNotificacion('Intercambio rechazado', 'success');
+        // Recargar la página para mostrar los cambios
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        const error = await response.json();
+        mostrarNotificacion(error.error || 'Error al rechazar intercambio', 'error');
+      }
+    } catch (error) {
+      console.error('Error rechazando intercambio:', error);
+      mostrarNotificacion('Error al rechazar intercambio', 'error');
+    }
+  }
+
+  // Sistema de notificaciones
+  function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear contenedor de notificaciones si no existe
+    let contenedor = document.getElementById('notificaciones');
+    if (!contenedor) {
+      contenedor = document.createElement('div');
+      contenedor.id = 'notificaciones';
+      contenedor.className = 'fixed top-4 right-4 z-50 space-y-2';
+      document.body.appendChild(contenedor);
+    }
+
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    const colores = {
+      success: 'bg-green-500 text-white',
+      error: 'bg-red-500 text-white',
+      info: 'bg-blue-500 text-white'
+    };
+    
+    notificacion.className = `${colores[tipo]} px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 flex items-center gap-3 max-w-sm`;
+    notificacion.innerHTML = `
+      <i class="fas ${tipo === 'success' ? 'fa-check' : tipo === 'error' ? 'fa-times' : 'fa-info'} text-lg"></i>
+      <span class="flex-1">${mensaje}</span>
+      <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+
+    contenedor.appendChild(notificacion);
+
+    // Animar entrada
+    setTimeout(() => {
+      notificacion.classList.remove('translate-x-full');
+    }, 100);
+
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+      if (notificacion.parentElement) {
+        notificacion.classList.add('translate-x-full');
+        setTimeout(() => {
+          if (notificacion.parentElement) {
+            notificacion.remove();
+          }
+        }, 300);
+      }
+    }, 5000);
+  }
 </script>
 
 </body>
