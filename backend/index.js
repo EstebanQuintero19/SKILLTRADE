@@ -104,6 +104,7 @@ const cursoController = require('./controller/curso.controller');
 const bibliotecaController = require('./controller/biblioteca.controller');
 const ventaController = require('./controller/venta.controller');
 const adminController = require('./controller/admin.controller');
+const exchangeController = require('./controller/exchange.controller');
 
 // Cargar middleware de autenticación
 const { autenticarApiKey } = require('./middleware/auth');
@@ -157,13 +158,14 @@ app.get('/api/estadisticas', usuarioController.obtenerEstadisticasGenerales);
 
 // Rutas de usuario autenticadas
 app.get('/api/usuarios/perfil', autenticarApiKey, usuarioController.obtenerPerfil);
+app.get('/api/usuarios/buscar', autenticarApiKey, usuarioController.buscarUsuarios);
+app.get('/api/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);
 app.get('/api/usuarios/:id', autenticarApiKey, usuarioController.obtenerUsuarioPorId);
 app.put('/api/usuarios/:id', autenticarApiKey, usuarioController.editarPerfil);
 app.put('/api/usuarios/perfil', autenticarApiKey, usuarioController.editarPerfil);
 app.post('/api/usuarios/password', autenticarApiKey, usuarioController.cambiarPassword);
 app.delete('/api/usuarios/:id', autenticarApiKey, usuarioController.eliminarUsuario);
 app.post('/api/auth/logout', autenticarApiKey, usuarioController.cerrarSesion);
-app.get('/api/usuarios', autenticarApiKey, usuarioController.obtenerUsuarios);
 app.post('/api/usuarios/limpiar-duplicado', usuarioController.limpiarUsuarioDuplicado);
 
 // Rutas de cursos (básicas para el frontend)
@@ -176,8 +178,25 @@ app.delete('/api/cursos/:id', autenticarApiKey, cursoController.eliminarCurso);
 app.post('/api/cursos', autenticarApiKey, upload.single('imagen'), cursoController.crearCurso);
 
 // Rutas de biblioteca
+app.get('/api/biblioteca/cursos-propios', autenticarApiKey, bibliotecaController.obtenerCursosPropios);
+app.get('/api/biblioteca/cursos-usuario/:usuarioId', autenticarApiKey, bibliotecaController.obtenerCursosDeUsuario);
+app.get('/api/biblioteca/cursos-intercambio', autenticarApiKey, bibliotecaController.obtenerCursosPorIntercambioActivo);
+app.get('/api/biblioteca/cursos-comprados', autenticarApiKey, bibliotecaController.obtenerCursosComprados);
+app.get('/api/biblioteca/favoritos', autenticarApiKey, bibliotecaController.obtenerFavoritos);
+app.post('/api/biblioteca/favoritos/:cursoId', autenticarApiKey, bibliotecaController.agregarFavorito);
+app.delete('/api/biblioteca/favoritos/:cursoId', autenticarApiKey, bibliotecaController.removerFavorito);
+app.get('/api/biblioteca/verificar-acceso/:cursoId', autenticarApiKey, bibliotecaController.verificarAccesoCurso);
 app.put('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.editarCursoDesdeLibreria);
 app.delete('/api/biblioteca/cursos/:cursoId', autenticarApiKey, bibliotecaController.eliminarCursoDesdeLibreria);
+
+// Rutas de intercambios
+app.post('/api/intercambios', autenticarApiKey, exchangeController.crearExchange);
+app.get('/api/intercambios', autenticarApiKey, exchangeController.obtenerExchanges);
+app.get('/api/intercambios/:id', autenticarApiKey, exchangeController.obtenerExchangePorId);
+app.put('/api/intercambios/:id/aceptar', autenticarApiKey, exchangeController.aceptarExchange);
+app.put('/api/intercambios/:id/rechazar', autenticarApiKey, exchangeController.rechazarExchange);
+app.put('/api/intercambios/:id/cancelar', autenticarApiKey, exchangeController.cancelarExchange);
+app.delete('/api/intercambios/:id', autenticarApiKey, exchangeController.eliminarExchange);
 
 // Rutas de ventas y carrito
 app.post('/api/ventas', autenticarApiKey, ventaController.crearVenta);

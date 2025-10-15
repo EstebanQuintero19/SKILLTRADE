@@ -114,7 +114,11 @@ const aceptarExchange = async (req, res) => {
     try {
         const { id } = req.params;
         const { fechaInicio } = req.body;
-        const receptorId = req.usuario.id;
+        const receptorId = req.usuario.id || req.usuario._id;
+
+        console.log('🔄 Intentando aceptar intercambio:', id);
+        console.log('👤 Usuario que acepta:', req.usuario);
+        console.log('🆔 Receptor ID extraído:', receptorId);
 
         if (!fechaInicio) {
             return res.status(400).json({
@@ -131,7 +135,12 @@ const aceptarExchange = async (req, res) => {
             });
         }
 
-        if (exchange.receptor.toString() !== receptorId) {
+        console.log('📋 Intercambio encontrado:');
+        console.log('  - Receptor en DB:', exchange.receptor.toString());
+        console.log('  - Usuario actual:', receptorId.toString());
+        console.log('  - ¿Son iguales?:', exchange.receptor.toString() === receptorId.toString());
+
+        if (exchange.receptor.toString() !== receptorId.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Solo el receptor puede aceptar el intercambio'

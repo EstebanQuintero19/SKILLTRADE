@@ -19,6 +19,9 @@
       transform: translateY(-8px);
       box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15);
     }
+    .favorite-btn { transition: all 0.3s ease; }
+    .favorite-btn.active i { color: #ef4444; }
+    .favorite-btn:hover i { color: #ef4444; }
     .animate-fade-in {
       animation: fadeIn 0.6s ease-out forwards;
     }
@@ -99,12 +102,17 @@
           </div>
           
           <% if (locals.signedIn) { %>
-          <div class="flex-shrink-0">
+          <div class="flex-shrink-0 flex gap-4">
             <a href="/cursos/crear" 
                 class="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               <i class="fas fa-plus mr-3"></i>
               Crear Curso
             </a>
+            <button onclick="abrirModalIntercambio()" 
+                    class="inline-flex items-center px-8 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="fas fa-exchange-alt mr-3"></i>
+              Nuevo Intercambio
+            </button>
           </div>
           <% } %>
         </div>
@@ -228,8 +236,13 @@
                 <% } %>
               </div>
 
-              <!-- Rating (si existe) -->
-              <div class="absolute top-4 right-4">
+              <!-- Botón de favorito y rating -->
+              <div class="absolute top-4 right-4 flex gap-2">
+                <% if (user) { %>
+                <button onclick="toggleFavorito('<%= curso._id %>')" class="favorite-btn p-2 rounded-full bg-white/90 backdrop-blur hover:bg-white transition-colors" title="Agregar a favoritos">
+                  <i class="fas fa-heart text-gray-400 hover:text-red-500 transition-colors"></i>
+                </button>
+                <% } %>
                 <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur">
                   <i class="fas fa-star text-yellow-400 text-xs"></i>
                   <span class="text-xs font-semibold text-gray-800"><%= curso.estadisticas?.calificacionPromedio?.toFixed(1) || 'N/A' %></span>
@@ -504,6 +517,13 @@
 </div>
 
 <script>
+  // Datos de sesión disponibles para JavaScript
+  window.sessionData = {
+    signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
+    token: '<%= locals.token || '' %>',
+    user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
+  };
+
   // Función para agregar curso al carrito
   async function agregarAlCarrito(cursoId) {
     // Verificar si el usuario está autenticado
@@ -641,6 +661,546 @@
       hero.style.transform = `translateY(${scrolled * 0.2}px)`;
     }
   });
+</script>
+
+<!-- Modal de Intercambio -->
+<div id="modalIntercambio" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-gray-900">
+          <i class="fas fa-exchange-alt mr-3 text-teal-500"></i>
+          Nuevo Intercambio
+        </h2>
+        <button onclick="cerrarModalIntercambio()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <form id="formIntercambio">
+        <!-- Paso 1: Seleccionar mi curso -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-book mr-2 text-purple-500"></i>
+            Mi curso para intercambiar
+          </label>
+          <select id="miCurso" name="cursoEmisor" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" required>
+            <option value="">Selecciona uno de tus cursos...</option>
+          </select>
+        </div>
+
+        <!-- Paso 2: Buscar usuario -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-user mr-2 text-blue-500"></i>
+            Buscar usuario
+          </label>
+          <div class="relative">
+            <input type="text" id="buscarUsuario" placeholder="Haz clic para ver todos los usuarios o escribe para buscar..." 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <div id="resultadosUsuarios" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden"></div>
+          <input type="hidden" id="usuarioSeleccionado" name="receptor">
+          <div id="usuarioElegido" class="mt-2 hidden">
+            <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+              <i class="fas fa-user-circle text-blue-500 text-xl mr-3"></i>
+              <div>
+                <div class="font-medium" id="nombreUsuarioElegido"></div>
+                <div class="text-sm text-gray-600" id="emailUsuarioElegido"></div>
+              </div>
+              <button type="button" onclick="limpiarUsuarioSeleccionado()" class="ml-auto text-red-500 hover:text-red-700">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3: Seleccionar curso del usuario -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-book-open mr-2 text-green-500"></i>
+            Curso que deseas del usuario
+          </label>
+          <select id="cursoUsuario" name="cursoReceptor" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" required disabled>
+            <option value="">Primero selecciona un usuario...</option>
+          </select>
+        </div>
+
+        <!-- Paso 4: Duración -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-clock mr-2 text-orange-500"></i>
+            Duración del intercambio
+          </label>
+          <select name="duracion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" required>
+            <option value="7">1 semana</option>
+            <option value="14">2 semanas</option>
+            <option value="30" selected>1 mes</option>
+            <option value="60">2 meses</option>
+            <option value="90">3 meses</option>
+          </select>
+        </div>
+
+        <!-- Paso 5: Comentario opcional -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-comment mr-2 text-indigo-500"></i>
+            Mensaje (opcional)
+          </label>
+          <textarea name="comentario" rows="3" placeholder="Escribe un mensaje para el usuario..." 
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3">
+          <button type="button" onclick="cerrarModalIntercambio()" 
+                  class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" 
+                  class="flex-1 px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Enviar Solicitud
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Variables globales para el modal de intercambio
+let usuariosEncontrados = [];
+let cursosUsuarioSeleccionado = [];
+let todosLosUsuarios = []; // Cache global de usuarios
+
+// Función para abrir el modal de intercambio
+async function abrirModalIntercambio() {
+  const modal = document.getElementById('modalIntercambio');
+  modal.classList.remove('hidden');
+  
+  // Cargar mis cursos
+  await cargarMisCursos();
+}
+
+// Función para cerrar el modal
+function cerrarModalIntercambio() {
+  const modal = document.getElementById('modalIntercambio');
+  modal.classList.add('hidden');
+  
+  // Limpiar formulario
+  document.getElementById('formIntercambio').reset();
+  limpiarUsuarioSeleccionado();
+}
+
+// Cargar mis cursos
+async function cargarMisCursos() {
+  try {
+    const token = getAuthToken();
+    const response = await fetch('/api/biblioteca/cursos-propios', {
+      headers: {
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const select = document.getElementById('miCurso');
+      select.innerHTML = '<option value="">Selecciona uno de tus cursos...</option>';
+      
+      data.cursos.forEach(curso => {
+        const option = document.createElement('option');
+        option.value = curso._id;
+        option.textContent = `${curso.titulo} (${curso.categoria.join(', ')})`;
+        select.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error cargando mis cursos:', error);
+    mostrarNotificacion('Error al cargar tus cursos', 'error');
+  }
+}
+
+// Búsqueda de usuarios en tiempo real y lista desplegable
+document.addEventListener('DOMContentLoaded', () => {
+  const buscarInput = document.getElementById('buscarUsuario');
+  let timeoutBusqueda;
+  
+  if (buscarInput) {
+    // Al hacer clic en el input, mostrar todos los usuarios
+    buscarInput.addEventListener('focus', async () => {
+      if (todosLosUsuarios.length === 0) {
+        // Mostrar indicador de carga
+        const contenedor = document.getElementById('resultadosUsuarios');
+        contenedor.innerHTML = `
+          <div class="p-4 text-center text-gray-500">
+            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+            <div class="text-sm">Cargando usuarios...</div>
+          </div>
+        `;
+        contenedor.classList.remove('hidden');
+        
+        await cargarTodosLosUsuarios();
+      }
+      mostrarResultadosUsuarios(todosLosUsuarios);
+    });
+
+    // Al escribir, filtrar usuarios
+    buscarInput.addEventListener('input', (e) => {
+      clearTimeout(timeoutBusqueda);
+      const query = e.target.value.trim();
+      
+      if (query.length === 0) {
+        // Si no hay texto, mostrar todos los usuarios
+        mostrarResultadosUsuarios(todosLosUsuarios);
+        return;
+      }
+      
+      if (query.length < 2) {
+        // Si hay menos de 2 caracteres, ocultar resultados
+        document.getElementById('resultadosUsuarios').classList.add('hidden');
+        return;
+      }
+      
+      // Filtrar usuarios localmente primero para respuesta inmediata
+      const usuariosFiltrados = todosLosUsuarios.filter(usuario => 
+        usuario.nombre.toLowerCase().includes(query.toLowerCase()) ||
+        usuario.email.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      mostrarResultadosUsuarios(usuariosFiltrados);
+      
+      // También hacer búsqueda en servidor para resultados más completos
+      timeoutBusqueda = setTimeout(() => {
+        buscarUsuarios(query);
+      }, 500);
+    });
+
+    // Ocultar resultados al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!buscarInput.contains(e.target) && !document.getElementById('resultadosUsuarios').contains(e.target)) {
+        document.getElementById('resultadosUsuarios').classList.add('hidden');
+      }
+    });
+  }
+});
+
+// Función para buscar usuarios
+async function buscarUsuarios(query) {
+  try {
+    const token = getAuthToken();
+    const response = await fetch(`/api/usuarios/buscar?q=${encodeURIComponent(query)}`, {
+      headers: {
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      mostrarResultadosUsuarios(data.data || []);
+    }
+  } catch (error) {
+    console.error('Error buscando usuarios:', error);
+  }
+}
+
+// Función para cargar todos los usuarios
+async function cargarTodosLosUsuarios() {
+  try {
+    console.log('🔄 Iniciando carga de usuarios...');
+    const token = getAuthToken();
+    console.log('🔑 Token obtenido:', token ? 'SÍ' : 'NO');
+    
+    const response = await fetch('/api/usuarios', {
+      headers: {
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📦 Datos completos recibidos:', data);
+      
+      // Intentar diferentes estructuras de datos
+      let usuarios = [];
+      if (data.data && data.data.usuarios) {
+        usuarios = data.data.usuarios;
+        console.log('✅ Usuarios encontrados en data.data.usuarios');
+      } else if (data.usuarios) {
+        usuarios = data.usuarios;
+        console.log('✅ Usuarios encontrados en data.usuarios');
+      } else if (Array.isArray(data.data)) {
+        usuarios = data.data;
+        console.log('✅ Usuarios encontrados en data.data (array)');
+      } else if (Array.isArray(data)) {
+        usuarios = data;
+        console.log('✅ Usuarios encontrados en data (array directo)');
+      }
+      
+      todosLosUsuarios = usuarios;
+      console.log('👥 Total usuarios cargados:', todosLosUsuarios.length);
+      console.log('👤 Primer usuario (ejemplo):', todosLosUsuarios[0]);
+    } else {
+      console.error('❌ Error al cargar usuarios:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('💥 Error cargando todos los usuarios:', error);
+  }
+}
+
+// Mostrar resultados de búsqueda de usuarios
+function mostrarResultadosUsuarios(usuarios) {
+  console.log('🎭 Mostrando usuarios:', usuarios.length, usuarios);
+  const contenedor = document.getElementById('resultadosUsuarios');
+  
+  if (!contenedor) {
+    console.error('❌ No se encontró el contenedor resultadosUsuarios');
+    return;
+  }
+  
+  if (usuarios.length === 0) {
+    console.log('⚠️ No hay usuarios para mostrar');
+    contenedor.innerHTML = `
+      <div class="p-4 text-center text-gray-500">
+        <i class="fas fa-users text-2xl mb-2"></i>
+        <div class="text-sm">No se encontraron usuarios</div>
+      </div>
+    `;
+    contenedor.classList.remove('hidden');
+    return;
+  }
+  
+  contenedor.innerHTML = '';
+  contenedor.classList.remove('hidden');
+  
+  usuarios.forEach((usuario, index) => {
+    const div = document.createElement('div');
+    div.className = `flex items-center p-3 hover:bg-teal-50 cursor-pointer transition-colors ${index === usuarios.length - 1 ? '' : 'border-b border-gray-100'}`;
+    div.innerHTML = `
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+        ${usuario.nombre.charAt(0).toUpperCase()}
+      </div>
+      <div class="flex-1">
+        <div class="font-medium text-gray-900">${usuario.nombre}</div>
+        <div class="text-sm text-gray-500">${usuario.email}</div>
+      </div>
+      <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+    `;
+    
+    div.addEventListener('click', () => seleccionarUsuario(usuario));
+    contenedor.appendChild(div);
+  });
+}
+
+// Seleccionar usuario
+async function seleccionarUsuario(usuario) {
+  document.getElementById('usuarioSeleccionado').value = usuario._id;
+  document.getElementById('nombreUsuarioElegido').textContent = usuario.nombre;
+  document.getElementById('emailUsuarioElegido').textContent = usuario.email;
+  document.getElementById('usuarioElegido').classList.remove('hidden');
+  document.getElementById('resultadosUsuarios').classList.add('hidden');
+  document.getElementById('buscarUsuario').value = '';
+  
+  // Cargar cursos del usuario seleccionado
+  await cargarCursosUsuario(usuario._id);
+}
+
+// Limpiar usuario seleccionado
+function limpiarUsuarioSeleccionado() {
+  document.getElementById('usuarioSeleccionado').value = '';
+  document.getElementById('usuarioElegido').classList.add('hidden');
+  document.getElementById('cursoUsuario').innerHTML = '<option value="">Primero selecciona un usuario...</option>';
+  document.getElementById('cursoUsuario').disabled = true;
+}
+
+// Cargar cursos del usuario seleccionado
+async function cargarCursosUsuario(usuarioId) {
+  try {
+    console.log('📚 Cargando cursos para usuario:', usuarioId);
+    const token = getAuthToken();
+    const response = await fetch(`/api/biblioteca/cursos-usuario/${usuarioId}`, {
+      headers: {
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    console.log('📡 Respuesta cursos usuario:', response.status, response.statusText);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📦 Datos cursos recibidos:', data);
+      
+      const select = document.getElementById('cursoUsuario');
+      select.innerHTML = '<option value="">Selecciona el curso que deseas...</option>';
+      select.disabled = false;
+      
+      // Intentar diferentes estructuras de datos
+      let cursos = [];
+      if (data.data && Array.isArray(data.data)) {
+        cursos = data.data;
+        console.log('✅ Cursos encontrados en data.data');
+      } else if (data.cursos && Array.isArray(data.cursos)) {
+        cursos = data.cursos;
+        console.log('✅ Cursos encontrados en data.cursos');
+      } else if (Array.isArray(data)) {
+        cursos = data;
+        console.log('✅ Cursos encontrados en data (array directo)');
+      }
+      
+      console.log('📚 Total cursos del usuario:', cursos.length);
+      
+      if (cursos.length > 0) {
+        cursos.forEach(curso => {
+          const option = document.createElement('option');
+          option.value = curso._id;
+          option.textContent = `${curso.titulo} (${curso.categoria.join(', ')}) - ${curso.precio > 0 ? '$' + curso.precio : 'Gratis'}`;
+          select.appendChild(option);
+        });
+        console.log('✅ Cursos agregados al select');
+      } else {
+        select.innerHTML = '<option value="">Este usuario no tiene cursos disponibles</option>';
+        console.log('⚠️ Usuario sin cursos disponibles');
+      }
+    } else {
+      console.error('❌ Error en respuesta:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('💥 Error cargando cursos del usuario:', error);
+    mostrarNotificacion('Error al cargar cursos del usuario', 'error');
+  }
+}
+
+// Manejar envío del formulario de intercambio
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('formIntercambio');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await enviarSolicitudIntercambio();
+    });
+  }
+});
+
+// Enviar solicitud de intercambio
+async function enviarSolicitudIntercambio() {
+  try {
+    const formData = new FormData(document.getElementById('formIntercambio'));
+    const data = Object.fromEntries(formData.entries());
+    
+    // Validaciones
+    if (!data.cursoEmisor) {
+      mostrarNotificacion('Selecciona uno de tus cursos', 'error');
+      return;
+    }
+    
+    if (!data.receptor) {
+      mostrarNotificacion('Selecciona un usuario', 'error');
+      return;
+    }
+    
+    if (!data.cursoReceptor) {
+      mostrarNotificacion('Selecciona el curso que deseas', 'error');
+      return;
+    }
+    
+    const token = getAuthToken();
+    const response = await fetch('/api/intercambios', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+      mostrarNotificacion('Solicitud de intercambio enviada exitosamente', 'success');
+      cerrarModalIntercambio();
+    } else {
+      const error = await response.json();
+      mostrarNotificacion(error.error || 'Error al enviar solicitud', 'error');
+    }
+  } catch (error) {
+    console.error('Error enviando solicitud:', error);
+    mostrarNotificacion('Error al enviar solicitud de intercambio', 'error');
+  }
+}
+
+// Función para obtener token de autenticación (reutilizada)
+function getAuthToken() {
+  if (window.sessionData && window.sessionData.token) {
+    return window.sessionData.token;
+  }
+  return localStorage.getItem('authToken') || '';
+}
+
+// Función para toggle favorito
+async function toggleFavorito(cursoId) {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      mostrarNotificacion('Debes iniciar sesión para agregar favoritos', 'error');
+      return;
+    }
+
+    const btn = document.querySelector(`button[onclick="toggleFavorito('${cursoId}')"]`);
+    const icon = btn.querySelector('i');
+    
+    // Cambiar visualmente mientras se procesa
+    btn.disabled = true;
+    icon.className = 'fas fa-spinner fa-spin text-gray-400';
+    
+    const response = await fetch(`/api/biblioteca/favoritos/${cursoId}`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': token,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Actualizar el botón según el resultado
+      if (data.action === 'added') {
+        icon.className = 'fas fa-heart text-red-500';
+        btn.classList.add('active');
+        mostrarNotificacion('Curso agregado a favoritos', 'success');
+      } else {
+        icon.className = 'fas fa-heart text-gray-400';
+        btn.classList.remove('active');
+        mostrarNotificacion('Curso removido de favoritos', 'success');
+      }
+    } else {
+      // Restaurar estado original en caso de error
+      icon.className = 'fas fa-heart text-gray-400';
+      mostrarNotificacion('Error al actualizar favoritos', 'error');
+    }
+    
+    btn.disabled = false;
+  } catch (error) {
+    console.error('Error toggling favorito:', error);
+    mostrarNotificacion('Error de conexión', 'error');
+    
+    // Restaurar estado original
+    const btn = document.querySelector(`button[onclick="toggleFavorito('${cursoId}')"]`);
+    if (btn) {
+      const icon = btn.querySelector('i');
+      icon.className = 'fas fa-heart text-gray-400';
+      btn.disabled = false;
+    }
+  }
+}
 </script>
 
 </body>

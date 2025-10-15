@@ -81,6 +81,10 @@
       <!-- Título y descripción -->
       <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] p-6 mb-6">
         <h1 class="text-3xl font-bold text-[#151117] mb-4"><%= curso?.titulo %></h1>
+        
+        <!-- Información de acceso al curso -->
+        <div id="acceso-info" class="mb-4 hidden"></div>
+        
         <p class="text-[#6f6880] leading-relaxed mb-6"><%= curso?.descripcion %></p>
 
         <!-- Información del curso en badges -->
@@ -451,9 +455,100 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Token del servidor disponible:', '<%= locals.token ? "SÍ" : "NO" %>');
     // Verificar autenticación después de 1 segundo
     setTimeout(verificarAuth, 1000);
+    // Verificar acceso al curso
+    setTimeout(() => verificarAccesoCurso('<%= curso._id %>'), 1500);
   <% } else { %>
     console.log('Usuario no autenticado según el servidor');
   <% } %>
+
+  // Función para verificar acceso al curso
+  async function verificarAccesoCurso(cursoId) {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`/api/biblioteca/verificar-acceso/${cursoId}`, {
+        headers: {
+          'X-API-Key': token,
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Acceso al curso verificado:', data);
+        
+        // Mostrar información de acceso
+        if (data.tieneAcceso) {
+          mostrarAccesoCurso(data.origen);
+        } else {
+          mostrarSinAcceso();
+        }
+      } else {
+        console.log('Sin acceso al curso');
+        mostrarSinAcceso();
+      }
+    } catch (error) {
+      console.error('Error verificando acceso al curso:', error);
+    }
+  }
+
+  // Mostrar información de acceso al curso
+  function mostrarAccesoCurso(origen) {
+    const contenedor = document.getElementById('acceso-info');
+    if (!contenedor) return;
+
+    let mensaje = '';
+    let color = '';
+    let icono = '';
+
+    switch (origen) {
+      case 'propio':
+        mensaje = 'Este es tu curso';
+        color = 'bg-blue-100 text-blue-800 border-blue-200';
+        icono = 'fas fa-user';
+        break;
+      case 'intercambio':
+        mensaje = 'Acceso por intercambio temporal';
+        color = 'bg-teal-100 text-teal-800 border-teal-200';
+        icono = 'fas fa-exchange-alt';
+        break;
+      case 'venta':
+        mensaje = 'Curso comprado';
+        color = 'bg-green-100 text-green-800 border-green-200';
+        icono = 'fas fa-shopping-cart';
+        break;
+      case 'suscripcion':
+        mensaje = 'Acceso por suscripción';
+        color = 'bg-purple-100 text-purple-800 border-purple-200';
+        icono = 'fas fa-crown';
+        break;
+      default:
+        mensaje = 'Tienes acceso a este curso';
+        color = 'bg-gray-100 text-gray-800 border-gray-200';
+        icono = 'fas fa-check';
+    }
+
+    contenedor.innerHTML = `
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${color}">
+        <i class="${icono}"></i>
+        ${mensaje}
+      </div>
+    `;
+    contenedor.classList.remove('hidden');
+  }
+
+  // Mostrar mensaje de sin acceso
+  function mostrarSinAcceso() {
+    const contenedor = document.getElementById('acceso-info');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = `
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border bg-red-100 text-red-800 border-red-200">
+        <i class="fas fa-lock"></i>
+        No tienes acceso a este curso
+      </div>
+    `;
+    contenedor.classList.remove('hidden');
+  }
 });
 </script>
 

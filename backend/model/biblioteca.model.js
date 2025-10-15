@@ -205,6 +205,10 @@ const bibliotecaSchema = new Schema({
             }
         }
     }],
+    favoritos: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Curso'
+    }]
 }, {
     collection: 'bibliotecas',
     timestamps: true
