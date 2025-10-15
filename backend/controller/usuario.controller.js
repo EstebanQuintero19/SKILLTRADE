@@ -975,6 +975,46 @@ const limpiarUsuarioDuplicado = async (req, res) => {
     }
 };
 
+// Función para buscar usuarios por nombre o email
+const buscarUsuarios = async (req, res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.trim().length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'La búsqueda debe tener al menos 2 caracteres'
+            });
+        }
+
+        const busqueda = q.trim();
+        const regex = new RegExp(busqueda, 'i');
+
+        const usuarios = await Usuario.find({
+            $or: [
+                { nombre: regex },
+                { email: regex }
+            ],
+            // Excluir al usuario actual de los resultados
+            _id: { $ne: req.usuario.id }
+        })
+        .select('_id nombre email')
+        .limit(10);
+
+        res.json({
+            success: true,
+            data: usuarios
+        });
+
+    } catch (error) {
+        console.error('Error al buscar usuarios:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al buscar usuarios'
+        });
+    }
+};
+
 module.exports = {
     registrarUsuario,
     loginUsuario,
@@ -991,5 +1031,6 @@ module.exports = {
     crearUsuario,
     actualizarUsuario,
     obtenerEstadisticasGenerales,
-    limpiarUsuarioDuplicado
+    limpiarUsuarioDuplicado,
+    buscarUsuarios
 };

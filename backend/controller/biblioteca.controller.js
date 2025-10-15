@@ -1,9 +1,9 @@
-const Biblioteca = require('../model/biblioteca.model');
-const Usuario = require('../model/usuario.model');
 const Curso = require('../model/curso.model');
-const Suscripcion = require('../model/suscripcion.model');
-const Exchange = require('../model/exchange.model');
+const Usuario = require('../model/usuario.model');
 const Venta = require('../model/venta.model');
+const Exchange = require('../model/exchange.model');
+const Suscripcion = require('../model/suscripcion.model');
+const Biblioteca = require('../model/biblioteca.model');
 
 // RF-BIB-01: Cursos propios
 const obtenerCursosPropios = async (req, res) => {
@@ -190,67 +190,6 @@ const obtenerCursosPorIntercambio = async (req, res) => {
     }
 };
 
-// RF-BIB-04: Cursos comprados
-const obtenerCursosComprados = async (req, res) => {
-    try {
-        const usuarioId = req.usuario._id;
-        const { page = 1, limit = 10, categoria } = req.query;
-
-        // Obtener ventas completadas del usuario
-        const ventas = await Venta.find({
-            comprador: usuarioId,
-            estado: 'completada'
-        }).populate('items.curso');
-
-        // Extraer cursos comprados
-        const cursosComprados = [];
-        ventas.forEach(venta => {
-            venta.items.forEach(item => {
-                if (item.curso) {
-                    cursosComprados.push({
-                        ...item.curso.toObject(),
-                        origen: 'venta',
-                        ventaId: venta._id,
-                        fechaCompra: venta.fechaCompra,
-                        precioPagado: item.precio
-                    });
-                }
-            });
-        });
-
-        // Aplicar filtros
-        let cursosFiltrados = cursosComprados;
-        if (categoria) {
-            cursosFiltrados = cursosComprados.filter(curso =>
-                curso.categoria.includes(categoria)
-            );
-        }
-
-        // Aplicar paginación
-        const total = cursosFiltrados.length;
-        const inicio = (parseInt(page) - 1) * parseInt(limit);
-        const fin = inicio + parseInt(limit);
-        const cursosPaginados = cursosFiltrados.slice(inicio, fin);
-
-        res.json({
-            tipo: 'venta',
-            cursos: cursosPaginados,
-            total,
-            paginacion: {
-                pagina: parseInt(page),
-                totalPaginas: Math.ceil(total / parseInt(limit)),
-                totalElementos: total,
-                elementosPorPagina: parseInt(limit)
-            }
-        });
-
-    } catch (error) {
-        console.error('Error al obtener cursos comprados:', error);
-        res.status(500).json({
-            error: 'Error interno del servidor al obtener cursos comprados'
-        });
-    }
-};
 
 // RF-BIB-05: Clasificar por origen
 const obtenerBibliotecaCompleta = async (req, res) => {
@@ -470,12 +409,15 @@ const filtrarCursos = async (req, res) => {
 // RF-BIB-07: Favoritos
 const agregarFavorito = async (req, res) => {
     try {
-        const usuarioId = req.usuario._id;
-        const { cursoId } = req.body;
+        const usuarioId = req.usuario.id || req.usuario._id;
+        const { cursoId } = req.params; // Obtener del parámetro de la URL
+        
+        console.log('Agregando favorito:', { usuarioId, cursoId });
 
         if (!cursoId) {
             return res.status(400).json({
-                error: 'ID del curso es obligatorio'
+                success: false,
+                message: 'ID del curso es obligatorio'
             });
         }
 
@@ -483,40 +425,53 @@ const agregarFavorito = async (req, res) => {
         const curso = await Curso.findById(cursoId);
         if (!curso) {
             return res.status(404).json({
-                error: 'Curso no encontrado'
+                success: false,
+                message: 'Curso no encontrado'
             });
         }
 
         // Obtener o crear biblioteca del usuario
         let biblioteca = await Biblioteca.findOne({ usuario: usuarioId });
         if (!biblioteca) {
-            biblioteca = new Biblioteca({ usuario: usuarioId });
-        }
-
-        // Verificar si ya está en favoritos
-        const yaFavorito = biblioteca.favoritos.includes(cursoId);
-        if (yaFavorito) {
-            return res.status(400).json({
-                error: 'El curso ya está en favoritos'
+            biblioteca = new Biblioteca({ 
+                usuario: usuarioId,
+                favoritos: []
             });
         }
 
-        // Agregar a favoritos
-        biblioteca.favoritos.push(cursoId);
-        await biblioteca.save();
-
-        res.json({
-            mensaje: 'Curso agregado a favoritos exitosamente',
-            biblioteca: {
-                favoritos: biblioteca.favoritos.length,
-                cursoId
-            }
-        });
+        // Verificar si ya está en favoritos
+        const yaFavorito = biblioteca.favoritos.some(fav => fav.toString() === cursoId);
+        
+        if (yaFavorito) {
+            // Si ya está en favoritos, lo removemos (toggle)
+            biblioteca.favoritos = biblioteca.favoritos.filter(fav => fav.toString() !== cursoId);
+            await biblioteca.save();
+            
+            return res.json({
+                success: true,
+                action: 'removed',
+                message: 'Curso removido de favoritos',
+                total: biblioteca.favoritos.length
+            });
+        } else {
+            // Si no está en favoritos, lo agregamos
+            biblioteca.favoritos.push(cursoId);
+            await biblioteca.save();
+            
+            return res.json({
+                success: true,
+                action: 'added',
+                message: 'Curso agregado a favoritos',
+                total: biblioteca.favoritos.length
+            });
+        }
 
     } catch (error) {
-        console.error('Error al agregar favorito:', error);
+        console.error('Error al manejar favorito:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al agregar favorito'
+            success: false,
+            message: 'Error interno del servidor al manejar favorito',
+            error: error.message
         });
     }
 };
@@ -563,47 +518,44 @@ const removerFavorito = async (req, res) => {
 
 const obtenerFavoritos = async (req, res) => {
     try {
-        const usuarioId = req.usuario._id;
-        const { page = 1, limit = 10 } = req.query;
+        const usuarioId = req.usuario.id || req.usuario._id;
+        console.log('❤️ Obteniendo favoritos para usuario:', usuarioId);
 
-        // Obtener biblioteca del usuario
-        const biblioteca = await Biblioteca.findOne({ usuario: usuarioId })
-            .populate('favoritos');
-
-        if (!biblioteca || !biblioteca.favoritos || biblioteca.favoritos.length === 0) {
-            return res.json({
-                favoritos: [],
-                total: 0,
-                paginacion: {
-                    pagina: 1,
-                    totalPaginas: 0,
-                    totalElementos: 0,
-                    elementosPorPagina: parseInt(limit)
+        // Obtener o crear biblioteca del usuario
+        let biblioteca = await Biblioteca.findOne({ usuario: usuarioId })
+            .populate({
+                path: 'favoritos',
+                populate: {
+                    path: 'owner',
+                    select: 'nombre email'
                 }
             });
+
+        // Si no existe biblioteca, crear una vacía
+        if (!biblioteca) {
+            biblioteca = new Biblioteca({
+                usuario: usuarioId,
+                favoritos: []
+            });
+            await biblioteca.save();
         }
 
-        // Aplicar paginación
-        const total = biblioteca.favoritos.length;
-        const inicio = (parseInt(page) - 1) * parseInt(limit);
-        const fin = inicio + parseInt(limit);
-        const favoritosPaginados = biblioteca.favoritos.slice(inicio, fin);
+        // Obtener favoritos
+        const favoritos = biblioteca.favoritos || [];
+        console.log('❤️ Favoritos encontrados:', favoritos.length);
 
         res.json({
-            favoritos: favoritosPaginados,
-            total,
-            paginacion: {
-                pagina: parseInt(page),
-                totalPaginas: Math.ceil(total / parseInt(limit)),
-                totalElementos: total,
-                elementosPorPagina: parseInt(limit)
-            }
+            success: true,
+            data: favoritos,
+            total: favoritos.length
         });
 
     } catch (error) {
         console.error('Error al obtener favoritos:', error);
         res.status(500).json({
-            error: 'Error interno del servidor al obtener favoritos'
+            success: false,
+            message: 'Error interno del servidor al obtener favoritos',
+            error: error.message
         });
     }
 };
@@ -925,6 +877,161 @@ const eliminarCursoDesdeLibreria = async (req, res) => {
     }
 };
 
+// Función para obtener cursos de un usuario específico (para intercambios)
+const obtenerCursosDeUsuario = async (req, res) => {
+    try {
+        const { usuarioId } = req.params;
+        
+        if (!usuarioId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID de usuario es requerido'
+            });
+        }
+
+        console.log('🔍 Buscando cursos para usuario:', usuarioId);
+        
+        // Obtener cursos del usuario especificado (incluyendo borradores y activos)
+        const cursos = await Curso.find({ 
+            owner: usuarioId,
+            estadoCurso: { $in: ['activo', 'borrador', 'publicado'] } // Incluir diferentes estados
+        })
+        .select('_id titulo categoria imagen precio nivel estadoCurso')
+        .populate('owner', 'nombre email')
+        .sort({ fechaCreacion: -1 });
+
+        console.log('📚 Cursos encontrados para usuario:', cursos.length);
+        console.log('📋 Estados de cursos:', cursos.map(c => ({ titulo: c.titulo, estado: c.estadoCurso })));
+
+        res.json({
+            success: true,
+            data: cursos,
+            total: cursos.length
+        });
+
+    } catch (error) {
+        console.error('Error al obtener cursos de usuario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al obtener cursos'
+        });
+    }
+};
+
+// Función para obtener cursos disponibles por intercambios activos
+const obtenerCursosPorIntercambioActivo = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id || req.usuario._id;
+        console.log('📚 Obteniendo cursos por intercambio activo para usuario:', usuarioId);
+
+        // Buscar intercambios activos donde el usuario es receptor
+        const intercambiosActivos = await Exchange.find({
+            receptor: usuarioId,
+            estado: 'activo',
+            fechaFin: { $gte: new Date() } // Solo intercambios que no han expirado
+        })
+        .populate({
+            path: 'cursoEmisor',
+            populate: {
+                path: 'owner',
+                select: 'nombre email'
+            }
+        })
+        .populate('emisor', 'nombre email')
+        .sort({ fechaInicio: -1 });
+
+        console.log('🔄 Intercambios activos encontrados:', intercambiosActivos.length);
+
+        // Extraer los cursos de los intercambios (el usuario receptor accede al curso del emisor)
+        const cursosIntercambio = intercambiosActivos
+            .filter(intercambio => intercambio.cursoEmisor) // Filtrar intercambios con curso válido
+            .map(intercambio => ({
+                ...intercambio.cursoEmisor.toObject(),
+                intercambio: {
+                    id: intercambio._id,
+                    fechaInicio: intercambio.fechaInicio,
+                    fechaFin: intercambio.fechaFin,
+                    duracion: intercambio.duracion,
+                    solicitante: intercambio.emisor
+                }
+            }));
+
+        console.log('📚 Cursos de intercambio procesados:', cursosIntercambio.length);
+
+        res.json({
+            success: true,
+            data: cursosIntercambio,
+            total: cursosIntercambio.length
+        });
+
+    } catch (error) {
+        console.error('Error al obtener cursos por intercambio:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al obtener cursos por intercambio',
+            error: error.message
+        });
+    }
+};
+
+// Función para obtener cursos comprados
+const obtenerCursosComprados = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id || req.usuario._id;
+        console.log('🛒 Obteniendo cursos comprados para usuario:', usuarioId);
+
+        // Buscar ventas completadas del usuario
+        const ventas = await Venta.find({
+            comprador: usuarioId,
+            estado: 'completada'
+        })
+        .populate({
+            path: 'items.curso',
+            populate: {
+                path: 'owner',
+                select: 'nombre email'
+            }
+        })
+        .sort({ fechaCompra: -1 });
+
+        console.log('🛒 Ventas encontradas:', ventas.length);
+
+        // Extraer cursos de las ventas
+        const cursosComprados = [];
+        ventas.forEach(venta => {
+            venta.items.forEach(item => {
+                if (item.curso) {
+                    cursosComprados.push({
+                        ...item.curso.toObject(),
+                        compra: {
+                            ventaId: venta._id,
+                            fechaCompra: venta.fechaCompra,
+                            precio: item.precio,
+                            metodoPago: venta.metodoPago
+                        }
+                    });
+                }
+            });
+        });
+
+        console.log('🛒 Cursos comprados procesados:', cursosComprados.length);
+
+        res.json({
+            success: true,
+            data: cursosComprados,
+            total: cursosComprados.length
+        });
+
+    } catch (error) {
+        console.error('Error al obtener cursos comprados:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al obtener cursos comprados',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     obtenerCursosPropios,
     obtenerCursosPorSuscripcion,
@@ -938,5 +1045,7 @@ module.exports = {
     verificarAccesoCurso,
     obtenerBiblioteca,
     editarCursoDesdeLibreria,
-    eliminarCursoDesdeLibreria
+    eliminarCursoDesdeLibreria,
+    obtenerCursosDeUsuario,
+    obtenerCursosPorIntercambioActivo
 };
