@@ -239,6 +239,32 @@ const ventaSchema = new Schema({
             term: String,
             content: String
         }
+    },
+    mercadopago: {
+        payment_id: {
+            type: String,
+            index: true
+        },
+        preference_id: String,
+        status: String,
+        status_detail: String,
+        payment_method_id: String,
+        transaction_amount: Number,
+        installments: Number,
+        issuer_id: String,
+        payment_type_id: String,
+        date_created: Date,
+        date_approved: Date,
+        money_release_date: Date,
+        collector_id: String,
+        payer: {
+            id: String,
+            email: String,
+            identification: {
+                type: String,
+                number: String
+            }
+        }
     }
 }, {
     collection: 'ventas',

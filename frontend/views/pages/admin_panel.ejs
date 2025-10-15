@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SkillTrade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow { box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1); }
+        .admin-gradient { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('../partials/header') %>
+    
+    <div class="min-h-screen bg-gray-50">
+        <!-- Hero Section -->
+        <div class="admin-gradient text-white py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="bg-white/20 p-4 rounded-full">
+                            <i class="fas fa-shield-alt text-4xl"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl font-bold mb-4">Panel de Administrador</h1>
+                    <p class="text-xl text-red-100 max-w-2xl mx-auto">
+                        Gestiona todos los aspectos de SkillTrade desde este panel centralizado
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Cursos -->
+                <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Cursos</p>
+                            <p class="text-3xl font-bold text-gray-900"><%= estadisticas.totalCursos || 0 %></p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-graduation-cap text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/admin_cursos" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            Ver todos <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Total Usuarios -->
+                <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Usuarios</p>
+                            <p class="text-3xl font-bold text-gray-900"><%= estadisticas.totalUsuarios || 0 %></p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-users text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/admin_usuarios" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                            Ver todos <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Total Ventas -->
+                <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Ventas</p>
+                            <p class="text-3xl font-bold text-gray-900"><%= estadisticas.totalVentas || 0 %></p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="/admin_ventas" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
+                            Ver todas <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Ingresos Totales -->
+                <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Ingresos Totales</p>
+                            <p class="text-3xl font-bold text-gray-900">$<%= (estadisticas.ingresosTotales || 0).toLocaleString() %></p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-yellow-600 text-sm font-medium">
+                            Total recaudado
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="bg-white rounded-xl card-shadow p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-bolt text-red-600 mr-3"></i>
+                    Acciones Rápidas
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="/admin_cursos" class="bg-blue-50 hover:bg-blue-100 p-6 rounded-lg text-center transition-colors">
+                        <i class="fas fa-graduation-cap text-blue-600 text-2xl mb-3"></i>
+                        <h3 class="font-semibold text-gray-900">Gestionar Cursos</h3>
+                        <p class="text-sm text-gray-600 mt-2">Ver y administrar todos los cursos</p>
+                    </a>
+                    
+                    <a href="/admin_usuarios" class="bg-green-50 hover:bg-green-100 p-6 rounded-lg text-center transition-colors">
+                        <i class="fas fa-users text-green-600 text-2xl mb-3"></i>
+                        <h3 class="font-semibold text-gray-900">Gestionar Usuarios</h3>
+                        <p class="text-sm text-gray-600 mt-2">Ver y administrar usuarios</p>
+                    </a>
+                    
+                    <a href="/admin_ventas" class="bg-purple-50 hover:bg-purple-100 p-6 rounded-lg text-center transition-colors">
+                        <i class="fas fa-chart-line text-purple-600 text-2xl mb-3"></i>
+                        <h3 class="font-semibold text-gray-900">Ver Ventas</h3>
+                        <p class="text-sm text-gray-600 mt-2">Revisar historial de ventas</p>
+                    </a>
+                    
+                    <a href="/admin_intercambios" class="bg-orange-50 hover:bg-orange-100 p-6 rounded-lg text-center transition-colors">
+                        <i class="fas fa-exchange-alt text-orange-600 text-2xl mb-3"></i>
+                        <h3 class="font-semibold text-gray-900">Ver Intercambios</h3>
+                        <p class="text-sm text-gray-600 mt-2">Gestionar intercambios</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información del Sistema -->
+            <div class="bg-white rounded-xl card-shadow p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-red-600 mr-3"></i>
+                    Información del Sistema
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="bg-red-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900">Acceso Seguro</h3>
+                        <p class="text-sm text-gray-600 mt-2">Panel protegido con autenticación de administrador</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-database text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900">Datos en Tiempo Real</h3>
+                        <p class="text-sm text-gray-600 mt-2">Información actualizada automáticamente</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-cogs text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900">Control Total</h3>
+                        <p class="text-sm text-gray-600 mt-2">Gestión completa de la plataforma</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-8"></div>
+</body>
+</html>
