@@ -10,18 +10,41 @@ const logger = require('./services/winston-logger');
 
 const app = express();
 
-// Configuración de multer para manejar archivos en memoria
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: config.MAX_FILE_SIZE || 5 * 1024 * 1024 // 5MB por defecto
+// Configuración de multer para subida de archivos
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, config.UPLOAD_PATH);
     },
-    fileFilter: (req, file, cb) => {
-        // Solo permitir imágenes
-        if (!file.mimetype.startsWith('image/')) {
-            return cb(new Error('Solo se permiten archivos de imagen'));
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: config.MAX_FILE_SIZE,
+        files: 1 // Solo un archivo por petición
+    },
+    fileFilter: function (req, file, cb) {
+        // Validación más estricta de archivos
+        const allowedMimes = [
+            'image/jpeg',
+            'image/jpg', 
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'video/mp4',
+            'video/webm',
+            'video/avi'
+        ];
+        
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Tipo de archivo no permitido: ${file.mimetype}`));
         }
-        cb(null, true);
     }
 });
 
@@ -174,8 +197,19 @@ app.get('/api/cursos/:id', cursoController.obtenerCursoPorId);
 app.get('/api/cursos/mis-cursos/paginados', autenticarApiKey, cursoController.obtenerMisCursosPaginados);
 app.put('/api/cursos/:id', autenticarApiKey, cursoController.actualizarCurso);
 app.delete('/api/cursos/:id', autenticarApiKey, cursoController.eliminarCurso);
-// Ruta para crear curso con carga de imagen
-app.post('/api/cursos', autenticarApiKey, upload.single('imagen'), cursoController.crearCurso);
+app.post('/api/cursos', autenticarApiKey, (req, res, next) => {
+    const upload = req.app.locals.upload;
+    if (upload) {
+        upload.single('imagen')(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+}, cursoController.crearCurso);
 
 // Rutas de biblioteca
 app.get('/api/biblioteca/cursos-propios', autenticarApiKey, bibliotecaController.obtenerCursosPropios);

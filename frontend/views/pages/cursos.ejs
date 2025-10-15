@@ -104,7 +104,7 @@
           <% if (locals.signedIn) { %>
           <div class="flex-shrink-0 flex gap-4">
             <a href="/cursos/crear" 
-                class="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+               class="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               <i class="fas fa-plus mr-3"></i>
               Crear Curso
             </a>
@@ -128,57 +128,48 @@
         <div class="relative">
           <input 
             name="q" 
-            value="<%= typeof q !== 'undefined' ? q.replace(/"/g, '&quot;') : '' %>" 
+            value="<%= q || '' %>" 
             class="w-full h-14 rounded-xl border border-gray-300 pl-14 pr-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
             placeholder="Buscar cursos por título, categoría o instructor..." 
-            aria-label="Buscar cursos"
           />
           <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
           <!-- Mantener otros filtros en la búsqueda -->
-          <% if (typeof categoria !== 'undefined' && categoria) { %>
-            <input type="hidden" name="categoria" value="<%= categoria.replace(/"/g, '&quot;') %>">
-          <% } %>
-          <% if (typeof nivel !== 'undefined' && nivel) { %>
-            <input type="hidden" name="nivel" value="<%= nivel.replace(/"/g, '&quot;') %>">
-          <% } %>
-          <% if (typeof precioMin !== 'undefined' && precioMin !== null) { %>
-            <input type="hidden" name="precioMin" value="<%= precioMin %>">
-          <% } %>
-          <% if (typeof precioMax !== 'undefined' && precioMax !== null) { %>
-            <input type="hidden" name="precioMax" value="<%= precioMax %>">
-          <% } %>
+          <% if (categoria) { %><input type="hidden" name="categoria" value="<%= categoria %>"><% } %>
+          <% if (nivel) { %><input type="hidden" name="nivel" value="<%= nivel %>"><% } %>
+          <% if (precioMin) { %><input type="hidden" name="precioMin" value="<%= precioMin %>"><% } %>
+          <% if (precioMax) { %><input type="hidden" name="precioMax" value="<%= precioMax %>"><% } %>
         </div>
       </form>
 
       <!-- Filtros rápidos -->
       <div class="flex flex-wrap gap-3">
         <a href="/cursos<%= q ? '?q=' + encodeURIComponent(q) : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= !categoria ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= !categoria ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-th-large mr-2"></i>
           Todos
         </a>
         <a href="/cursos?categoria=programacion<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'programacion' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'programacion' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-code mr-2"></i>
           Programación
         </a>
         <a href="/cursos?categoria=diseno<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'diseno' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'diseno' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-palette mr-2"></i>
           Diseño
         </a>
         <a href="/cursos?categoria=marketing<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'marketing' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'marketing' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-bullhorn mr-2"></i>
           Marketing
         </a>
         <a href="/cursos?categoria=negocios<%= q ? '&q=' + encodeURIComponent(q) : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'negocios' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= categoria === 'negocios' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-briefcase mr-2"></i>
           Negocios
         </a>
         <a href="/cursos?precioMax=0<%= q ? '&q=' + encodeURIComponent(q) : '' %><%= categoria ? '&categoria=' + categoria : '' %>" 
-            class="px-4 py-2 rounded-lg border transition-all <%= precioMax === '0' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
+           class="px-4 py-2 rounded-lg border transition-all <%= precioMax === '0' ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-gift mr-2"></i>
           Gratis
         </a>
@@ -207,9 +198,9 @@
         <% cursos.forEach((curso, index) => { %>
           <div class="course-card bg-white rounded-2xl card-shadow overflow-hidden animate-fade-in" 
                style="animation-delay: <%= (index * 0.1) %>s;"
-                data-categories="<%= (curso.categoria || []).join(',').toLowerCase() %>"
-                data-price="<%= curso.precio || 0 %>"
-                data-title="<%= curso.titulo.toLowerCase() %>">
+               data-categories="<%= (curso.categoria || []).join(',').toLowerCase() %>"
+               data-price="<%= curso.precio || 0 %>"
+               data-title="<%= curso.titulo.toLowerCase() %>">
             
             <!-- Imagen del curso -->
             <div class="relative aspect-video overflow-hidden">
@@ -245,7 +236,7 @@
                 <% } %>
                 <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur">
                   <i class="fas fa-star text-yellow-400 text-xs"></i>
-                  <span class="text-xs font-semibold text-gray-800"><%= curso.estadisticas?.calificacionPromedio?.toFixed(1) || 'N/A' %></span>
+                  <span class="text-xs font-semibold text-gray-800">4.8</span>
                 </div>
               </div>
 
@@ -266,33 +257,25 @@
             <!-- Contenido -->
             <div class="p-6">
               <!-- Título -->
-              <h3 class="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-purple-600 transition-colors" title="<%= typeof curso.titulo === 'string' ? curso.titulo.replace(/"/g, '&quot;') : 'Curso sin título' %>">
-                <%= typeof curso.titulo === 'string' ? curso.titulo : 'Curso sin título' %>
+              <h3 class="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-purple-600 transition-colors">
+                <%= curso.titulo %>
               </h3>
               
               <!-- Descripción -->
               <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
-                <%= typeof curso.descripcion === 'string' ? curso.descripcion : 'Descripción no disponible' %>
+                <%= curso.descripcion %>
               </p>
 
               <!-- Categorías -->
               <div class="flex flex-wrap gap-2 mb-4">
-                <% if (Array.isArray(curso.categoria) && curso.categoria.length > 0) { %>
-                  <% curso.categoria.slice(0, 3).forEach(cat => { 
-                      if (typeof cat === 'string' && cat.trim() !== '') { 
-                  %>
+                <% if (curso.categoria && Array.isArray(curso.categoria)) { %>
+                  <% curso.categoria.slice(0, 3).forEach(cat => { %>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                       <i class="fas fa-tag mr-1"></i>
-                      <%= cat.trim() %>
+                      <%= cat %>
                     </span>
-                  <% } 
-                    }); 
-                  } else { %>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-                      <i class="fas fa-tag mr-1"></i>
-                      Sin categoría
-                    </span>
-                  <% } %>
+                  <% }) %>
+                <% } %>
               </div>
 
               <!-- Información adicional -->
@@ -300,72 +283,41 @@
                 <div class="flex items-center gap-4">
                   <div class="flex items-center gap-1">
                     <i class="fas fa-clock"></i>
-                    <span>
-                      <% if (typeof curso.duracion === 'number' && curso.duracion > 0) { %>
-                        <%= Math.ceil(curso.duracion / 60) %> horas
-                      <% } else { %>
-                        Sin duración
-                      <% } %>
-                    </span>
+                    <span>2-4 horas</span>
                   </div>
                   <div class="flex items-center gap-1">
                     <i class="fas fa-users"></i>
-                    <span>
-                      <% 
-                        const ventas = parseInt(curso.estadisticas?.ventasRealizadas) || 0;
-                        if (ventas > 0) {
-                          if (ventas >= 1000) {
-                            out.write((ventas / 1000).toFixed(1) + 'K+');
-                          } else {
-                            out.write(ventas);
-                          }
-                        } else {
-                          out.write('Nuevo');
-                        }
-                      %> estudiantes
-                    </span>
+                    <span>120 estudiantes</span>
                   </div>
                 </div>
               </div>
 
               <!-- Botones de acción -->
               <div class="flex gap-3">
-                <a href="/cursos/<%= typeof curso._id === 'string' ? curso._id : '' %>" 
-                   class="flex-1 inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                   aria-label="Ver curso <%= typeof curso.titulo === 'string' ? curso.titulo : '' %>">
+                <a href="/cursos/<%= curso._id %>" 
+                   class="flex-1 inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                   <i class="fas fa-play mr-2"></i>
                   Ver Curso
                 </a>
                 
                 <!-- Botón agregar al carrito (solo para cursos de pago) -->
-                <% if (typeof curso.precio === 'number' && curso.precio > 0) { %>
+                <% if (curso.precio && curso.precio > 0) { %>
                   <% if (locals.signedIn) { %>
-                  <button onclick="agregarAlCarrito('<%= typeof curso._id === 'string' ? curso._id : '' %>')" 
+                  <button onclick="agregarAlCarrito('<%= curso._id %>')" 
                           class="px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                          title="Agregar al carrito"
-                          aria-label="Agregar al carrito">
+                          title="Agregar al carrito">
                     <i class="fas fa-shopping-cart"></i>
                   </button>
                   <% } else { %>
-                  <a href="/login?redirect=/cursos<%= typeof q !== 'undefined' ? '?q=' + encodeURIComponent(q) : '' %>" 
+                  <a href="/login" 
                      class="px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                     title="Iniciar sesión para comprar"
-                     aria-label="Iniciar sesión para comprar">
+                     title="Iniciar sesión para comprar">
                     <i class="fas fa-sign-in-alt"></i>
                   </a>
                   <% } %>
-                <% } else { %>
-                  <a href="/cursos/<%= typeof curso._id === 'string' ? curso._id : '' %>" 
-                     class="px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                     title="Ver más detalles"
-                     aria-label="Ver más detalles">
-                    <i class="fas fa-info-circle"></i>
-                  </a>
                 <% } %>
                 
-                <button class="px-4 py-3 border border-gray-300 text-gray-600 rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all"
-                        title="Añadir a favoritos"
-                        aria-label="Añadir a favoritos">
+                <button class="px-4 py-3 border border-gray-300 text-gray-600 rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all">
                   <i class="fas fa-heart"></i>
                 </button>
               </div>
@@ -527,9 +479,9 @@
   // Función para agregar curso al carrito
   async function agregarAlCarrito(cursoId) {
     // Verificar si el usuario está autenticado
-    const isSignedIn = <%- typeof signedIn !== 'undefined' ? JSON.stringify(signedIn) : 'false' %>;
+    const isSignedIn = <%= locals.signedIn ? 'true' : 'false' %>;
     
-    if (isSignedIn !== 'true') {
+    if (!isSignedIn) {
       // Redirigir al login si no está autenticado
       window.location.href = '/login';
       return;
