@@ -1,3 +1,27 @@
+<!--
+/**
+ * GESTIÓN DE VENTAS ADMIN - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de administración para gestionar todas las ventas de la plataforma.
+ * Muestra transacciones, detalles de compras y estadísticas de ventas.
+ * 
+ * FUNCIONALIDADES:
+ * - Listado paginado de todas las ventas (5 por página)
+ * - Información detallada: usuario, cursos comprados, totales
+ * - Estadísticas de ventas con métricas clave
+ * - Tabla responsive con diseño moderno
+ * - Breadcrumb de navegación admin
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - ventas: Array de ventas paginadas
+ * - paginacion: Objeto con información de paginación
+ * - estadisticas: Métricas de ventas
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +39,7 @@
     <%- include('../partials/header') %>
     
     <div class="min-h-screen bg-gray-50">
-        <!-- Header -->
+        <!--HEADER - Breadcrumb y título de sección-->
         <div class="admin-gradient text-white py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between">

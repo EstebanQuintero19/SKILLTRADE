@@ -1,12 +1,37 @@
+/**
+ * Middleware de Autenticación - SkillTrade
+ * 
+ * Proporciona funciones de middleware para:
+ * - Autenticación basada en API Keys
+ * - Verificación de roles de usuario
+ * - Control de acceso a recursos
+ * - Validación de propiedad de contenido
+ */
+
 const Usuario = require('../model/usuario.model');
 
-// Middleware de autenticación con API Key (TTL: 24 horas)
+/**
+ * Middleware principal de autenticación basado en API Key
+ * 
+ * Valida la API Key del usuario en cada petición protegida:
+ * - Extrae API Key de headers X-API-Key o Authorization
+ * - Busca usuario correspondiente en base de datos
+ * - Verifica que la cuenta esté activa
+ * - Adjunta información del usuario al request
+ * 
+ * @param {Object} req - Request object de Express
+ * @param {Object} res - Response object de Express
+ * @param {Function} next - Función next para continuar middleware chain
+ */
 const autenticarApiKey = async (req, res, next) => {
     try {
         console.log(`autenticarApiKey - ${req.method} ${req.path}`);
         
-        // Bypass temporal de autenticación controlado por variable de entorno
-        // Si AUTH_DISABLED === 'true', se asigna un usuario mock y se continúa
+        /**
+         * Bypass de desarrollo para testing
+         * Permite deshabilitar autenticación en entorno de desarrollo
+         * mediante variable de entorno AUTH_DISABLED=true
+         */
         if (process.env.AUTH_DISABLED === 'true') {
             req.usuario = {
                 id: 'dev-user-id',
@@ -17,7 +42,10 @@ const autenticarApiKey = async (req, res, next) => {
             return next();
         }
 
-        // Obtener API Key del header
+        /**
+         * Extracción de API Key desde headers
+         * Soporta tanto X-API-Key como Authorization Bearer token
+         */
         const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
         console.log('autenticarApiKey - API Key presente:', apiKey ? 'SÍ' : 'NO');
         console.log('autenticarApiKey - API Key length:', apiKey ? apiKey.length : 0);
@@ -74,7 +102,22 @@ const autenticarApiKey = async (req, res, next) => {
     }
 };
 
-// Middleware para roles específicos
+/**
+ * Middleware de autorización basado en roles
+ * 
+ * Crea un middleware que verifica si el usuario autenticado
+ * tiene uno de los roles permitidos para acceder al recurso.
+ * 
+ * @param {Array<string>} roles - Array de roles permitidos (ej: ['admin', 'moderador'])
+ * @returns {Function} Middleware function para Express
+ * 
+ * @example
+ * // Solo administradores pueden acceder
+ * app.get('/admin/users', autenticarApiKey, requerirRol(['admin']), handler);
+ * 
+ * // Administradores y moderadores pueden acceder
+ * app.delete('/posts/:id', autenticarApiKey, requerirRol(['admin', 'moderador']), handler);
+ */
 const requerirRol = (roles) => {
     return (req, res, next) => {
         if (!req.usuario) {

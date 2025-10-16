@@ -1,6 +1,43 @@
+/**
+ * Middleware de Validación - SkillTrade
+ * 
+ * Sistema centralizado de validaciones usando express-validator:
+ * - Validaciones de entrada para todas las entidades
+ * - Sanitización automática de datos
+ * - Manejo consistente de errores de validación
+ * - Validaciones específicas por endpoint
+ * - Normalización de emails y datos de entrada
+ * 
+ * Tipos de validación implementados:
+ * - Usuarios: registro, login, actualización de perfil
+ * - Cursos: creación, actualización, validación de precios
+ * - Suscripciones: planes, métodos de pago, fechas
+ * - Intercambios: duración, comentarios, validación de cursos
+ * - Notificaciones: tipos, prioridades, acciones
+ * 
+ * Características principales:
+ * - Validaciones reutilizables y modulares
+ * - Mensajes de error descriptivos y localizados
+ * - Sanitización automática para prevenir inyecciones
+ * - Validación de tipos de datos y rangos
+ * - Integración con sistema de respuestas de error
+ */
+
 const { body, param, query, validationResult } = require('express-validator');
 
-// Middleware para manejar errores de validación
+/**
+ * Middleware central para manejo de errores de validación
+ * 
+ * Procesa los resultados de validación de express-validator:
+ * - Extrae errores de validación del request
+ * - Formatea errores en respuesta JSON consistente
+ * - Proporciona detalles específicos de cada error
+ * - Continúa al siguiente middleware si no hay errores
+ * 
+ * @param {Object} req - Request object de Express
+ * @param {Object} res - Response object de Express
+ * @param {Function} next - Función next para continuar middleware chain
+ */
 const manejarErroresValidacion = (req, res, next) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {

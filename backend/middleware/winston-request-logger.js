@@ -1,5 +1,15 @@
 /**
- * Middleware simple de logging de requests con Winston
+ * Middleware de Winston Request Logger - SkillTrade
+ * 
+ * Versión alternativa del middleware de logging con Winston:
+ * - Funcionalidad idéntica al request-logger principal
+ * - Logging estructurado de peticiones HTTP
+ * - Medición precisa de tiempo de respuesta
+ * - Clasificación automática por códigos de estado
+ * - Captura de metadatos de usuario e IP
+ * 
+ * Este archivo es una copia de seguridad o versión alternativa
+ * del middleware principal de logging de peticiones.
  */
 
 const logger = require('../services/winston-logger');

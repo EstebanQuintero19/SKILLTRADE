@@ -1,6 +1,21 @@
 /**
- * Middleware de seguridad para la API
- * Implementa Helmet, CORS seguro, Rate Limiting y validaciones
+ * Middleware de Seguridad - SkillTrade
+ * 
+ * Implementa múltiples capas de seguridad para proteger la API:
+ * - Headers de seguridad con Helmet
+ * - CORS configurado con lista blanca de orígenes
+ * - Rate limiting para prevenir ataques de fuerza bruta
+ * - Content Security Policy (CSP) para prevenir XSS
+ * - HTTP Strict Transport Security (HSTS)
+ * - Validaciones de origen y referrer
+ * 
+ * Características de seguridad:
+ * - Protección contra ataques XSS y CSRF
+ * - Prevención de clickjacking con frame options
+ * - Rate limiting configurable por entorno
+ * - CORS dinámico basado en lista blanca
+ * - Headers de seguridad estándar de la industria
+ * - Logging de intentos de acceso bloqueados
  */
 
 const helmet = require('helmet');

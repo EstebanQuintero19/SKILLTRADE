@@ -1,9 +1,47 @@
+/**
+ * Controlador de Notificaciones - SkillTrade
+ * 
+ * Gestiona el sistema completo de notificaciones de la plataforma:
+ * - Creación de notificaciones por tipo y prioridad
+ * - Obtención de notificaciones del usuario con filtros
+ * - Marcado de notificaciones como leídas/no leídas
+ * - Eliminación de notificaciones individuales o masivas
+ * - Estadísticas de notificaciones por usuario
+ * - Integración con sistema de logging para auditoría
+ * 
+ * Tipos de notificación soportados:
+ * - intercambio: Solicitudes, aceptaciones, rechazos de intercambios
+ * - curso: Nuevos cursos, actualizaciones, completados
+ * - suscripcion: Renovaciones, vencimientos, cambios de plan
+ * - sistema: Mantenimiento, actualizaciones, comunicados
+ * - venta: Confirmaciones de compra, procesamiento de pagos
+ * 
+ * Funcionalidades principales:
+ * - CRUD completo de notificaciones
+ * - Filtrado por tipo, estado de lectura y fechas
+ * - Paginación para grandes volúmenes de notificaciones
+ * - Validaciones de integridad y permisos
+ * - Logging detallado para auditoría y debugging
+ */
+
 const Notificacion = require('../model/notificacion.model');
 const Usuario = require('../model/usuario.model');
 const mongoose = require('mongoose');
 const logger = require('../services/winston-logger');
 
-
+/**
+ * Crear nueva notificación para un usuario
+ * 
+ * Procesa la creación de notificaciones con validaciones completas:
+ * - Validación de campos requeridos y tipos permitidos
+ * - Verificación de existencia del usuario destinatario
+ * - Validación de prioridad y estructura de acciones
+ * - Logging de creación para auditoría
+ * 
+ * @param {Object} req - Request con datos de la notificación
+ * @param {Object} res - Response con notificación creada o error
+ * @returns {Object} JSON con resultado de la operación
+ */
 const crearNotificacion = async (req, res) => {
     try {
         const { usuario, tipo, titulo, mensaje, accion, prioridad = 'media' } = req.body;

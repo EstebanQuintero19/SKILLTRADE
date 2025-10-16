@@ -1,3 +1,38 @@
+<!--
+/**
+ * PÁGINA DE ERROR - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de error genérica que maneja diferentes tipos de errores HTTP
+ * con diseño centrado, iconos contextuales y opciones de navegación.
+ * 
+ * TIPOS DE ERROR SOPORTADOS:
+ * - 403: Acceso denegado (icono escudo)
+ * - 404: Página no encontrada (icono búsqueda)
+ * - 500: Error del servidor (icono advertencia)
+ * - Otros: Error genérico
+ * 
+ * FUNCIONALIDADES:
+ * - Mostrar código de error prominente
+ * - Mensaje personalizado según tipo de error
+ * - Iconos contextuales para cada tipo
+ * - Botones de navegación (inicio, atrás)
+ * - Diseño centrado y responsive
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - codigo: Código de error HTTP
+ * - mensaje: Mensaje descriptivo del error
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Gradiente rojo para indicar error
+ * - Iconos diferenciados por tipo de error
+ * - Botones de acción para recuperación
+ * - JavaScript para navegación hacia atrás
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,9 +52,9 @@
         <div class="max-w-md w-full mx-auto">
             <div class="text-center">
                 <div class="error-gradient rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <% if (codigo === 403) { %>
+                    <% if (typeof codigo !== 'undefined' && codigo === 403) { %>
                         <i class="fas fa-shield-alt text-white text-3xl"></i>
-                    <% } else if (codigo === 404) { %>
+                    <% } else if (typeof codigo !== 'undefined' && codigo === 404) { %>
                         <i class="fas fa-search text-white text-3xl"></i>
                     <% } else { %>
                         <i class="fas fa-exclamation-triangle text-white text-3xl"></i>
@@ -29,9 +64,9 @@
                 <h1 class="text-6xl font-bold text-gray-900 mb-4"><%= codigo || 500 %></h1>
                 
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">
-                    <% if (codigo === 403) { %>
+                    <% if (typeof codigo !== 'undefined' && codigo === 403) { %>
                         Acceso Denegado
-                    <% } else if (codigo === 404) { %>
+                    <% } else if (typeof codigo !== 'undefined' && codigo === 404) { %>
                         Página No Encontrada
                     <% } else { %>
                         Error del Servidor

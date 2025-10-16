@@ -1,6 +1,41 @@
+/**
+ * Modelo de Notificación - SkillTrade
+ * 
+ * Sistema de notificaciones para comunicación con usuarios:
+ * - Notificaciones de intercambios (solicitudes, aceptaciones, rechazos)
+ * - Notificaciones de cursos (nuevos, actualizaciones, completados)
+ * - Notificaciones de suscripción (renovaciones, vencimientos)
+ * - Notificaciones del sistema (mantenimiento, actualizaciones)
+ * 
+ * Características principales:
+ * - Múltiples tipos de notificación con prioridades
+ * - Sistema de acciones configurables (navegar, abrir, dismiss)
+ * - Estado de lectura para seguimiento de engagement
+ * - Validaciones de URLs para acciones de navegación
+ * - Métodos de utilidad para gestión masiva
+ * - Índices optimizados para consultas frecuentes
+ * 
+ * Tipos de notificación:
+ * - intercambio: Relacionadas con el sistema de intercambios
+ * - curso: Relacionadas con cursos y contenido educativo
+ * - suscripcion: Relacionadas con planes y pagos
+ * - sistema: Comunicaciones administrativas y técnicas
+ * 
+ * Prioridades:
+ * - baja: Información general, no urgente
+ * - media: Información importante, requiere atención
+ * - alta: Información crítica, requiere acción inmediata
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Notificación
+ * 
+ * Estructura completa para gestionar comunicaciones del sistema
+ * con usuarios, incluyendo acciones y seguimiento de lectura.
+ */
 const notificacionSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,

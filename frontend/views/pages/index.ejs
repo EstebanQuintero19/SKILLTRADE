@@ -1,3 +1,38 @@
+<!--
+/**
+ * PÁGINA PRINCIPAL (LANDING PAGE) - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de inicio de SkillTrade que presenta la plataforma a nuevos visitantes
+ * y usuarios existentes. Incluye hero section, características, cursos destacados
+ * y llamadas a la acción para registro y exploración de cursos.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación principal con estadísticas y botones de acción
+ * - CARACTERÍSTICAS: Beneficios y ventajas de la plataforma
+ * - CURSOS DESTACADOS: Muestra de los mejores cursos disponibles
+ * - CTA FINAL: Llamada a la acción para registro o exploración
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Diseño responsive con Tailwind CSS
+ * - Animaciones CSS personalizadas
+ * - Gradientes y efectos visuales modernos
+ * - Integración con FontAwesome para iconos
+ * - Contenido dinámico basado en datos del servidor
+ * - Estados condicionales según autenticación
+ * 
+ * VARIABLES EJS:
+ * - signedIn: Estado de autenticación del usuario
+ * - estadisticas: Objeto con métricas de la plataforma
+ * - cursos: Array de cursos para mostrar en sección destacados
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/index.css: Estilos específicos de la página
+ * - /js/index.js: JavaScript para interactividad
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,7 +48,7 @@
 
 <%- include('../partials/header') %>
 
-<!-- Hero Section Mejorado -->
+<!--HERO SECTION - Sección principal de presentación-->
 <section class="relative overflow-hidden">
   <div class="gradient-bg relative">
     <!-- Elementos decorativos -->
@@ -24,7 +59,7 @@
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         
-        <!-- Contenido principal -->
+        <!-- CONTENIDO PRINCIPAL DEL HERO -->
         <div class="text-white">
           <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur text-sm font-medium mb-8">
             <i class="fas fa-graduation-cap mr-2"></i>
@@ -40,7 +75,7 @@
             Descubre cursos increíbles, conecta con expertos y acelera tu crecimiento en la plataforma educativa más innovadora.
           </p>
           
-          <!-- Estadísticas destacadas -->
+          <!-- ESTADÍSTICAS DESTACADAS: Métricas dinámicas de la plataforma -->
           <div class="grid grid-cols-3 gap-6 mb-10">
             <div class="text-center">
               <div class="flex items-center justify-center gap-2 mb-2">
@@ -75,7 +110,7 @@
             </div>
           </div>
 
-          <!-- Botones de acción -->
+          <!-- BOTONES DE ACCIÓN: Diferentes según estado de autenticación -->
           <div class="flex flex-col sm:flex-row gap-4">
             <a href="/cursos" class="inline-flex items-center justify-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               <i class="fas fa-search mr-2"></i>
@@ -95,7 +130,7 @@
           </div>
         </div>
         
-        <!-- Elemento visual -->
+        <!-- ELEMENTO VISUAL: Animación y decoración del hero -->
         <div class="relative">
           <div class="hero-animation">
             <div class="w-80 h-80 mx-auto bg-white/10 backdrop-blur rounded-3xl p-8 border border-white/20">
@@ -105,7 +140,7 @@
             </div>
           </div>
           
-          <!-- Elementos flotantes -->
+          <!-- Elementos flotantes decorativos -->
           <div class="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
             <i class="fas fa-star text-white text-xl"></i>
           </div>
@@ -118,7 +153,7 @@
   </div>
 </section>
 
-<!-- Características principales -->
+<!--SECCIÓN CARACTERÍSTICAS - Beneficios de la plataforma-->
 <section class="py-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16 animate-fade-in">
@@ -164,7 +199,7 @@
   </div>
 </section>
 
-<!-- Cursos destacados -->
+<!--CURSOS DESTACADOS - Muestra de mejores cursos-->
 <section class="py-20 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-12">
@@ -178,6 +213,7 @@
       </a>
     </div>
 
+    <!-- GRID DE CURSOS: Muestra hasta 6 cursos destacados -->
     <% if (cursos && cursos.length > 0) { %>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <% cursos.slice(0, 6).forEach((c, index) => { %>
@@ -262,11 +298,11 @@
   </div>
 </section>
 
-<!-- CTA Final -->
+<!--CTA FINAL - Llamada a la acción principal-->
 <section class="py-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="gradient-bg rounded-3xl p-12 text-center text-white relative overflow-hidden">
-      <!-- Elementos decorativos -->
+      <!-- Elementos decorativos de fondo -->
       <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
       <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
       
@@ -293,8 +329,10 @@
   </div>
 </section>
 
+<!-- FOOTER GLOBAL -->
 <%- include('../partials/footer') %>
 
+<!-- JAVASCRIPT ESPECÍFICO DE LA PÁGINA -->
 <script src="/js/index.js"></script>
 
 </body>

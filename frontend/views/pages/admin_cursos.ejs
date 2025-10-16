@@ -1,3 +1,26 @@
+<!--
+/**
+ * GESTIÓN DE CURSOS ADMIN - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de administración para gestionar todos los cursos de la plataforma.
+ * Permite ver, editar y eliminar cursos con paginación y tabla detallada.
+ * 
+ * FUNCIONALIDADES:
+ * - Listado paginado de todos los cursos (5 por página)
+ * - Información detallada: instructor, categoría, nivel, precio
+ * - Acciones: editar y eliminar cursos
+ * - Breadcrumb de navegación admin
+ * - Tabla responsive con diseño moderno
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - cursos: Array de cursos paginados
+ * - paginacion: Objeto con información de paginación
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +35,7 @@
     <%- include('../partials/header') %>
     
     <div class="min-h-screen bg-gray-50">
-        <!-- Header -->
+        <!--HEADER - Breadcrumb y título de sección-->
         <div class="admin-gradient text-white py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between">

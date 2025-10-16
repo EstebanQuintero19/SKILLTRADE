@@ -1,10 +1,39 @@
+/**
+ * Controlador de Ventas y Carrito - SkillTrade
+ * 
+ * Maneja todo el flujo de compras y gestión del carrito:
+ * - Gestión del carrito de compras (agregar, remover, obtener)
+ * - Procesamiento de ventas y pagos
+ * - Historial de compras del usuario
+ * - Validaciones de disponibilidad de cursos
+ * - Integración con sistema de notificaciones
+ * - Actualización de estadísticas de cursos
+ * 
+ * Flujo de compra:
+ * 1. Usuario agrega cursos al carrito
+ * 2. Sistema valida disponibilidad y precios
+ * 3. Usuario procede al pago (MercadoPago u otros)
+ * 4. Se crea registro de venta
+ * 5. Se actualiza biblioteca del usuario
+ * 6. Se envían notificaciones
+ */
+
 const Venta = require('../model/venta.model');
 const Curso = require('../model/curso.model');
 const Usuario = require('../model/usuario.model');
 const Carrito = require('../model/carrito.model');
 const Notificacion = require('../model/notificacion.model');
 
-// RF-VEN-01: Comprar curso
+/**
+ * RF-VEN-01: Procesar compra de cursos
+ * 
+ * Crea una nueva venta validando disponibilidad de cursos,
+ * calculando totales y procesando el pago.
+ * 
+ * @param {Object} req - Request con items, metodoPago y datos del usuario
+ * @param {Object} res - Response con resultado de la venta
+ * @returns {Object} JSON con venta creada o mensaje de error
+ */
 const crearVenta = async (req, res) => {
     try {
         const { items, metodoPago, direccionEnvio } = req.body;

@@ -1,24 +1,51 @@
 /**
- * Configuración segura de variables de entorno
- * Valida que todas las variables críticas estén presentes
+ * Configuración de Entorno - SkillTrade Backend
+ * 
+ * Centraliza la gestión de variables de entorno y configuración del sistema.
+ * Proporciona valores por defecto seguros para desarrollo y validaciones
+ * para entorno de producción.
+ * 
+ * Características:
+ * - Validación de variables críticas requeridas
+ * - Valores por defecto para desarrollo local
+ * - Configuración específica para producción
+ * - Soporte para múltiples proveedores de base de datos
+ * - Configuración de seguridad y rate limiting
+ * - Gestión de archivos y uploads
  */
 
 require('dotenv').config();
 
-// Variables mínimas requeridas para poder arrancar el servidor en desarrollo
-// En producción se recomienda definir todas explícitamente
+/**
+ * Variables de entorno mínimas requeridas
+ * 
+ * Lista de variables críticas que deben estar definidas.
+ * En desarrollo se proporcionan valores por defecto,
+ * en producción deben estar explícitamente configuradas.
+ */
 const requiredEnvVars = [
     'NODE_ENV',
     'PORT'
 ];
 
-// Validar variables críticas
+/**
+ * Validación de variables críticas
+ * 
+ * Verifica que las variables esenciales estén presentes
+ * y advierte sobre las faltantes con valores por defecto.
+ */
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
     console.warn('⚠️  Variables mínimas faltantes. Se usarán valores por defecto:', missingVars.join(', '));
 }
 
+/**
+ * Objeto de configuración principal
+ * 
+ * Centraliza toda la configuración del sistema con valores
+ * por defecto seguros y validaciones de entorno.
+ */
 const config = {
     // Servidor
     NODE_ENV: process.env.NODE_ENV || 'development',

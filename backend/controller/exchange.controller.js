@@ -1,9 +1,40 @@
+/**
+ * Controlador de Intercambios - SkillTrade
+ * 
+ * Maneja el sistema de intercambio de cursos entre usuarios:
+ * - Creación de solicitudes de intercambio
+ * - Gestión de estados (pendiente, aceptado, rechazado, cancelado)
+ * - Validaciones de propiedad y disponibilidad
+ * - Sistema de notificaciones para usuarios
+ * - Control de acceso temporal a cursos intercambiados
+ * 
+ * Flujo de intercambio:
+ * 1. Usuario A solicita intercambiar su curso X por curso Y de usuario B
+ * 2. Sistema valida propiedad, disponibilidad y reglas de negocio
+ * 3. Se crea solicitud en estado "pendiente"
+ * 4. Usuario B puede aceptar o rechazar la solicitud
+ * 5. Si se acepta, ambos usuarios obtienen acceso temporal al curso del otro
+ * 6. El intercambio se activa por la duración especificada
+ */
+
 const Exchange = require('../model/exchange.model');
 const Curso = require('../model/curso.model');
 const Usuario = require('../model/usuario.model');
 const Notificacion = require('../model/notificacion.model');
 
-// RF-INT-01: Solicitar intercambio (curso propio vs ajeno)
+/**
+ * RF-INT-01: Crear solicitud de intercambio de cursos
+ * 
+ * Procesa la creación de una nueva solicitud de intercambio:
+ * - Valida autenticación y permisos del usuario
+ * - Verifica propiedad de cursos y reglas de negocio
+ * - Previene intercambios duplicados o inválidos
+ * - Crea notificación para el usuario receptor
+ * 
+ * @param {Object} req - Request con cursoEmisor, cursoReceptor, duracion, comentario
+ * @param {Object} res - Response con intercambio creado o mensaje de error
+ * @returns {Object} JSON con resultado de la operación
+ */
 const crearExchange = async (req, res) => {
     try {
         const { cursoEmisor, cursoReceptor, duracion: durRaw, comentario } = req.body;
