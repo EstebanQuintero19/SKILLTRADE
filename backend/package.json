@@ -4,18 +4,44 @@
   "description": "backend de la aplicación de skilltrade",
   "main": "index.js",
   "scripts": {
-  "start": "node index.js",    // (Render)
-  "dev": "nodemon index.js",   // local
-  "test": "echo \"Error: no test specified\" && exit 1"
-}
+    "start": "node index.js && node frontend/server.js",
+    "dev": "nodemon index.js",
+    "docs": "jsdoc -c jsdoc.json",
+    "build": "npm install",
+    "postinstall": "npm ls mongoose",
+    "clean": "rm -rf node_modules package-lock.json && npm install"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "concurrently": "8.2.2",
+    "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "mongoose": "^8.0.0",
+    "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.2",
+    "helmet": "^7.1.0",
+    "is-stream": "^4.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^2.9.0",
+    "mongoose": "8.7.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.10"
+    "multer": "^2.0.2",
+    "nodemailer": "^6.9.7",
+    "nodemon": "^3.1.10",
+    "validator": "^13.11.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": "18.20.4",
+    "npm": ">=9.0.0"
   }
 }

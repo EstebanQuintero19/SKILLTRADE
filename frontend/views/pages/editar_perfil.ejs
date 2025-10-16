@@ -1,0 +1,407 @@
+<!--
+/**
+ * PÁGINA EDITAR PERFIL - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Formulario para editar la información personal del usuario incluyendo
+ * datos básicos, configuración de privacidad, preferencias de notificaciones
+ * y cambio de contraseña con validaciones.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HEADER: Breadcrumb y título de edición
+ * - INFORMACIÓN PERSONAL: Nombre, biografía, teléfono
+ * - CONFIGURACIÓN: Visibilidad del perfil y notificaciones
+ * - CAMBIO DE CONTRASEÑA: Formulario con validaciones
+ * 
+ * FUNCIONALIDADES:
+ * - Editar información personal del usuario
+ * - Configurar visibilidad del perfil (público/privado)
+ * - Gestionar preferencias de notificaciones
+ * - Cambiar contraseña con validación de fortaleza
+ * - Modal de confirmación para cambios
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Formularios pre-rellenados con datos actuales
+ * - Validación en tiempo real de contraseñas
+ * - Sistema de notificaciones toast
+ * - Modal de confirmación de cambios
+ * - Breadcrumb de navegación
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/editar_perfil.css: Estilos específicos
+ * - JavaScript inline para validaciones
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Perfil - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/editar_perfil.css">
+</head>
+<body>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!--HEADER - Breadcrumb y título de edición-->
+  <div class="mb-8">
+    <nav class="flex items-center gap-2 text-sm text-white/70 mb-6">
+      <a href="/perfil" class="hover:text-white transition-colors flex items-center gap-1">
+        <i class="fas fa-user"></i>
+        Mi Perfil
+      </a>
+      <i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-white font-medium">Editar Perfil</span>
+    </nav>
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">Editar Perfil</h1>
+      <p class="text-white/80">Actualiza tu información personal</p>
+    </div>
+  </div>
+
+  <!-- Notificaciones -->
+  <div id="notification-container" class="fixed top-4 right-4 z-50"></div>
+
+  <div class="grid lg:grid-cols-3 gap-8">
+    <!-- Sidebar - Avatar y datos básicos -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-2xl card-shadow p-6 sticky top-4">
+        <!-- Avatar -->
+        <div class="text-center mb-6">
+          <div class="relative inline-block">
+            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-[#5a1593] to-[#8b4dbf] flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+              <%= (usuario?.nombre || 'U').charAt(0).toUpperCase() %>
+            </div>
+            <button 
+              type="button"
+              class="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full shadow-lg border-2 border-white flex items-center justify-center hover:bg-gray-50 transition-colors"
+              title="Cambiar foto"
+            >
+              <svg class="w-5 h-5 text-[#5a1593]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </div>
+          <h3 class="text-xl font-bold text-[#151117] mt-4"><%= usuario?.nombre || 'Usuario' %></h3>
+          <p class="text-sm text-[#6f6880]"><%= usuario?.email || '' %></p>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="space-y-3 pt-6 border-t border-[#edeaf0]">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-[#6f6880]">Miembro desde</span>
+            <span class="font-semibold text-[#151117]">
+              <%= usuario?.createdAt ? new Date(usuario.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short' }) : 'N/A' %>
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-[#6f6880]">Rol</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-[#f5f2f8] text-[#5a1593] capitalize">
+              <%= usuario?.rol || 'estudiante' %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario principal -->
+    <div class="lg:col-span-2">
+      <form method="post" action="/perfil/editar" enctype="application/x-www-form-urlencoded">
+        
+        <!-- Información personal -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            Información Personal
+          </h2>
+
+          <div class="space-y-4">
+            <!-- Nombre -->
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Nombre completo <span class="text-red-500">*</span>
+              </label>
+              <input 
+                class="w-full h-11 rounded-lg border border-[#edeaf0] px-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                name="nombre" 
+                value="<%= usuario?.nombre %>" 
+                placeholder="Tu nombre completo"
+                required 
+              />
+            </div>
+
+            <!-- Email (solo lectura) -->
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Correo electrónico
+              </label>
+              <input 
+                class="w-full h-11 rounded-lg border border-[#edeaf0] px-4 bg-gray-50 text-[#6f6880] cursor-not-allowed" 
+                value="<%= usuario?.email || '' %>" 
+                disabled
+              />
+              <p class="text-xs text-[#6f6880] mt-1">El correo no se puede modificar</p>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Teléfono
+              </label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#6f6880]">📱</span>
+                <input 
+                  class="w-full h-11 rounded-lg border border-[#edeaf0] pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                  name="telefono" 
+                  type="tel"
+                  value="<%= usuario?.telefono || '' %>" 
+                  placeholder="+57 300 123 4567"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Biografía -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </div>
+            Acerca de Ti
+          </h2>
+
+          <div>
+            <label class="block text-sm font-medium text-[#151117] mb-2">
+              Biografía
+            </label>
+            <textarea 
+              class="w-full rounded-lg border border-[#edeaf0] p-3 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all resize-none" 
+              name="biografia" 
+              rows="6"
+              placeholder="Cuéntanos sobre ti, tus intereses, experiencia o cualquier cosa que quieras compartir..."
+            ><%= usuario?.biografia || '' %></textarea>
+            <p class="text-xs text-[#6f6880] mt-1">
+              <span id="bio-count">0</span> caracteres
+            </p>
+          </div>
+        </div>
+
+        <!-- Cambiar Contraseña -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <i class="fas fa-lock text-white"></i>
+            </div>
+            Cambiar Contraseña
+          </h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Contraseña actual <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input 
+                  type="password"
+                  id="passwordActual"
+                  name="passwordActual"
+                  class="w-full h-11 rounded-lg border border-[#edeaf0] px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                  placeholder="Tu contraseña actual"
+                />
+                <button type="button" onclick="togglePassword('passwordActual')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6f6880] hover:text-[#5a1593] transition-colors">
+                  <i class="fas fa-eye" id="passwordActual-icon"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Nueva contraseña <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input 
+                  type="password"
+                  id="passwordNueva"
+                  name="passwordNueva"
+                  class="w-full h-11 rounded-lg border border-[#edeaf0] px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                  placeholder="Tu nueva contraseña"
+                  minlength="6"
+                />
+                <button type="button" onclick="togglePassword('passwordNueva')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6f6880] hover:text-[#5a1593] transition-colors">
+                  <i class="fas fa-eye" id="passwordNueva-icon"></i>
+                </button>
+              </div>
+              <div class="mt-2">
+                <div class="flex items-center gap-2 text-xs">
+                  <div id="strength-bar" class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div id="strength-fill" class="h-full bg-red-400 transition-all duration-300" style="width: 0%"></div>
+                  </div>
+                  <span id="strength-text" class="text-[#6f6880] font-medium">Débil</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-[#151117] mb-2">
+                Confirmar nueva contraseña <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input 
+                  type="password"
+                  id="passwordConfirmar"
+                  name="passwordConfirmar"
+                  class="w-full h-11 rounded-lg border border-[#edeaf0] px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-[#5a1593] focus:border-transparent transition-all" 
+                  placeholder="Confirma tu nueva contraseña"
+                  minlength="6"
+                />
+                <button type="button" onclick="togglePassword('passwordConfirmar')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6f6880] hover:text-[#5a1593] transition-colors">
+                  <i class="fas fa-eye" id="passwordConfirmar-icon"></i>
+                </button>
+              </div>
+              <p id="password-match" class="text-xs mt-1 hidden"></p>
+            </div>
+
+            <div class="pt-4">
+              <button 
+                type="button"
+                onclick="cambiarContrasena()"
+                class="w-full sm:w-auto py-2 px-4 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <i class="fas fa-key"></i>
+                Cambiar Contraseña
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferencias -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <i class="fas fa-bell text-white"></i>
+            </div>
+            Notificaciones
+          </h2>
+
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#f5f2f8] rounded-lg flex items-center justify-center">
+                  <i class="fas fa-envelope text-[#5a1593]"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-[#151117]">Notificaciones por email</p>
+                  <p class="text-xs text-[#6f6880]">Recibe actualizaciones en tu correo</p>
+                </div>
+              </div>
+              <input type="checkbox" name="notificaciones_email" class="w-5 h-5 text-[#5a1593] rounded focus:ring-[#5a1593]" <%= (usuario?.preferencias?.notificaciones_email !== false) ? 'checked' : '' %>>
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#f5f2f8] rounded-lg flex items-center justify-center">
+                  <i class="fas fa-graduation-cap text-[#5a1593]"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-[#151117]">Novedades de cursos</p>
+                  <p class="text-xs text-[#6f6880]">Entérate de nuevos cursos disponibles</p>
+                </div>
+              </div>
+              <input type="checkbox" name="notificaciones_cursos" class="w-5 h-5 text-[#5a1593] rounded focus:ring-[#5a1593]" <%= (usuario?.preferencias?.notificaciones_cursos !== false) ? 'checked' : '' %>>
+            </label>
+          </div>
+        </div>
+
+        <!-- Privacidad -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+          <h2 class="text-xl font-bold text-[#151117] mb-6 flex items-center gap-2">
+            <div class="w-8 h-8 bg-[#5a1593] rounded-lg flex items-center justify-center">
+              <i class="fas fa-shield-alt text-white"></i>
+            </div>
+            Privacidad del Perfil
+          </h2>
+
+          <div class="space-y-4">
+            <p class="text-sm text-[#6f6880] mb-4">
+              Controla quién puede ver tu perfil y información personal
+            </p>
+            
+            <div class="space-y-3">
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+                <input type="radio" name="visibilidad" value="publico" class="mt-1 w-5 h-5 text-[#5a1593] focus:ring-[#5a1593]" <%= (usuario?.visibilidad === 'publico' || !usuario?.visibilidad) ? 'checked' : '' %>>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-globe text-green-600"></i>
+                    <p class="font-medium text-[#151117]">Perfil Público</p>
+                  </div>
+                  <p class="text-xs text-[#6f6880]">Cualquier usuario puede ver tu perfil, biografía y estadísticas</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#edeaf0] hover:bg-gray-50 cursor-pointer transition-colors">
+                <input type="radio" name="visibilidad" value="privado" class="mt-1 w-5 h-5 text-[#5a1593] focus:ring-[#5a1593]" <%= (usuario?.visibilidad === 'privado') ? 'checked' : '' %>>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="fas fa-lock text-orange-600"></i>
+                    <p class="font-medium text-[#151117]">Perfil Privado</p>
+                  </div>
+                  <p class="text-xs text-[#6f6880]">Solo tú puedes ver tu información personal. Otros usuarios verán un mensaje de perfil privado</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="bg-white rounded-2xl card-shadow p-6">
+          <div class="flex flex-wrap gap-3">
+            <button 
+              class="flex-1 sm:flex-none py-3 px-6 rounded-lg bg-[#5a1593] text-white font-semibold hover:bg-[#4a1275] transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2" 
+              type="submit"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Guardar Cambios
+            </button>
+
+            <a 
+              href="/perfil" 
+              class="flex-1 sm:flex-none py-3 px-6 rounded-lg bg-[#eee8f3] text-[#5a1593] font-semibold hover:bg-[#e0d5ed] transition-colors text-center flex items-center justify-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Cancelar
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.sessionData = {
+    signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
+    token: '<%= locals.token || '' %>',
+    user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
+  };
+</script>
+<script src="/js/editar_perfil.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!--
+/**
+ * GESTIÓN DE VENTAS ADMIN - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de administración para gestionar todas las ventas de la plataforma.
+ * Muestra transacciones, detalles de compras y estadísticas de ventas.
+ * 
+ * FUNCIONALIDADES:
+ * - Listado paginado de todas las ventas (5 por página)
+ * - Información detallada: usuario, cursos comprados, totales
+ * - Estadísticas de ventas con métricas clave
+ * - Tabla responsive con diseño moderno
+ * - Breadcrumb de navegación admin
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - ventas: Array de ventas paginadas
+ * - paginacion: Objeto con información de paginación
+ * - estadisticas: Métricas de ventas
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SkillTrade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow { box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1); }
+        .admin-gradient { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('../partials/header') %>
+    
+    <div class="min-h-screen bg-gray-50">
+        <!--HEADER - Breadcrumb y título de sección-->
+        <div class="admin-gradient text-white py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <nav class="flex items-center space-x-2 text-red-200 mb-4">
+                            <a href="/admin" class="hover:text-white">Admin</a>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                            <span class="text-white">Ventas</span>
+                        </nav>
+                        <h1 class="text-3xl font-bold flex items-center">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            Gestión de Ventas
+                        </h1>
+                        <p class="text-red-100 mt-2">Administra todas las transacciones de la plataforma</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold"><%= paginacion.totalElementos || 0 %></div>
+                        <div class="text-red-200">Total Ventas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+            <!-- Tabla de Ventas -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                    <h2 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Lista de Ventas
+                        <span class="ml-auto text-purple-100">
+                            Página <%= paginacion.paginaActual || 1 %> de <%= paginacion.totalPaginas || 1 %>
+                        </span>
+                    </h2>
+                </div>
+
+                <% if (ventas && ventas.length > 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-receipt mr-1"></i> ID Venta
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-user mr-1"></i> Usuario
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-shopping-cart mr-1"></i> Cursos
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-dollar-sign mr-1"></i> Total
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-calendar mr-1"></i> Fecha
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-info-circle mr-1"></i> Estado
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-cogs mr-1"></i> Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% ventas.forEach((venta, index) => { %>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                #<%= venta._id.toString().slice(-8).toUpperCase() %>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <div class="h-8 w-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                                                        <span class="text-white text-xs font-medium">
+                                                            <%= (venta.usuario?.nombre || 'Usuario').charAt(0).toUpperCase() %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <%= venta.usuario?.nombre || 'Sin nombre' %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        <%= venta.usuario?.email || 'Sin email' %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900">
+                                                <% if (venta.cursos && venta.cursos.length > 0) { %>
+                                                    <div class="space-y-1">
+                                                        <% venta.cursos.forEach((item, idx) => { %>
+                                                            <div class="flex items-center text-xs">
+                                                                <i class="fas fa-graduation-cap text-purple-500 mr-2"></i>
+                                                                <span class="truncate max-w-xs">
+                                                                    <%= item.curso?.titulo || 'Curso eliminado' %>
+                                                                </span>
+                                                                <span class="ml-auto text-green-600 font-medium">
+                                                                    $<%= (item.precio || 0).toLocaleString() %>
+                                                                </span>
+                                                            </div>
+                                                        <% }); %>
+                                                    </div>
+                                                <% } else { %>
+                                                    <span class="text-gray-500">Sin cursos</span>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="text-lg font-bold text-green-600">
+                                                $<%= (venta.total || 0).toLocaleString() %>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= new Date(venta.fechaVenta).toLocaleDateString('es-ES') %>
+                                            <div class="text-xs text-gray-400">
+                                                <%= new Date(venta.fechaVenta).toLocaleTimeString('es-ES') %>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Completada
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <button onclick="verDetalleVenta('<%= venta._id %>')"
+                                                        class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors"
+                                                        title="Ver detalle">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button onclick="descargarFactura('<%= venta._id %>')"
+                                                        class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-green-600 bg-green-100 hover:bg-green-200 transition-colors"
+                                                        title="Descargar factura">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <% if (paginacion.totalPaginas > 1) { %>
+                        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <% if (paginacion.paginaActual > 1) { %>
+                                        <a href="?page=<%= paginacion.paginaActual - 1 %>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Anterior
+                                        </a>
+                                    <% } %>
+                                    <% if (paginacion.paginaActual < paginacion.totalPaginas) { %>
+                                        <a href="?page=<%= paginacion.paginaActual + 1 %>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Siguiente
+                                        </a>
+                                    <% } %>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Mostrando
+                                            <span class="font-medium"><%= ((paginacion.paginaActual - 1) * 5) + 1 %></span>
+                                            a
+                                            <span class="font-medium"><%= Math.min(paginacion.paginaActual * 5, paginacion.totalElementos) %></span>
+                                            de
+                                            <span class="font-medium"><%= paginacion.totalElementos %></span>
+                                            ventas
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                            <% if (paginacion.paginaActual > 1) { %>
+                                                <a href="?page=<%= paginacion.paginaActual - 1 %>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
+                                            <% } %>
+                                            
+                                            <% for (let i = 1; i <= paginacion.totalPaginas; i++) { %>
+                                                <% if (i === paginacion.paginaActual) { %>
+                                                    <span class="relative inline-flex items-center px-4 py-2 border border-red-500 bg-red-50 text-sm font-medium text-red-600">
+                                                        <%= i %>
+                                                    </span>
+                                                <% } else { %>
+                                                    <a href="?page=<%= i %>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                        <%= i %>
+                                                    </a>
+                                                <% } %>
+                                            <% } %>
+                                            
+                                            <% if (paginacion.paginaActual < paginacion.totalPaginas) { %>
+                                                <a href="?page=<%= paginacion.paginaActual + 1 %>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            <% } %>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="text-center py-12">
+                        <i class="fas fa-chart-line text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No hay ventas</h3>
+                        <p class="text-gray-500">No se encontraron transacciones en la plataforma.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-8"></div>
+
+    <script>
+        function verDetalleVenta(ventaId) {
+            // Redirigir a página de detalle de venta
+            window.location.href = `/admin_venta_detalle/${ventaId}`;
+        }
+
+        function descargarFactura(ventaId) {
+            // Abrir factura en nueva ventana
+            window.open(`/api/admin/ventas/${ventaId}/factura`, '_blank');
+        }
+    </script>
+</body>
+</html>

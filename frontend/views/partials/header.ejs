@@ -1,43 +1,100 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top shadow-sm">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/">SKILLTRADE</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/cursos">Cursos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/intercambios">Intercambios</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/mis-cursos">Mis Cursos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin">Admin</a>
-                </li>
-            </ul>
-            <form class="d-flex me-3" role="search">
-                <input class="form-control me-2 rounded-pill" type="search" placeholder="Buscar cursos..." aria-label="Buscar">
-                <button class="btn btn-outline-secondary rounded-circle" type="submit">
-                    <i class="bi bi-search"></i>
-                </button>
-            </form>
-            <button class="btn btn-outline-primary position-relative me-2" data-bs-toggle="modal" data-bs-target="#cartModal">
-                <i class="bi bi-cart"></i>
-                <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.75em;">0</span>
-            </button>
-            <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
-                Iniciar Sesión
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">
-                Registrarse
-            </button>
-        </div>
+<!--
+/**
+ * HEADER DE NAVEGACIÓN - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Barra de navegación principal sticky que se mantiene fija en la parte superior.
+ * Incluye logo, menú de navegación, enlaces de autenticación y funcionalidades
+ * específicas según el estado del usuario (autenticado/no autenticado).
+ * 
+ * SECCIONES:
+ * - LOGO: Marca SkillTrade con enlace a página principal
+ * - NAVEGACIÓN: Enlaces principales (Cursos, Intercambios, Ventas)
+ * - ÁREA ADMIN: Enlace al panel de administrador (solo para admin)
+ * - ÁREA USUARIO: Enlaces y acciones según estado de autenticación
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Header sticky con backdrop-blur para efecto glassmorphism
+ * - Navegación responsive (oculta en móviles con md:flex)
+ * - Iconos FontAwesome para mejor UX
+ * - Autenticación condicional con variables EJS
+ * - Colores consistentes con tema purple/blue
+ * 
+ * VARIABLES EJS:
+ * - signedIn: Boolean que indica si el usuario está autenticado
+ * - user: Objeto con datos del usuario autenticado
+ * - user.email: Email del usuario para verificar permisos de admin
+ */
+-->
+<header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-[#edeaf0]">
+  <div class="mx-auto max-w-[1200px] px-6 h-14 flex items-center justify-between">
+    <!-- LOGO Y MARCA -->
+    <a href="/" class="flex items-center space-x-2">
+      <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+        <span class="text-white font-bold text-sm">ST</span>
+      </div>
+      <span class="text-xl font-bold text-gray-900">SkillTrade</span>
+    </a>
+    <!-- NAVEGACIÓN PRINCIPAL (oculta en móviles) -->
+    <nav class="hidden md:flex space-x-8">
+      <!-- Enlace a página de cursos -->
+      <a href="/cursos" class="text-gray-600 hover:text-purple-600 font-medium flex items-center gap-2">
+        <i class="fas fa-graduation-cap"></i>
+        Cursos
+      </a>
+      <!-- Enlace a sistema de intercambios -->
+      <a href="/intercambios" class="text-gray-600 hover:text-purple-600 font-medium flex items-center gap-2">
+        <i class="fas fa-exchange-alt"></i>
+        Intercambios
+      </a>
+      <!-- Enlace a gestión de ventas -->
+      <a href="/ventas" class="text-gray-600 hover:text-purple-600 font-medium flex items-center gap-2">
+        <i class="fas fa-chart-line"></i>
+        Ventas
+      </a>
+      <!-- ENLACE ADMIN: Solo visible para el administrador específico -->
+      <% if (signedIn && user && user.email === 'skilltrade_admin@gmail.com') { %>
+        <a href="/admin" class="text-gray-600 hover:text-red-600 font-medium flex items-center gap-2">
+          <i class="fas fa-cog"></i>
+          Admin
+        </a>
+      <% } %>
+    </nav>
+    <!-- ÁREA DE USUARIO Y AUTENTICACIÓN -->
+    <div class="flex items-center gap-3">
+      <!-- USUARIO AUTENTICADO: Muestra opciones de usuario logueado -->
+      <% if (signedIn) { %>
+        <!-- Enlace al carrito de compras -->
+        <a href="/carrito" class="text-gray-600 hover:text-purple-600 font-medium flex items-center gap-2">
+          <i class="fas fa-shopping-cart"></i>
+          Carrito
+        </a>
+        <!-- Enlace al perfil del usuario -->
+        <a href="/perfil" class="text-sm text-[#151117] hover:text-[#5a1593] flex items-center gap-2">
+          <i class="fas fa-user"></i>
+          Mi perfil
+        </a>
+        <!-- Formulario de logout -->
+        <form action="/logout" method="post">
+          <button class="h-9 px-3 rounded-lg bg-[#eee8f3] text-[#151117] text-sm font-semibold flex items-center gap-2">
+            <i class="fas fa-sign-out-alt"></i>
+            Salir
+          </button>
+        </form>
+      <% } else { %>
+        <!-- USUARIO NO AUTENTICADO: Muestra opciones de login/registro -->
+        <a href="/login" class="text-gray-600 hover:text-purple-600 font-medium flex items-center gap-2">
+          <i class="fas fa-sign-in-alt"></i>
+          Iniciar Sesión
+        </a>
+        <a href="/registro" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2">
+          <i class="fas fa-user-plus"></i>
+          Registrarse
+        </a>
+      <% } %>
     </div>
-</nav> 
+  </div>
+</header>
+

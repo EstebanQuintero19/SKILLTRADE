@@ -1,0 +1,1044 @@
+<!--
+/**
+ * PÁGINA DE PERFIL - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de perfil de usuario que muestra información personal, estadísticas,
+ * acciones rápidas y historial de compras. Diferencia entre perfil propio
+ * y perfil de otros usuarios con funcionalidades específicas.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Avatar, información básica y estadísticas
+ * - SIDEBAR: Acciones rápidas y configuración (solo perfil propio)
+ * - CONTENIDO PRINCIPAL: Información detallada y historial
+ * - HISTORIAL COMPRAS: Sección dinámica con paginación
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Estilos CSS personalizados para animaciones
+ * - Avatar con efecto shimmer y estado online
+ * - Estadísticas con efectos hover
+ * - Carga dinámica de historial de compras
+ * - Diferenciación de permisos según usuario
+ * - Diseño responsive con grid adaptativo
+ * 
+ * VARIABLES EJS:
+ * - usuario: Objeto con datos del usuario a mostrar
+ * - esPropio: Boolean que indica si es el perfil del usuario actual
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - Estilos CSS inline para animaciones específicas
+ * - JavaScript inline para funcionalidad de historial
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .profile-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-avatar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+<%- include('../partials/header') %>
+
+<!--HERO SECTION - Avatar, información básica y estadísticas-->
+<section class="gradient-bg relative overflow-hidden">
+  <!--Elementos decorativos de fondo-->
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col md:flex-row items-center gap-8">
+      
+      <!--AVATAR Y INFO BÁSICA - Foto de perfil y datos principales-->
+      <div class="text-center md:text-left">
+        <div class="relative inline-block mb-6">
+          <!--Avatar principal con efecto shimmer-->
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full profile-avatar border-4 border-white shadow-2xl flex items-center justify-center">
+            <% if (usuario?.fotoUrl && usuario.fotoUrl !== 'https://via.placeholder.com/200') { %>
+              <img src="<%= usuario.fotoUrl %>" alt="<%= usuario?.nombre %>" class="w-full h-full rounded-full object-cover">
+            <% } else { %>
+              <i class="fas fa-user text-white text-4xl md:text-5xl"></i>
+            <% } %>
+          </div>
+          
+          <!--Indicador de estado online con animación-->
+          <div class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg">
+            <div class="w-full h-full bg-green-500 rounded-full animate-ping"></div>
+          </div>
+          
+          <!--Botón de editar foto-->
+          <button class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-purple-600 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-camera text-sm"></i>
+          </button>
+        </div>
+        
+        <div class="text-white">
+          <h1 class="text-3xl md:text-4xl font-bold mb-2"><%= usuario?.nombre || 'Usuario' %></h1>
+          <p class="text-purple-100 text-lg mb-4 flex items-center justify-center md:justify-start">
+            <i class="fas fa-envelope mr-2"></i>
+            <%= usuario?.email || 'No especificado' %>
+          </p>
+          
+          <% if (usuario?.telefono) { %>
+          <p class="text-purple-100 flex items-center justify-center md:justify-start">
+            <i class="fas fa-phone mr-2"></i>
+            <%= usuario.telefono %>
+          </p>
+          <% } %>
+        </div>
+      </div>
+      
+      <!--ESTADÍSTICAS RÁPIDAS - Métricas del usuario con efectos hover-->
+      <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div class="text-2xl font-bold">0</div>
+          <div class="text-xs text-purple-100">Cursos</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-exchange-alt"></i>
+          </div>
+          <div class="text-2xl font-bold">0</div>
+          <div class="text-xs text-purple-100">Intercambios</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="text-2xl font-bold">4.8</div>
+          <div class="text-xs text-purple-100">Calificación</div>
+        </div>
+        
+        <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
+          <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="text-2xl font-bold">12</div>
+          <div class="text-xs text-purple-100">Logros</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contenido principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="grid lg:grid-cols-3 gap-8">
+    
+    <!--SIDEBAR - Acciones rápidas y configuración-->
+    <aside class="lg:col-span-1 space-y-6">
+      
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!--TARJETA DE ACCIONES - Solo visible para perfil propio-->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-cogs text-purple-600 mr-2"></i>
+          Acciones Rápidas
+        </h3>
+        
+        <div class="space-y-3">
+          <a href="/perfil/editar" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-edit mr-2"></i>
+            Editar Perfil
+          </a>
+          
+          <a href="/cursos/crear" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-plus mr-2"></i>
+            Crear Curso
+          </a>
+          
+          <a href="/biblioteca" 
+             class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            <i class="fas fa-book-open mr-2"></i>
+            Mi Biblioteca
+          </a>
+        </div>
+      </div>
+      <% } else { %>
+      <!-- Tarjeta de información (para perfiles de otros usuarios) -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+          Información del Usuario
+        </h3>
+        
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Miembro desde</span>
+            <span class="font-semibold text-gray-800">
+              <%= usuario?.fechaCreacion ? new Date(usuario.fechaCreacion).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'N/A' %>
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Visibilidad</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold <%= usuario?.visibilidad === 'publico' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+              <i class="fas <%= usuario?.visibilidad === 'publico' ? 'fa-globe' : 'fa-lock' %> mr-1"></i>
+              <%= usuario?.visibilidad === 'publico' ? 'Público' : 'Privado' %>
+            </span>
+          </div>
+        </div>
+      </div>
+      <% } %>
+      
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Progreso del perfil (solo para perfil propio) -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.1s">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+          Completar Perfil
+        </h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">Progreso del perfil</span>
+            <span class="font-semibold text-green-600">75%</span>
+          </div>
+          
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 75%"></div>
+          </div>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-2"></i>
+              Información básica
+            </div>
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-2"></i>
+              Email verificado
+            </div>
+            <div class="flex items-center text-gray-400">
+              <i class="fas fa-circle mr-2"></i>
+              Agregar biografía
+            </div>
+            <div class="flex items-center text-gray-400">
+              <i class="fas fa-circle mr-2"></i>
+              Subir foto de perfil
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Configuración de cuenta (solo para perfil propio) -->
+      <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in" style="animation-delay: 0.2s">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-shield-alt text-red-600 mr-2"></i>
+          Zona Peligrosa
+        </h3>
+        
+        <form method="post" action="/perfil/eliminar" onsubmit="return confirmarEliminacion();">
+          <input type="hidden" name="confirmacion" value="ELIMINAR_CUENTA">
+          <button type="submit" 
+                  class="w-full inline-flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg">
+            <i class="fas fa-trash-alt mr-2"></i>
+            Eliminar Cuenta
+          </button>
+        </form>
+      </div>
+      <% } %>
+    </aside>
+    
+    <!-- Contenido principal -->
+    <div class="lg:col-span-2 space-y-8">
+      
+      <!-- Biografía -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.3s">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-user text-blue-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Biografía</h3>
+          </div>
+          <a href="/perfil/editar" class="text-blue-600 hover:text-blue-700 transition-colors">
+            <i class="fas fa-edit"></i>
+          </a>
+        </div>
+        
+        <% if (usuario?.biografia) { %>
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+            <p class="text-gray-700 leading-relaxed text-lg"><%= usuario.biografia %></p>
+          </div>
+        <% } else { %>
+          <div class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-user-edit text-blue-600 text-2xl"></i>
+            </div>
+            <h4 class="text-xl font-semibold text-gray-800 mb-2">Cuéntanos sobre ti</h4>
+            <p class="text-gray-500 mb-6 max-w-md mx-auto">Agrega una biografía para que otros usuarios puedan conocerte mejor</p>
+            <a href="/perfil/editar" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar Biografía
+            </a>
+          </div>
+        <% } %>
+      </section>
+      
+      <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+      <!-- Seguridad (solo para perfil propio) -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.4s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-lock text-purple-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Seguridad</h3>
+        </div>
+        
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+          <h4 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-key text-purple-600 mr-2"></i>
+            Cambiar Contraseña
+          </h4>
+          
+          <form id="password-form" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña Actual</label>
+                <div class="relative">
+                  <input id="current-password" class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                         type="password" name="actual" placeholder="••••••••" required />
+                  <i class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
+                <div class="relative">
+                  <input id="new-password" class="w-full h-12 pl-12 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" 
+                         type="password" name="nueva" placeholder="••••••••" required minlength="6" />
+                  <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Indicador de fortaleza de contraseña -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Fortaleza de la contraseña</span>
+                <span id="password-strength" class="font-semibold text-gray-400">Sin evaluar</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="password-strength-bar" class="bg-gray-300 h-2 rounded-full transition-all" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <i class="fas fa-shield-alt mr-2"></i>
+              Actualizar Contraseña
+            </button>
+          </form>
+        </div>
+      </section>
+      
+      <!-- Historial de compras (solo para perfil propio) -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.5s">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-shopping-bag text-emerald-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Historial de Compras</h3>
+          </div>
+          <div id="compras-contador" class="text-sm text-gray-500">
+            Cargando...
+          </div>
+        </div>
+        
+        <!-- Contenedor del historial -->
+        <div id="historial-compras-container">
+          <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <div class="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p class="text-gray-500">Cargando historial de compras...</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Paginación -->
+        <div id="historial-paginacion" class="hidden mt-6">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500" id="historial-info">
+              <!-- Info de paginación -->
+            </div>
+            <div class="flex space-x-2" id="historial-controles">
+              <!-- Controles de paginación -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Actividad reciente (solo para perfil propio) -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-history text-green-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Actividad Reciente</h3>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Actividades de ejemplo -->
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-sign-in-alt text-blue-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Inicio de sesión</p>
+              <p class="text-sm text-gray-500">Hace 2 horas</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              Hoy
+            </div>
+          </div>
+          
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-edit text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Perfil actualizado</p>
+              <p class="text-sm text-gray-500">Información de contacto modificada</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              Ayer
+            </div>
+          </div>
+          
+          <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-graduation-cap text-purple-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">Curso creado</p>
+              <p class="text-sm text-gray-500">Introducción a JavaScript</p>
+            </div>
+            <div class="text-xs text-gray-400">
+              <i class="fas fa-clock mr-1"></i>
+              3 días
+            </div>
+          </div>
+          
+          <!-- Ver más actividades -->
+          <div class="text-center pt-4">
+            <button class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:border-purple-500 hover:text-purple-600 transition-all">
+              <i class="fas fa-history mr-2"></i>
+              Ver Más Actividad
+            </button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Logros y badges (solo para perfil propio) -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.7s">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-trophy text-yellow-600 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800">Logros y Badges</h3>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="text-center p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-star text-yellow-600 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-1">Primer Curso</h4>
+            <p class="text-sm text-gray-600">Creaste tu primer curso</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-users text-blue-600 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-1">Mentor</h4>
+            <p class="text-sm text-gray-600">10+ estudiantes inscritos</p>
+          </div>
+          
+          <div class="text-center p-6 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl border border-green-200 opacity-50">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-medal text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="font-semibold text-gray-500 mb-1">Experto</h4>
+            <p class="text-sm text-gray-400">50+ estudiantes (Bloqueado)</p>
+          </div>
+        </div>
+      </section>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<% if (typeof esPropio !== 'undefined' && esPropio) { %>
+<!-- Modal de confirmación para cambio de contraseña (solo para perfil propio) -->
+<div id="password-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Confirmar Cambio de Contraseña</h3>
+      <p class="text-gray-600">¿Estás seguro de que deseas cambiar tu contraseña?</p>
+    </div>
+    
+    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+      <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+        <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+        Cambios que se realizarán:
+      </h4>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Se actualizará tu contraseña actual
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Se cerrará tu sesión en otros dispositivos
+        </li>
+        <li class="flex items-center">
+          <i class="fas fa-check text-green-600 mr-2"></i>
+          Recibirás una notificación de confirmación
+        </li>
+      </ul>
+    </div>
+    
+    <div class="flex gap-3">
+      <button type="button" id="cancel-password-change" 
+              class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all">
+        <i class="fas fa-times mr-2"></i>
+        Cancelar
+      </button>
+      <button type="button" id="confirm-password-change" 
+              class="flex-1 px-4 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all">
+        <i class="fas fa-check mr-2"></i>
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast de notificaciones -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<script>
+  // Función para mostrar/ocultar contraseña
+  function togglePassword(button) {
+    const input = button.parentElement.querySelector('input');
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fas fa-eye';
+    }
+  }
+  
+  // Evaluador de fortaleza de contraseña
+  function evaluatePasswordStrength(password) {
+    let strength = 0;
+    let feedback = 'Muy débil';
+    let color = 'bg-red-500';
+    let width = '20%';
+    
+    if (password.length >= 8) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    
+    switch (strength) {
+      case 0:
+      case 1:
+        feedback = 'Muy débil';
+        color = 'bg-red-500';
+        width = '20%';
+        break;
+      case 2:
+        feedback = 'Débil';
+        color = 'bg-orange-500';
+        width = '40%';
+        break;
+      case 3:
+        feedback = 'Regular';
+        color = 'bg-yellow-500';
+        width = '60%';
+        break;
+      case 4:
+        feedback = 'Fuerte';
+        color = 'bg-blue-500';
+        width = '80%';
+        break;
+      case 5:
+        feedback = 'Muy fuerte';
+        color = 'bg-green-500';
+        width = '100%';
+        break;
+    }
+    
+    return { feedback, color, width };
+  }
+  
+  // Función para mostrar toast de notificación
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    
+    const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.className = `${bgColor} text-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 transform translate-x-full transition-transform duration-300`;
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span class="font-medium">${message}</span>
+      <button onclick="this.parentElement.remove()" class="ml-2 hover:bg-white/20 rounded p-1">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
+  }
+
+  // Variables globales para historial de compras
+  let paginaActualHistorial = 1;
+  let cargandoHistorial = false;
+
+  // Función para cargar historial de compras
+  async function cargarHistorialCompras(pagina = 1) {
+    if (cargandoHistorial) return;
+    
+    cargandoHistorial = true;
+    const container = document.getElementById('historial-compras-container');
+    const contador = document.getElementById('compras-contador');
+    const paginacion = document.getElementById('historial-paginacion');
+    
+    try {
+      const response = await fetch(`/api/ventas/historial/compras?page=${pagina}`);
+      const data = await response.json();
+      
+      if (data.ventas && data.ventas.length > 0) {
+        // Mostrar compras
+        container.innerHTML = data.ventas.map(venta => `
+          <div class="border border-gray-200 rounded-xl p-6 mb-4 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                  <i class="fas fa-receipt text-white text-lg"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-800">Compra #${venta._id.slice(-8)}</h4>
+                  <p class="text-sm text-gray-500">${new Date(venta.fechaCompra).toLocaleDateString('es-ES', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-emerald-600">$${venta.total.toLocaleString()}</div>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                  venta.estado === 'completada' ? 'bg-green-100 text-green-800' :
+                  venta.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }">
+                  <i class="fas ${
+                    venta.estado === 'completada' ? 'fa-check-circle' :
+                    venta.estado === 'pendiente' ? 'fa-clock' :
+                    'fa-times-circle'
+                  } mr-1"></i>
+                  ${venta.estado.charAt(0).toUpperCase() + venta.estado.slice(1)}
+                </span>
+              </div>
+            </div>
+            
+            <div class="space-y-3">
+              ${venta.items.map(item => `
+                <div class="flex items-center bg-gray-50 rounded-lg p-3">
+                  <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-graduation-cap text-white text-lg"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-medium text-gray-800">${item.curso?.titulo || 'Curso no disponible'}</h5>
+                    <p class="text-sm text-gray-500">
+                      <i class="fas fa-tag mr-1"></i>
+                      ${item.curso?.categoria || 'Sin categoría'}
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold text-gray-800">$${item.precio.toLocaleString()}</div>
+                    <div class="text-xs text-gray-500">Cantidad: ${item.cantidad}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+              <div class="text-sm text-gray-500">
+                <i class="fas fa-credit-card mr-1"></i>
+                ${venta.metodoPago?.tipo || 'No especificado'}
+              </div>
+              <button class="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                <i class="fas fa-download mr-1"></i>
+                Descargar comprobante
+              </button>
+            </div>
+          </div>
+        `).join('');
+        
+        // Actualizar contador
+        contador.textContent = `${data.paginacion.totalElementos} compra${data.paginacion.totalElementos !== 1 ? 's' : ''}`;
+        
+        // Mostrar paginación si hay más de una página
+        if (data.paginacion.totalPaginas > 1) {
+          mostrarPaginacionHistorial(data.paginacion);
+          paginacion.classList.remove('hidden');
+        } else {
+          paginacion.classList.add('hidden');
+        }
+        
+      } else {
+        // No hay compras
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shopping-bag text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-xl font-semibold text-gray-800 mb-2">No tienes compras aún</h4>
+            <p class="text-gray-500 mb-6">Explora nuestros cursos y realiza tu primera compra</p>
+            <a href="/cursos" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+              <i class="fas fa-search mr-2"></i>
+              Explorar Cursos
+            </a>
+          </div>
+        `;
+        contador.textContent = 'Sin compras';
+        paginacion.classList.add('hidden');
+      }
+      
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+          </div>
+          <h4 class="text-xl font-semibold text-gray-800 mb-2">Error al cargar historial</h4>
+          <p class="text-gray-500 mb-6">No se pudo cargar tu historial de compras</p>
+          <button onclick="cargarHistorialCompras(${pagina})" class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all">
+            <i class="fas fa-redo mr-2"></i>
+            Reintentar
+          </button>
+        </div>
+      `;
+      contador.textContent = 'Error';
+      paginacion.classList.add('hidden');
+    } finally {
+      cargandoHistorial = false;
+    }
+  }
+
+  // Función para mostrar paginación del historial
+  function mostrarPaginacionHistorial(paginacion) {
+    const info = document.getElementById('historial-info');
+    const controles = document.getElementById('historial-controles');
+    
+    const inicio = ((paginacion.pagina - 1) * paginacion.elementosPorPagina) + 1;
+    const fin = Math.min(paginacion.pagina * paginacion.elementosPorPagina, paginacion.totalElementos);
+    
+    info.textContent = `Mostrando ${inicio}-${fin} de ${paginacion.totalElementos} compras`;
+    
+    let controlesHTML = '';
+    
+    // Botón anterior
+    if (paginacion.pagina > 1) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${paginacion.pagina - 1})" 
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      `;
+    }
+    
+    // Números de página
+    const maxPaginas = 5;
+    let inicio_pag = Math.max(1, paginacion.pagina - Math.floor(maxPaginas / 2));
+    let fin_pag = Math.min(paginacion.totalPaginas, inicio_pag + maxPaginas - 1);
+    
+    if (fin_pag - inicio_pag < maxPaginas - 1) {
+      inicio_pag = Math.max(1, fin_pag - maxPaginas + 1);
+    }
+    
+    for (let i = inicio_pag; i <= fin_pag; i++) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${i})" 
+                class="px-3 py-2 text-sm border rounded-lg transition-colors ${
+                  i === paginacion.pagina 
+                    ? 'bg-purple-600 text-white border-purple-600' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }">
+          ${i}
+        </button>
+      `;
+    }
+    
+    // Botón siguiente
+    if (paginacion.pagina < paginacion.totalPaginas) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${paginacion.pagina + 1})" 
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+    }
+    
+    controles.innerHTML = controlesHTML;
+  }
+
+  // Función para cambiar página del historial
+  function cambiarPaginaHistorial(pagina) {
+    paginaActualHistorial = pagina;
+    cargarHistorialCompras(pagina);
+  }
+
+  // Event listener para evaluación de contraseña
+  document.addEventListener('DOMContentLoaded', function() {
+    const newPasswordInput = document.querySelector('input[name="nueva"]');
+    const strengthText = document.getElementById('password-strength');
+    const strengthBar = document.getElementById('password-strength-bar');
+    const passwordForm = document.getElementById('password-form');
+    const modal = document.getElementById('password-confirmation-modal');
+    const cancelBtn = document.getElementById('cancel-password-change');
+    const confirmBtn = document.getElementById('confirm-password-change');
+    
+    // Evaluación de fortaleza de contraseña
+    if (newPasswordInput && strengthText && strengthBar) {
+      newPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        if (password.length === 0) {
+          strengthText.textContent = 'Sin evaluar';
+          strengthText.className = 'font-semibold text-gray-400';
+          strengthBar.className = 'bg-gray-300 h-2 rounded-full transition-all';
+          strengthBar.style.width = '0%';
+          return;
+        }
+        
+        const { feedback, color, width } = evaluatePasswordStrength(password);
+        strengthText.textContent = feedback;
+        
+        // Actualizar colores del texto
+        strengthText.className = `font-semibold ${
+          feedback === 'Muy débil' ? 'text-red-600' :
+          feedback === 'Débil' ? 'text-orange-600' :
+          feedback === 'Regular' ? 'text-yellow-600' :
+          feedback === 'Fuerte' ? 'text-blue-600' :
+          'text-green-600'
+        }`;
+        
+        strengthBar.className = `${color} h-2 rounded-full transition-all`;
+        strengthBar.style.width = width;
+      });
+    }
+
+    // Manejo del formulario de cambio de contraseña
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        if (!currentPassword || !newPassword) {
+          showToast('Por favor completa todos los campos', 'error');
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showToast('La nueva contraseña debe tener al menos 6 caracteres', 'error');
+          return;
+        }
+        
+        // Mostrar modal de confirmación
+        modal.classList.remove('hidden');
+      });
+    }
+
+    // Cancelar cambio de contraseña
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+      });
+    }
+
+    // Confirmar cambio de contraseña
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', async function() {
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        try {
+          confirmBtn.disabled = true;
+          confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cambiando...';
+          
+          const response = await fetch('/api/usuarios/password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              actual: currentPassword,
+              nueva: newPassword
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('Contraseña actualizada exitosamente', 'success');
+            passwordForm.reset();
+            modal.classList.add('hidden');
+            
+            // Resetear indicador de fortaleza
+            if (strengthText && strengthBar) {
+              strengthText.textContent = 'Sin evaluar';
+              strengthText.className = 'font-semibold text-gray-400';
+              strengthBar.className = 'bg-gray-300 h-2 rounded-full transition-all';
+              strengthBar.style.width = '0%';
+            }
+          } else {
+            showToast(data.message || 'Error al cambiar la contraseña', 'error');
+          }
+        } catch (error) {
+          console.error('Error al cambiar contraseña:', error);
+          showToast('Error de conexión. Inténtalo de nuevo.', 'error');
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirmar';
+        }
+      });
+    }
+
+    // Cerrar modal al hacer clic fuera
+    modal?.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    });
+
+    // Cargar historial de compras al cargar la página (solo para perfil propio)
+    <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+    cargarHistorialCompras(1);
+    <% } %>
+  });
+  
+  // Animaciones de entrada
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  }, observerOptions);
+  
+  document.querySelectorAll('section, aside > div').forEach(el => {
+    observer.observe(el);
+  });
+  
+  // Función para confirmar eliminación de cuenta
+  function confirmarEliminacion() {
+    const confirmacion = confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');
+    if (!confirmacion) {
+      return false;
+    }
+    
+    const segundaConfirmacion = prompt('Para confirmar la eliminación, escribe "ELIMINAR" (en mayúsculas):');
+    if (segundaConfirmacion !== 'ELIMINAR') {
+      alert('Confirmación incorrecta. La cuenta no será eliminada.');
+      return false;
+    }
+    
+    return true;
+  }
+</script>
+<% } %>
+
+</body>
+</html>

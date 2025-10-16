@@ -1,108 +1,69 @@
-    <footer class="bg-dark text-light py-5 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>SKILLTRADE</h5>
-                    <p>Comparte tu talento, descubre nuevos conocimientos.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Enlaces</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-light">Inicio</a></li>
-                        <li><a href="/cursos" class="text-light">Cursos</a></li>
-                        <li><a href="/intercambios" class="text-light">Intercambios</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Contacto</h5>
-                    <p>Email: info@skilltrade.com</p>
-                </div>
-            </div>
-            <hr>
-            <div class="text-center">
-                <p>&copy; 2025 SKILLTRADE. Todos los derechos reservados.</p>
-            </div>
+<!--
+/**
+ * FOOTER INFORMATIVO - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Footer global de la aplicación que proporciona información corporativa,
+ * enlaces de navegación secundarios y datos de copyright. Se muestra en
+ * todas las páginas de la aplicación.
+ * 
+ * SECCIONES:
+ * - MARCA: Logo y descripción de la plataforma SkillTrade
+ * - NAVEGACIÓN: Enlaces rápidos a secciones principales
+ * - CUENTA: Enlaces relacionados con autenticación y perfil
+ * - COPYRIGHT: Información legal y derechos reservados
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Diseño responsive con grid adaptativo (1-4 columnas)
+ * - Fondo oscuro (bg-gray-900) para contraste
+ * - Espaciado generoso con padding y margins
+ * - Enlaces con efectos hover para mejor UX
+ * - Copyright dinámico con año actual
+ * - Estructura semántica con elementos apropiados
+ */
+-->
+<footer class="bg-gray-900 text-white mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- SECCIÓN PRINCIPAL: Marca y descripción (ocupa 2 columnas en desktop) -->
+      <div class="col-span-1 md:col-span-2">
+        <!-- Logo y marca SkillTrade -->
+        <div class="flex items-center space-x-2 mb-4">
+          <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">ST</span>
+          </div>
+          <span class="text-xl font-bold">SkillTrade</span>
         </div>
-    </footer>
-
-    <!-- Modales -->
-    <!-- Modal de Login -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Iniciar Sesión</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label for="loginEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="loginEmail" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="loginPassword" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="loginPassword" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <!-- Descripción de la plataforma -->
+        <p class="text-gray-400 mb-4">
+          La plataforma líder para el intercambio de conocimientos y habilidades profesionales.
+        </p>
+      </div>
+      <!-- SECCIÓN PLATAFORMA: Enlaces a funcionalidades principales -->
+      <div>
+        <h3 class="font-semibold mb-4">Plataforma</h3>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="/cursos" class="hover:text-white">Cursos</a></li>
+          <li><a href="/intercambios" class="hover:text-white">Intercambios</a></li>
+          <li><a href="/ventas" class="hover:text-white">Ventas</a></li>
+        </ul>
+      </div>
+      <!-- SECCIÓN CUENTA: Enlaces relacionados con usuario -->
+      <div>
+        <h3 class="font-semibold mb-4">Cuenta</h3>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="/login" class="hover:text-white">Iniciar Sesión</a></li>
+          <li><a href="/registro" class="hover:text-white">Registrarse</a></li>
+          <li><a href="/perfil" class="hover:text-white">Mi Perfil</a></li>
+        </ul>
+      </div>
     </div>
-
-    <!-- Modal de Registro -->
-    <div class="modal fade" id="registerModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrarse</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label for="registerName" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="registerName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="registerEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="registerEmail" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="registerPassword" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="registerPassword" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Registrarse</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <!-- SECCIÓN COPYRIGHT: Información legal con año dinámico -->
+    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+      <p>&copy; <%= new Date().getFullYear() %> SkillTrade. Todos los derechos reservados.</p>
     </div>
+  </div>
+</footer>
 
-    <!-- Modal del Carrito -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Carrito de Compras</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cart-items">
-                        <!-- Los items del carrito se cargarán dinámicamente -->
-                        <p class="text-muted">No hay cursos en el carrito</p>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="checkout-btn">Proceder al Pago</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/main.js"></script>
-</body>
-</html> 

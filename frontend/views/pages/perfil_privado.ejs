@@ -1,0 +1,203 @@
+<!--
+/**
+ * PERFIL PRIVADO - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página mostrada cuando un usuario intenta acceder a un perfil
+ * configurado como privado. Informa sobre la privacidad del perfil.
+ * 
+ * FUNCIONALIDADES:
+ * - Mensaje informativo sobre perfil privado
+ * - Opciones para contactar al usuario
+ * - Redirección a exploración de cursos
+ * - Diseño centrado y amigable
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Diseño responsive y centrado
+ * - Iconos contextuales para privacidad
+ * - Botones de acción alternativos
+ * - Mensaje claro sobre configuración de privacidad
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Privado - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-bounce-slow {
+      animation: bounce 2s infinite;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+<%- include('../partials/header') %>
+
+<!-- Hero Section -->
+<section class="gradient-bg relative overflow-hidden">
+  <!-- Elementos decorativos -->
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center">
+      <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur border-4 border-white shadow-2xl flex items-center justify-center animate-bounce-slow">
+        <i class="fas fa-lock text-white text-5xl"></i>
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Perfil Privado</h1>
+      <p class="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+        Este usuario ha configurado su perfil como privado. Solo él puede ver su información personal.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Contenido principal -->
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="bg-white rounded-2xl card-shadow p-8 md:p-12 text-center animate-fade-in">
+    
+    <!-- Icono principal -->
+    <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-8">
+      <i class="fas fa-user-shield text-orange-600 text-4xl"></i>
+    </div>
+    
+    <!-- Mensaje principal -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">
+      <i class="fas fa-shield-alt text-orange-600 mr-3"></i>
+      Información Protegida
+    </h2>
+    
+    <div class="max-w-2xl mx-auto space-y-6 text-gray-600">
+      <p class="text-lg leading-relaxed">
+        Este usuario ha elegido mantener su perfil privado para proteger su información personal.
+      </p>
+      
+      <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-center">
+          <i class="fas fa-info-circle text-orange-600 mr-2"></i>
+          ¿Qué significa esto?
+        </h3>
+        
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="flex items-start space-x-3">
+            <i class="fas fa-eye-slash text-orange-600 mt-1"></i>
+            <div>
+              <p class="font-medium text-gray-800">Información oculta</p>
+              <p class="text-gray-600">Biografía, estadísticas y actividad no son visibles</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <i class="fas fa-lock text-orange-600 mt-1"></i>
+            <div>
+              <p class="font-medium text-gray-800">Privacidad protegida</p>
+              <p class="text-gray-600">Solo el propietario puede ver su perfil completo</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <i class="fas fa-user-check text-orange-600 mt-1"></i>
+            <div>
+              <p class="font-medium text-gray-800">Decisión personal</p>
+              <p class="text-gray-600">El usuario eligió esta configuración de privacidad</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <i class="fas fa-cog text-orange-600 mt-1"></i>
+            <div>
+              <p class="font-medium text-gray-800">Configurable</p>
+              <p class="text-gray-600">Puede cambiar esta configuración en cualquier momento</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Acciones disponibles -->
+    <div class="mt-12 space-y-4">
+      <h3 class="text-xl font-semibold text-gray-800 mb-6">¿Qué puedes hacer?</h3>
+      
+      <div class="grid md:grid-cols-2 gap-4 max-w-lg mx-auto">
+        <a href="/cursos" 
+           class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+          <i class="fas fa-graduation-cap mr-2"></i>
+          Explorar Cursos
+        </a>
+        
+        <a href="/usuarios" 
+           class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+          <i class="fas fa-users mr-2"></i>
+          Ver Otros Usuarios
+        </a>
+      </div>
+      
+      <div class="mt-8">
+        <a href="/" 
+           class="inline-flex items-center justify-center px-8 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+          <i class="fas fa-home mr-2"></i>
+          Volver al Inicio
+        </a>
+      </div>
+    </div>
+    
+    <!-- Información adicional -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+      <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+        <div class="flex items-center justify-center mb-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-lightbulb text-blue-600"></i>
+          </div>
+          <h4 class="text-lg font-semibold text-gray-800">¿Sabías que...?</h4>
+        </div>
+        
+        <p class="text-gray-600 text-sm leading-relaxed">
+          En SkillTrade respetamos la privacidad de nuestros usuarios. Cada persona puede elegir 
+          qué información compartir y con quién. Si deseas hacer tu perfil público, puedes 
+          cambiar esta configuración en cualquier momento desde la sección de editar perfil.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Animaciones de entrada
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in');
+      }
+    });
+  }, observerOptions);
+  
+  document.querySelectorAll('main > div').forEach(el => {
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>

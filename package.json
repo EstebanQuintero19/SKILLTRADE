@@ -1,0 +1,22 @@
+{
+  "name": "skilltrade",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm start --prefix backend\" \"npm start --prefix frontend\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "concurrently": "8.2.2",
+    "jsdoc": "^4.0.4"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "concurrently": "^9.2.1",
+    "connect-mongo": "^5.1.0",
+    "express-session": "^1.18.2",
+    "fs": "^0.0.1-security",
+    "mercadopago": "^2.9.0",
+    "mongoose": "^8.18.1"
+  }
+}

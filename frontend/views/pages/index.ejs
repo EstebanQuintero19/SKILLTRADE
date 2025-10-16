@@ -1,0 +1,339 @@
+<!--
+/**
+ * PÁGINA PRINCIPAL (LANDING PAGE) - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de inicio de SkillTrade que presenta la plataforma a nuevos visitantes
+ * y usuarios existentes. Incluye hero section, características, cursos destacados
+ * y llamadas a la acción para registro y exploración de cursos.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación principal con estadísticas y botones de acción
+ * - CARACTERÍSTICAS: Beneficios y ventajas de la plataforma
+ * - CURSOS DESTACADOS: Muestra de los mejores cursos disponibles
+ * - CTA FINAL: Llamada a la acción para registro o exploración
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Diseño responsive con Tailwind CSS
+ * - Animaciones CSS personalizadas
+ * - Gradientes y efectos visuales modernos
+ * - Integración con FontAwesome para iconos
+ * - Contenido dinámico basado en datos del servidor
+ * - Estados condicionales según autenticación
+ * 
+ * VARIABLES EJS:
+ * - signedIn: Estado de autenticación del usuario
+ * - estadisticas: Objeto con métricas de la plataforma
+ * - cursos: Array de cursos para mostrar en sección destacados
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/index.css: Estilos específicos de la página
+ * - /js/index.js: JavaScript para interactividad
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillTrade - Plataforma de Aprendizaje</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/index.css">
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+<%- include('../partials/header') %>
+
+<!--HERO SECTION - Sección principal de presentación-->
+<section class="relative overflow-hidden">
+  <div class="gradient-bg relative">
+    <!-- Elementos decorativos -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+    <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-white/5 rounded-full"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        
+        <!-- CONTENIDO PRINCIPAL DEL HERO -->
+        <div class="text-white">
+          <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur text-sm font-medium mb-8">
+            <i class="fas fa-graduation-cap mr-2"></i>
+            Plataforma de Aprendizaje #1
+          </div>
+          
+          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            Transforma tu
+            <span class="text-yellow-300 block">futuro profesional</span>
+          </h1>
+          
+          <p class="text-xl text-purple-100 mb-8 max-w-lg">
+            Descubre cursos increíbles, conecta con expertos y acelera tu crecimiento en la plataforma educativa más innovadora.
+          </p>
+          
+          <!-- ESTADÍSTICAS DESTACADAS: Métricas dinámicas de la plataforma -->
+          <div class="grid grid-cols-3 gap-6 mb-10">
+            <div class="text-center">
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-graduation-cap text-yellow-300 text-xl"></i>
+                <div class="text-3xl font-bold"><%= estadisticas?.totalCursos || (cursos || []).length %></div>
+              </div>
+              <div class="text-sm text-purple-200">Cursos Activos</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-users text-green-300 text-xl"></i>
+                <div class="text-3xl font-bold">
+                  <% if (estadisticas?.totalUsuarios) { %>
+                    <% if (estadisticas.totalUsuarios >= 1000) { %>
+                      <%= (estadisticas.totalUsuarios / 1000).toFixed(1) %>K+
+                    <% } else { %>
+                      <%= estadisticas.totalUsuarios %>
+                    <% } %>
+                  <% } else { %>
+                    0
+                  <% } %>
+                </div>
+              </div>
+              <div class="text-sm text-purple-200">Estudiantes</div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-star text-yellow-400 text-xl"></i>
+                <div class="text-3xl font-bold"><%= estadisticas?.calificacionPromedio || '4.9' %></div>
+              </div>
+              <div class="text-sm text-purple-200">Calificación</div>
+            </div>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN: Diferentes según estado de autenticación -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/cursos" class="inline-flex items-center justify-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="fas fa-search mr-2"></i>
+              Explorar Cursos
+            </a>
+            <% if (locals.signedIn) { %>
+            <a href="/cursos/crear" class="inline-flex items-center justify-center px-8 py-4 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="fas fa-plus mr-2"></i>
+              Crear Curso
+            </a>
+            <% } else { %>
+            <a href="/registro" class="inline-flex items-center justify-center px-8 py-4 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+              <i class="fas fa-user-plus mr-2"></i>
+              Únete Gratis
+            </a>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- ELEMENTO VISUAL: Animación y decoración del hero -->
+        <div class="relative">
+          <div class="hero-animation">
+            <div class="w-80 h-80 mx-auto bg-white/10 backdrop-blur rounded-3xl p-8 border border-white/20">
+              <div class="w-full h-full bg-white/20 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-white text-8xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Elementos flotantes decorativos -->
+          <div class="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+            <i class="fas fa-star text-white text-xl"></i>
+          </div>
+          <div class="absolute -bottom-4 -left-4 w-12 h-12 bg-green-400 rounded-full flex items-center justify-center shadow-lg">
+            <i class="fas fa-check text-white"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--SECCIÓN CARACTERÍSTICAS - Beneficios de la plataforma-->
+<section class="py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16 animate-fade-in">
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">¿Por qué elegir SkillTrade?</h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Nuestra plataforma combina tecnología avanzada con metodologías probadas para ofrecerte la mejor experiencia de aprendizaje
+      </p>
+    </div>
+    
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="feature-card bg-white rounded-2xl card-shadow p-8 text-center animate-fade-in" style="animation-delay: 0.1s">
+        <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-book-open text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Cursos Variados</h3>
+        <p class="text-gray-600">Accede a cientos de cursos especializados en las tecnologías más demandadas del mercado</p>
+      </div>
+
+      <div class="feature-card bg-white rounded-2xl card-shadow p-8 text-center animate-fade-in" style="animation-delay: 0.2s">
+        <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-clock text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Aprende a tu Ritmo</h3>
+        <p class="text-gray-600">Contenido disponible 24/7 con acceso ilimitado para que aprendas cuando y donde quieras</p>
+      </div>
+
+      <div class="feature-card bg-white rounded-2xl card-shadow p-8 text-center animate-fade-in" style="animation-delay: 0.3s">
+        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-certificate text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Certificaciones</h3>
+        <p class="text-gray-600">Obtén certificados reconocidos por la industria al completar exitosamente tus cursos</p>
+      </div>
+
+      <div class="feature-card bg-white rounded-2xl card-shadow p-8 text-center animate-fade-in" style="animation-delay: 0.4s">
+        <div class="w-16 h-16 bg-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-users text-white text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Comunidad Activa</h3>
+        <p class="text-gray-600">Conecta con estudiantes y expertos de todo el mundo en nuestra vibrante comunidad</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--CURSOS DESTACADOS - Muestra de mejores cursos-->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-12">
+      <div>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Cursos Destacados</h2>
+        <p class="text-xl text-gray-600">Descubre los cursos más populares y mejor valorados</p>
+      </div>
+      <a href="/cursos" class="hidden sm:inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all">
+        Ver todos
+        <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+
+    <!-- GRID DE CURSOS: Muestra hasta 6 cursos destacados -->
+    <% if (cursos && cursos.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% cursos.slice(0, 6).forEach((c, index) => { %>
+          <div class="bg-white rounded-2xl card-shadow overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in" style="animation-delay: <%= index * 0.1 %>s">
+            <div class="relative aspect-video overflow-hidden">
+              <% if (c.imagen && c.imagen !== '/images/placeholder-course.jpg') { %>
+                <img src="<%= c.imagen %>" alt="<%= c.titulo %>" class="w-full h-full object-cover">
+              <% } else { %>
+                <div class="w-full h-full gradient-bg flex items-center justify-center">
+                  <i class="fas fa-graduation-cap text-white text-4xl"></i>
+                </div>
+              <% } %>
+              
+              <div class="absolute top-4 left-4">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur text-purple-600">
+                  <%= c.nivel || 'Principiante' %>
+                </span>
+              </div>
+              
+              <div class="absolute top-4 right-4">
+                <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur">
+                  <i class="fas fa-star text-yellow-400 text-xs"></i>
+                  <span class="text-xs font-semibold text-gray-800">4.8</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6">
+              <div class="flex flex-wrap gap-2 mb-3">
+                <% if (c.categoria && Array.isArray(c.categoria)) { %>
+                  <% c.categoria.slice(0, 2).forEach(cat => { %>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                      <%= cat %>
+                    </span>
+                  <% }) %>
+                <% } %>
+              </div>
+
+              <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                <%= c.titulo %>
+              </h3>
+
+              <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                <%= c.descripcion %>
+              </p>
+
+              <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold text-green-600">
+                  <% if (c.precio && c.precio > 0) { %>
+                    $<%= Number(c.precio).toLocaleString() %>
+                  <% } else { %>
+                    Gratis
+                  <% } %>
+                </div>
+                <a href="/curso/<%= c._id %>" 
+                   class="inline-flex items-center px-4 py-2 gradient-bg text-white font-semibold rounded-lg hover:opacity-90 transition-all">
+                  Ver curso
+                  <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-20 bg-gray-50 rounded-2xl">
+        <div class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-graduation-cap text-white text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">¡Próximamente cursos increíbles!</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          Estamos preparando contenido educativo de alta calidad. ¿Por qué no creas el primer curso?
+        </p>
+        <% if (locals.signedIn) { %>
+        <a href="/cursos/crear" class="inline-flex items-center px-8 py-4 gradient-bg text-white font-bold rounded-xl hover:opacity-90 transition-all">
+          <i class="fas fa-plus mr-2"></i>
+          Crear Primer Curso
+        </a>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<!--CTA FINAL - Llamada a la acción principal-->
+<section class="py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="gradient-bg rounded-3xl p-12 text-center text-white relative overflow-hidden">
+      <!-- Elementos decorativos de fondo -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+      
+      <div class="relative z-10">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">¿Listo para transformar tu carrera?</h2>
+        <p class="text-xl text-purple-100 mb-10 max-w-3xl mx-auto">
+          Únete a miles de profesionales que ya están acelerando su crecimiento con SkillTrade. Tu futuro comienza hoy.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <% if (!locals.signedIn) { %>
+          <a href="/registro" class="inline-flex items-center justify-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <i class="fas fa-user-plus mr-2"></i>
+            Crear Cuenta Gratis
+          </a>
+          <% } %>
+          <a href="/cursos" class="inline-flex items-center justify-center px-8 py-4 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-400 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <i class="fas fa-search mr-2"></i>
+            Explorar Cursos
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER GLOBAL -->
+<%- include('../partials/footer') %>
+
+<!-- JAVASCRIPT ESPECÍFICO DE LA PÁGINA -->
+<script src="/js/index.js"></script>
+
+</body>
+</html>

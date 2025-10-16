@@ -1,0 +1,12 @@
+{
+    "source": {
+      "include": ["./model"],
+      "includePattern": ".js$"
+    },
+    "opts": {
+      "destination": "./docs",
+      "recurse": true,
+      "verbose": true
+    }
+  }
+  

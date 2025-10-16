@@ -1,22 +1,245 @@
-const mongoose = require('../config/db');
+/**
+ * Modelo de Carrito de Compras - SkillTrade
+ * 
+ * Gestiona el carrito de compras temporal de cada usuario:
+ * - Un carrito por usuario (relación 1:1)
+ * - Múltiples items con cursos y cantidades
+ * - Cálculo automático de totales
+ * - Validaciones de precios y cantidades
+ * - Integración con MercadoPago para pagos
+ * - Limpieza automática después de compra exitosa
+ * 
+ * Características principales:
+ * - Persistencia temporal hasta completar compra
+ * - Validaciones de integridad de precios
+ * - Prevención de items duplicados
+ * - Cálculo automático de totales
+ * - Soporte para múltiples pasarelas de pago
+ * - Limpieza automática post-transacción
+ * 
+ * Flujo de uso:
+ * 1. Usuario agrega cursos al carrito
+ * 2. Sistema valida precios y disponibilidad
+ * 3. Se calcula total automáticamente
+ * 4. Usuario procede al pago
+ * 5. Se crea preferencia de pago (MercadoPago)
+ * 6. Después de pago exitoso, carrito se limpia
+ */
 
-const CarritoSchema = new mongoose.Schema({
-    usuario: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Usuario', 
-        required: true 
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+
+/**
+ * Esquema de Carrito de Compras
+ * 
+ * Estructura temporal para gestionar items de compra
+ * con validaciones financieras y soporte para pagos.
+ */
+const carritoSchema = new Schema({
+    usuario: {
+        type: Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: [true, 'El usuario es obligatorio'],
+        unique: true
     },
-    estado: { 
-        type: String, 
-        enum: ['abierto', 'comprado'], 
-        default: 'abierto' 
+    items: [{
+        curso: {
+            type: Schema.Types.ObjectId,
+            ref: 'Curso',
+            required: [true, 'El curso es obligatorio']
+        },
+        precio: {
+            type: Number,
+            required: [true, 'El precio es obligatorio'],
+            min: [0, 'El precio no puede ser negativo'],
+            validate: {
+                validator: function(v) {
+                    return Number.isFinite(v) && v >= 0;
+                },
+                message: 'El precio debe ser un número válido no negativo'
+            }
+        },
+        cantidad: {
+            type: Number,
+            default: 1,
+            min: [1, 'La cantidad mínima es 1'],
+            max: [10, 'La cantidad máxima es 10'],
+            validate: {
+                validator: function(v) {
+                    return Number.isInteger(v) && v >= 1 && v <= 10;
+                },
+                message: 'La cantidad debe ser un número entero entre 1 y 10'
+            }
+        }
+    }],
+    total: {
+        type: Number,
+        default: 0,
+        min: [0, 'El total no puede ser negativo'],
+        validate: {
+            validator: function(v) {
+                return Number.isFinite(v) && v >= 0;
+            },
+            message: 'El total debe ser un número válido no negativo'
+        }
     },
-    fechaCreacion: { 
-        type: Date, 
-        default: Date.now 
+    estado: {
+        type: String,
+        enum: {
+            values: ['activo', 'convertido'],
+            message: 'El estado debe ser activo o convertido'
+        },
+        default: 'activo'
+    },
+    expiraEn: {
+        type: Date,
+        default: function() {
+            return new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 días
+        }
+    },
+    mercadopago_preference_id: {
+        type: String,
+        default: null
     }
-}, { 
-    versionKey: false 
+}, {
+    collection: 'carritos',
+    timestamps: true
 });
 
-module.exports = mongoose.model('Carrito', CarritoSchema);
+// Índices básicos (usuario ya tiene índice único por la definición del campo)
+carritoSchema.index({ estado: 1 });
+carritoSchema.index({ expiraEn: 1 });
+
+// Validación personalizada para verificar que no haya cursos duplicados
+carritoSchema.path('items').validate(function(items) {
+    const cursoIds = items.map(item => item.curso.toString());
+    const uniqueIds = [...new Set(cursoIds)];
+    return cursoIds.length === uniqueIds.length;
+}, 'No se pueden agregar cursos duplicados al carrito');
+
+// Virtual para verificar si el carrito está vacío
+carritoSchema.virtual('estaVacio').get(function() {
+    return this.items.length === 0;
+});
+
+// Virtual para verificar si el carrito ha expirado
+carritoSchema.virtual('haExpirado').get(function() {
+    return new Date() > this.expiraEn;
+});
+
+// Virtual para obtener el número de items
+carritoSchema.virtual('numeroItems').get(function() {
+    return this.items.length;
+});
+
+// Método para agregar curso al carrito
+carritoSchema.methods.agregarCurso = function(cursoId, precio, cantidad = 1) {
+    // Validar cantidad
+    if (cantidad < 1 || cantidad > 10) {
+        throw new Error('La cantidad debe estar entre 1 y 10');
+    }
+    
+    const itemExistente = this.items.find(item => 
+        item.curso.toString() === cursoId.toString()
+    );
+    
+    if (itemExistente) {
+        const nuevaCantidad = itemExistente.cantidad + cantidad;
+        if (nuevaCantidad > 10) {
+            throw new Error('La cantidad total no puede exceder 10');
+        }
+        itemExistente.cantidad = nuevaCantidad;
+    } else {
+        this.items.push({
+            curso: cursoId,
+            precio,
+            cantidad
+        });
+    }
+    
+    this.calcularTotal();
+    this.renovarExpiracion();
+    
+    return this.save();
+};
+
+// Método para remover curso del carrito
+carritoSchema.methods.removerCurso = function(cursoId) {
+    this.items = this.items.filter(item => 
+        item.curso.toString() !== cursoId.toString()
+    );
+    
+    this.calcularTotal();
+    
+    return this.save();
+};
+
+// Método para actualizar cantidad de un curso
+carritoSchema.methods.actualizarCantidad = function(cursoId, cantidad) {
+    if (cantidad < 1 || cantidad > 10) {
+        throw new Error('La cantidad debe estar entre 1 y 10');
+    }
+    
+    const item = this.items.find(item => 
+        item.curso.toString() === cursoId.toString()
+    );
+    
+    if (!item) {
+        throw new Error('Curso no encontrado en el carrito');
+    }
+    
+    if (cantidad <= 0) {
+        return this.removerCurso(cursoId);
+    }
+    
+    item.cantidad = cantidad;
+    this.calcularTotal();
+    
+    return this.save();
+};
+
+// Método para limpiar carrito
+carritoSchema.methods.limpiar = function() {
+    this.items = [];
+    this.total = 0;
+    
+    return this.save();
+};
+
+// Método para calcular total
+carritoSchema.methods.calcularTotal = function() {
+    this.total = this.items.reduce((total, item) => {
+        return total + (item.precio * item.cantidad);
+    }, 0);
+    return this.total;
+};
+
+// Método para renovar expiración
+carritoSchema.methods.renovarExpiracion = function() {
+    this.expiraEn = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000));
+};
+
+// Método para convertir carrito en orden
+carritoSchema.methods.convertirEnOrden = function() {
+    if (this.items.length === 0) {
+        throw new Error('No se puede convertir un carrito vacío');
+    }
+    
+    if (this.haExpirado) {
+        throw new Error('No se puede convertir un carrito expirado');
+    }
+    
+    this.estado = 'convertido';
+    
+    return this.save();
+};
+
+// Hook para garantizar consistencia del total antes de guardar
+carritoSchema.pre('save', function(next) {
+    if (Array.isArray(this.items)) {
+        this.total = this.items.reduce((acc, item) => acc + (Number(item.precio) * Number(item.cantidad || 1)), 0);
+    }
+    next();
+});
+
+module.exports = mongoose.model('Carrito', carritoSchema);

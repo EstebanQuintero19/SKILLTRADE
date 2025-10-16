@@ -1,0 +1,97 @@
+<!--
+/**
+ * PÁGINA DE ERROR - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de error genérica que maneja diferentes tipos de errores HTTP
+ * con diseño centrado, iconos contextuales y opciones de navegación.
+ * 
+ * TIPOS DE ERROR SOPORTADOS:
+ * - 403: Acceso denegado (icono escudo)
+ * - 404: Página no encontrada (icono búsqueda)
+ * - 500: Error del servidor (icono advertencia)
+ * - Otros: Error genérico
+ * 
+ * FUNCIONALIDADES:
+ * - Mostrar código de error prominente
+ * - Mensaje personalizado según tipo de error
+ * - Iconos contextuales para cada tipo
+ * - Botones de navegación (inicio, atrás)
+ * - Diseño centrado y responsive
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - codigo: Código de error HTTP
+ * - mensaje: Mensaje descriptivo del error
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Gradiente rojo para indicar error
+ * - Iconos diferenciados por tipo de error
+ * - Botones de acción para recuperación
+ * - JavaScript para navegación hacia atrás
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - SkillTrade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .error-gradient { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('../partials/header') %>
+    
+    <div class="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full mx-auto">
+            <div class="text-center">
+                <div class="error-gradient rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <% if (typeof codigo !== 'undefined' && codigo === 403) { %>
+                        <i class="fas fa-shield-alt text-white text-3xl"></i>
+                    <% } else if (typeof codigo !== 'undefined' && codigo === 404) { %>
+                        <i class="fas fa-search text-white text-3xl"></i>
+                    <% } else { %>
+                        <i class="fas fa-exclamation-triangle text-white text-3xl"></i>
+                    <% } %>
+                </div>
+                
+                <h1 class="text-6xl font-bold text-gray-900 mb-4"><%= codigo || 500 %></h1>
+                
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+                    <% if (typeof codigo !== 'undefined' && codigo === 403) { %>
+                        Acceso Denegado
+                    <% } else if (typeof codigo !== 'undefined' && codigo === 404) { %>
+                        Página No Encontrada
+                    <% } else { %>
+                        Error del Servidor
+                    <% } %>
+                </h2>
+                
+                <p class="text-gray-600 mb-8 max-w-sm mx-auto">
+                    <%= mensaje || 'Ha ocurrido un error inesperado. Por favor, intenta nuevamente.' %>
+                </p>
+                
+                <div class="space-y-4">
+                    <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-home mr-2"></i>
+                        Volver al Inicio
+                    </a>
+                    
+                    <div>
+                        <button onclick="history.back()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Volver Atrás
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

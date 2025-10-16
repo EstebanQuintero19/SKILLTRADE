@@ -1,0 +1,101 @@
+<!--
+/**
+ * PÁGINA DE BIBLIOTECA - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de biblioteca personal del usuario que organiza y muestra todos
+ * sus cursos categorizados por tipo de acceso: propios, intercambio,
+ * favoritos y comprados. Incluye navegación por pestañas y carga dinámica.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación de la biblioteca personal
+ * - NAVEGACIÓN: Pestañas para diferentes categorías de cursos
+ * - CONTENEDOR: Área dinámica para mostrar cursos según categoría
+ * 
+ * CATEGORÍAS DE CURSOS:
+ * - MIS CURSOS: Cursos creados por el usuario
+ * - POR INTERCAMBIO: Cursos obtenidos mediante intercambios
+ * - FAVORITOS: Cursos marcados como favoritos
+ * - COMPRADOS: Cursos adquiridos mediante compra
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Navegación por pestañas con JavaScript
+ * - Carga dinámica de contenido por AJAX
+ * - Animaciones de transición entre secciones
+ * - Diseño responsive con grid adaptativo
+ * - Estados activos visuales en navegación
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/biblioteca.css: Estilos específicos
+ * - /js/biblioteca_new.js: JavaScript para funcionalidad dinámica
+ */
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Biblioteca - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/biblioteca.css">
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+<%- include('../partials/header') %>
+
+<!--HERO SECTION - Presentación de la biblioteca personal-->
+<section class="gradient-bg relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
+  <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
+  
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center text-white">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        <i class="fas fa-book-open mr-3"></i>
+        Mi Biblioteca
+      </h1>
+      <p class="text-xl text-purple-100 mb-8">Accede a todos tus cursos organizados por secciones</p>
+    </div>
+  </div>
+</section>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!--NAVEGACIÓN DE SECCIONES - Pestañas para categorías de cursos-->
+  <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+    <div class="flex flex-wrap gap-4 justify-center">
+      <button onclick="cambiarSeccion('propios')" id="tab-propios" class="section-tab section-active px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+        <i class="fas fa-user-graduate"></i>
+        Mis Cursos
+      </button>
+      <button onclick="cambiarSeccion('intercambio')" id="tab-intercambio" class="section-tab px-6 py-3 rounded-lg font-medium flex items-center gap-2 bg-gray-100 text-gray-700">
+        <i class="fas fa-exchange-alt"></i>
+        Por Intercambio
+      </button>
+      <button onclick="cambiarSeccion('favoritos')" id="tab-favoritos" class="section-tab px-6 py-3 rounded-lg font-medium flex items-center gap-2 bg-gray-100 text-gray-700">
+        <i class="fas fa-heart"></i>
+        Favoritos
+      </button>
+      <button onclick="cambiarSeccion('comprados')" id="tab-comprados" class="section-tab px-6 py-3 rounded-lg font-medium flex items-center gap-2 bg-gray-100 text-gray-700">
+        <i class="fas fa-shopping-cart"></i>
+        Comprados
+      </button>
+    </div>
+  </div>
+
+  <!--CONTENEDOR DE CURSOS - Área dinámica para mostrar cursos-->
+  <div id="contenedor-cursos" class="animate-fade-in">
+    <!--Los cursos se cargarán aquí dinámicamente vía JavaScript-->
+  </div>
+
+</main>
+
+<!--JAVASCRIPT ESPECÍFICO - Navegación por pestañas y carga dinámica-->
+<script src="/js/biblioteca_new.js"></script>
+
+</body>
+</html>

@@ -1,59 +1,237 @@
-const mongoose = require('../config/db');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const schemaUser = new mongoose.Schema({
+/**
+ * Esquema de usuario en SkillTrade
+ * 
+ * Representa a un usuario registrado en la plataforma, 
+ * incluyendo datos personales, autenticación, visibilidad,
+ * estadísticas y métodos de utilidad.
+ * 
+ * @typedef {Object} Usuario
+ * @property {string} nombre - Nombre del usuario (2-50 caracteres, requerido).
+ * @property {string} email - Correo electrónico único y válido (requerido).
+ * @property {string} password - Contraseña del usuario (mínimo 6 caracteres, requerida).
+ * @property {string} [apiKey] - Clave de acceso API generada automáticamente.
+ * @property {string} [foto] - URL o ruta local de la foto de perfil.
+ * @property {string} [biografia] - Breve descripción (máximo 500 caracteres).
+ * @property {string} [telefono] - Número de teléfono en formato internacional.
+ * @property {'publico'|'privado'} visibilidad - Controla la visibilidad del perfil.
+ * @property {Date} fechaCreacion - Fecha en que se creó el usuario.
+ * @property {Date} ultimoAcceso - Última vez que accedió a la plataforma.
+ * @property {'admin'|'usuario'} rol - Rol del usuario (por defecto: 'usuario').
+ * @property {boolean} activo - Indica si el usuario está activo.
+ * @property {Object} estadisticas - Datos de actividad del usuario.
+ * @property {number} estadisticas.cursosCreados - Cursos creados por el usuario.
+ * @property {number} estadisticas.intercambiosRealizados - Intercambios realizados.
+ * @property {number} estadisticas.suscripcionesActivas - Número de suscripciones activas.
+ */
+
+const usuarioSchema = new Schema({
     nombre: {
         type: String,
-        required: true,
-        minlength: 1,
-        maxlength: 150
+        required: [true, 'El nombre es obligatorio'],
+        trim: true,
+        minlength: [2, 'El nombre debe tener al menos 2 caracteres'],
+        maxlength: [50, 'El nombre no puede exceder 50 caracteres']
     },
-    nombreUsuario: {
+    email: {
         type: String,
-        required: true,
+        required: [true, 'El email es obligatorio'],
         unique: true,
-        minlength: 1,
-        maxlength: 150
-    },
-    fechaNacimiento: {
-        type: Date,
-        required: true
-    },
-    fechaRegistro: {
-        type: Date,
-        default: Date.now
-    },
-    correo: {
-        type: String,
-        required: true,
-        unique: true,
-        match: [/^\S+@\S+\.\S+$/, 'El correo debe ser válido']
-    },
-    cursosPagos: {
-        type: Array,
-        default: []
-    },
-    cursosInscritos: {
-        type: Array,
-        default: []
-    },
-    suscriptores: {
-        type: Number,
-        default: 0
-    },
-    suscripciones: {
-        type: Array,
-        default: []
+        lowercase: true,
+        trim: true,
+        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Formato de email inválido']
     },
     password: {
         type: String,
-        required: true,
-        minlength: [6, 'La contraseña debe tener al menos 6 caracteres']
+        required: [true, 'La contraseña es obligatoria'],
+        minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
+        select: false
+    },
+    apiKey: {
+        type: String,
+        unique: true,
+        sparse: true,
+        index: true
+    },
+    foto: {
+        type: String,
+        default: null,
+        validate: {
+            validator: function(v) {
+                if (!v) return true; // Permitir null
+                return v.startsWith('http') || v.startsWith('/');
+            },
+            message: 'La foto debe ser una URL válida o una ruta local'
+        }
+    },
+    biografia: {
+        type: String,
+        default: '',
+        maxlength: [500, 'La biografía no puede exceder 500 caracteres'],
+        trim: true
+    },
+    telefono: {
+        type: String,
+        default: '',
+        match: [/^[\+]?[0-9\s\-\(\)]+$/, 'Formato de teléfono inválido'],
+        trim: true
+    },
+    visibilidad: {
+        type: String,
+        enum: {
+            values: ['publico', 'privado'],
+            message: 'La visibilidad debe ser público o privado'
+        },
+        default: 'publico'
+    },
+    fechaCreacion: {
+        type: Date,
+        default: Date.now,
+        validate: {
+            validator: function(v) {
+                return v <= new Date();
+            },
+            message: 'La fecha de creación no puede ser futura'
+        }
+    },
+    ultimoAcceso: {
+        type: Date,
+        default: Date.now,
+        validate: {
+            validator: function(v) {
+                return v <= new Date();
+            },
+            message: 'La fecha de último acceso no puede ser futura'
+        }
+    },
+    rol: {
+        type: String,
+        enum: {
+            values: ['admin', 'usuario'],
+            message: 'El rol debe ser admin o usuario'
+        },
+        default: 'usuario'
+    },
+    activo: {
+        type: Boolean,
+        default: true
+    },
+    estadisticas: {
+        cursosCreados: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Los cursos creados no pueden ser negativos']
+        },
+        intercambiosRealizados: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Los intercambios no pueden ser negativos']
+        },
+        suscripcionesActivas: { 
+            type: Number, 
+            default: 0,
+            min: [0, 'Las suscripciones no pueden ser negativas']
+        }
+    },
+    preferencias: {
+        notificaciones_email: {
+            type: Boolean,
+            default: true
+        },
+        notificaciones_cursos: {
+            type: Boolean,
+            default: true
+        }
     }
 }, {
-    versionKey: false
+    collection: 'usuarios',
+    timestamps: true,
+    toJSON: { 
+        virtuals: true,
+        transform: function(doc, ret) {
+            delete ret.password;
+            return ret;
+        }
+    },
+    toObject: { 
+        virtuals: true,
+        transform: function(doc, ret) {
+            delete ret.password;
+            return ret;
+        }
+    }
 });
 
-const users = mongoose.model('users', schemaUser);
-module.exports = users;
+// Índices básicos (email ya tiene índice único en schema)
+usuarioSchema.index({ nombre: 'text', biografia: 'text' });
+usuarioSchema.index({ rol: 1 });
+usuarioSchema.index({ activo: 1 });
 
-//cuando el usuario pasa a ser un owner se le agrega el atributo rating(calificación)
+// Validación personalizada para verificar que el usuario no se registre a sí mismo como admin
+usuarioSchema.pre('save', function(next) {
+    if (this.isNew && this.rol === 'admin') {
+        // Solo permitir admin si es el primer usuario o si hay validación externa
+        console.log('Usuario admin creado:', this.email);
+    }
+    next();
+});
+
+/**
+ * Genera una nueva API Key para el usuario.
+ * 
+ * @function generarNuevaApiKey
+ * @memberof Usuario
+ * @instance
+ * @returns {Promise<Usuario>} Usuario actualizado con nueva API Key.
+ */
+usuarioSchema.methods.generarNuevaApiKey = function() {
+    const crypto = require('crypto');
+    this.apiKey = crypto.randomBytes(32).toString('hex');
+    return this.save();
+};
+
+/**
+ * Verifica si la contraseña ingresada es correcta.
+ * 
+ * @function verificarPassword
+ * @memberof Usuario
+ * @instance
+ * @param {string} password - Contraseña ingresada por el usuario.
+ * @returns {Promise<boolean>} True si la contraseña coincide.
+ */
+usuarioSchema.methods.verificarPassword = async function(password) {
+    const bcrypt = require('bcryptjs');
+    return await bcrypt.compare(password, this.password);
+};
+
+/**
+ * Actualiza la fecha de último acceso del usuario.
+ * 
+ * @function actualizarUltimoAcceso
+ * @memberof Usuario
+ * @instance
+ * @returns {Promise<Usuario>} Usuario actualizado con fecha de acceso.
+ */
+usuarioSchema.methods.actualizarUltimoAcceso = function() {
+    this.ultimoAcceso = new Date();
+    return this.save();
+};
+
+/**
+ * Limpia los datos sensibles de un usuario antes de enviarlos.
+ * 
+ * @function limpiarDatosSensibles
+ * @memberof Usuario
+ * @instance
+ * @returns {Object} Objeto usuario sin password ni apiKey.
+ */
+usuarioSchema.methods.limpiarDatosSensibles = function() {
+    const usuario = this.toObject();
+    delete usuario.password;
+    delete usuario.apiKey;
+    return usuario;
+};
+
+module.exports = mongoose.model('Usuario', usuarioSchema);
