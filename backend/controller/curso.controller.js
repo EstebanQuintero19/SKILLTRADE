@@ -126,7 +126,11 @@ const actualizarCurso = async (req, res) => {
             });
         }
 
-        if (curso.owner.toString() !== ownerId.toString()) {
+        // Verificar permisos: propietario del curso O administrador
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = curso.owner.toString() === ownerId.toString();
+        
+        if (!esPropietario && !esAdmin) {
             return res.status(403).json({ 
                 error: 'No tienes permisos para editar este curso' 
             });
@@ -195,7 +199,11 @@ const actualizarPrecio = async (req, res) => {
             });
         }
 
-        if (curso.owner.toString() !== ownerId.toString()) {
+        // Verificar permisos: propietario del curso O administrador
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = curso.owner.toString() === ownerId.toString();
+        
+        if (!esPropietario && !esAdmin) {
             return res.status(403).json({ 
                 error: 'No tienes permisos para modificar este curso' 
             });
@@ -235,7 +243,11 @@ const eliminarCurso = async (req, res) => {
             });
         }
 
-        if (curso.owner.toString() !== ownerId.toString()) {
+        // Verificar permisos: propietario del curso O administrador
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = curso.owner.toString() === ownerId.toString();
+        
+        if (!esPropietario && !esAdmin) {
             return res.status(403).json({ 
                 error: 'No tienes permisos para eliminar este curso' 
             });
@@ -494,10 +506,43 @@ const obtenerCursos = async (req, res) => {
             .skip(skip)
             .limit(parseInt(limit));
 
+        // Agregar datos calculados a cada curso
+        const cursosConDatos = await Promise.all(cursos.map(async (curso) => {
+            const cursoObj = curso.toObject();
+            
+            // Calcular horas totales del curso
+            let horasTotales = 0;
+            if (curso.lecciones && curso.lecciones.length > 0) {
+                horasTotales = curso.lecciones.reduce((total, leccion) => {
+                    return total + (leccion.duracion || 0);
+                }, 0);
+                // Convertir de minutos a horas
+                horasTotales = Math.round(horasTotales / 60 * 10) / 10; // Redondear a 1 decimal
+            }
+            
+            // Contar estudiantes únicos que han comprado el curso
+            let numeroEstudiantes = 1; // Siempre incluir al creador
+            try {
+                const ventasUnicas = await Venta.distinct('comprador', {
+                    'items.curso': curso._id,
+                    estado: 'completada'
+                });
+                numeroEstudiantes += ventasUnicas.length;
+            } catch (error) {
+                console.error('Error contando estudiantes para curso', curso._id, ':', error);
+            }
+            
+            // Agregar los campos calculados
+            cursoObj.horasTotales = horasTotales;
+            cursoObj.numeroEstudiantes = numeroEstudiantes;
+            
+            return cursoObj;
+        }));
+
         const total = await Curso.countDocuments(filtros);
 
         res.json({
-            cursos,
+            cursos: cursosConDatos,
             paginacion: {
                 pagina: parseInt(page),
                 totalPaginas: Math.ceil(total / parseInt(limit)),

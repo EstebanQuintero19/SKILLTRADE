@@ -6,10 +6,7 @@
     <title><%= title %> - SkillTrade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .card-shadow { box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1); }
-        .admin-gradient { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
-    </style>
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="bg-gray-50">
     <%- include('../partials/header') %>
@@ -155,7 +152,7 @@
                                                    title="Ver curso">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="/editar-curso/<%= curso._id %>" 
+                                                <a href="/curso/<%= curso._id %>/editar" 
                                                    class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-yellow-600 bg-yellow-100 hover:bg-yellow-200 transition-colors"
                                                    title="Editar curso">
                                                     <i class="fas fa-edit"></i>
@@ -246,31 +243,12 @@
     <div class="py-8"></div>
 
     <script>
-        function eliminarCurso(cursoId, cursoTitulo) {
-            if (confirm(`¿Estás seguro de que deseas eliminar el curso "${cursoTitulo}"? Esta acción no se puede deshacer.`)) {
-                fetch(`/api/admin/cursos/${cursoId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': '<%= locals.token || "" %>',
-                        'Authorization': 'Bearer <%= locals.token || "" %>'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Curso eliminado exitosamente');
-                        window.location.reload();
-                    } else {
-                        alert('Error al eliminar curso: ' + (data.message || 'Error desconocido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al eliminar curso');
-                });
-            }
-        }
+        window.sessionData = {
+            signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
+            token: '<%= locals.token || '' %>',
+            user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
+        };
     </script>
+    <script src="/js/admin_cursos.js"></script>
 </body>
 </html>

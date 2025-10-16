@@ -355,8 +355,45 @@
         </div>
       </section>
       
-      <!-- Actividad reciente (solo para perfil propio) -->
+      <!-- Historial de compras (solo para perfil propio) -->
       <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.5s">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-shopping-bag text-emerald-600 text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">Historial de Compras</h3>
+          </div>
+          <div id="compras-contador" class="text-sm text-gray-500">
+            Cargando...
+          </div>
+        </div>
+        
+        <!-- Contenedor del historial -->
+        <div id="historial-compras-container">
+          <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <div class="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p class="text-gray-500">Cargando historial de compras...</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Paginación -->
+        <div id="historial-paginacion" class="hidden mt-6">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500" id="historial-info">
+              <!-- Info de paginación -->
+            </div>
+            <div class="flex space-x-2" id="historial-controles">
+              <!-- Controles de paginación -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Actividad reciente (solo para perfil propio) -->
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
             <i class="fas fa-history text-green-600 text-xl"></i>
@@ -419,7 +456,7 @@
       </section>
       
       <!-- Logros y badges (solo para perfil propio) -->
-      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.6s">
+      <section class="bg-white rounded-2xl card-shadow p-8 animate-fade-in" style="animation-delay: 0.7s">
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
             <i class="fas fa-trophy text-yellow-600 text-xl"></i>
@@ -600,6 +637,209 @@
     }, 5000);
   }
 
+  // Variables globales para historial de compras
+  let paginaActualHistorial = 1;
+  let cargandoHistorial = false;
+
+  // Función para cargar historial de compras
+  async function cargarHistorialCompras(pagina = 1) {
+    if (cargandoHistorial) return;
+    
+    cargandoHistorial = true;
+    const container = document.getElementById('historial-compras-container');
+    const contador = document.getElementById('compras-contador');
+    const paginacion = document.getElementById('historial-paginacion');
+    
+    try {
+      const response = await fetch(`/api/ventas/historial/compras?page=${pagina}`);
+      const data = await response.json();
+      
+      if (data.ventas && data.ventas.length > 0) {
+        // Mostrar compras
+        container.innerHTML = data.ventas.map(venta => `
+          <div class="border border-gray-200 rounded-xl p-6 mb-4 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                  <i class="fas fa-receipt text-white text-lg"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-800">Compra #${venta._id.slice(-8)}</h4>
+                  <p class="text-sm text-gray-500">${new Date(venta.fechaCompra).toLocaleDateString('es-ES', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-emerald-600">$${venta.total.toLocaleString()}</div>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                  venta.estado === 'completada' ? 'bg-green-100 text-green-800' :
+                  venta.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }">
+                  <i class="fas ${
+                    venta.estado === 'completada' ? 'fa-check-circle' :
+                    venta.estado === 'pendiente' ? 'fa-clock' :
+                    'fa-times-circle'
+                  } mr-1"></i>
+                  ${venta.estado.charAt(0).toUpperCase() + venta.estado.slice(1)}
+                </span>
+              </div>
+            </div>
+            
+            <div class="space-y-3">
+              ${venta.items.map(item => `
+                <div class="flex items-center bg-gray-50 rounded-lg p-3">
+                  <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-graduation-cap text-white text-lg"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-medium text-gray-800">${item.curso?.titulo || 'Curso no disponible'}</h5>
+                    <p class="text-sm text-gray-500">
+                      <i class="fas fa-tag mr-1"></i>
+                      ${item.curso?.categoria || 'Sin categoría'}
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold text-gray-800">$${item.precio.toLocaleString()}</div>
+                    <div class="text-xs text-gray-500">Cantidad: ${item.cantidad}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+              <div class="text-sm text-gray-500">
+                <i class="fas fa-credit-card mr-1"></i>
+                ${venta.metodoPago?.tipo || 'No especificado'}
+              </div>
+              <button class="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                <i class="fas fa-download mr-1"></i>
+                Descargar comprobante
+              </button>
+            </div>
+          </div>
+        `).join('');
+        
+        // Actualizar contador
+        contador.textContent = `${data.paginacion.totalElementos} compra${data.paginacion.totalElementos !== 1 ? 's' : ''}`;
+        
+        // Mostrar paginación si hay más de una página
+        if (data.paginacion.totalPaginas > 1) {
+          mostrarPaginacionHistorial(data.paginacion);
+          paginacion.classList.remove('hidden');
+        } else {
+          paginacion.classList.add('hidden');
+        }
+        
+      } else {
+        // No hay compras
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shopping-bag text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-xl font-semibold text-gray-800 mb-2">No tienes compras aún</h4>
+            <p class="text-gray-500 mb-6">Explora nuestros cursos y realiza tu primera compra</p>
+            <a href="/cursos" class="inline-flex items-center px-6 py-3 gradient-bg text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg">
+              <i class="fas fa-search mr-2"></i>
+              Explorar Cursos
+            </a>
+          </div>
+        `;
+        contador.textContent = 'Sin compras';
+        paginacion.classList.add('hidden');
+      }
+      
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+          </div>
+          <h4 class="text-xl font-semibold text-gray-800 mb-2">Error al cargar historial</h4>
+          <p class="text-gray-500 mb-6">No se pudo cargar tu historial de compras</p>
+          <button onclick="cargarHistorialCompras(${pagina})" class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all">
+            <i class="fas fa-redo mr-2"></i>
+            Reintentar
+          </button>
+        </div>
+      `;
+      contador.textContent = 'Error';
+      paginacion.classList.add('hidden');
+    } finally {
+      cargandoHistorial = false;
+    }
+  }
+
+  // Función para mostrar paginación del historial
+  function mostrarPaginacionHistorial(paginacion) {
+    const info = document.getElementById('historial-info');
+    const controles = document.getElementById('historial-controles');
+    
+    const inicio = ((paginacion.pagina - 1) * paginacion.elementosPorPagina) + 1;
+    const fin = Math.min(paginacion.pagina * paginacion.elementosPorPagina, paginacion.totalElementos);
+    
+    info.textContent = `Mostrando ${inicio}-${fin} de ${paginacion.totalElementos} compras`;
+    
+    let controlesHTML = '';
+    
+    // Botón anterior
+    if (paginacion.pagina > 1) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${paginacion.pagina - 1})" 
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      `;
+    }
+    
+    // Números de página
+    const maxPaginas = 5;
+    let inicio_pag = Math.max(1, paginacion.pagina - Math.floor(maxPaginas / 2));
+    let fin_pag = Math.min(paginacion.totalPaginas, inicio_pag + maxPaginas - 1);
+    
+    if (fin_pag - inicio_pag < maxPaginas - 1) {
+      inicio_pag = Math.max(1, fin_pag - maxPaginas + 1);
+    }
+    
+    for (let i = inicio_pag; i <= fin_pag; i++) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${i})" 
+                class="px-3 py-2 text-sm border rounded-lg transition-colors ${
+                  i === paginacion.pagina 
+                    ? 'bg-purple-600 text-white border-purple-600' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }">
+          ${i}
+        </button>
+      `;
+    }
+    
+    // Botón siguiente
+    if (paginacion.pagina < paginacion.totalPaginas) {
+      controlesHTML += `
+        <button onclick="cambiarPaginaHistorial(${paginacion.pagina + 1})" 
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+    }
+    
+    controles.innerHTML = controlesHTML;
+  }
+
+  // Función para cambiar página del historial
+  function cambiarPaginaHistorial(pagina) {
+    paginaActualHistorial = pagina;
+    cargarHistorialCompras(pagina);
+  }
+
   // Event listener para evaluación de contraseña
   document.addEventListener('DOMContentLoaded', function() {
     const newPasswordInput = document.querySelector('input[name="nueva"]');
@@ -723,6 +963,11 @@
         modal.classList.add('hidden');
       }
     });
+
+    // Cargar historial de compras al cargar la página (solo para perfil propio)
+    <% if (typeof esPropio !== 'undefined' && esPropio) { %>
+    cargarHistorialCompras(1);
+    <% } %>
   });
   
   // Animaciones de entrada

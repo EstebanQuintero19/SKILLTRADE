@@ -242,6 +242,9 @@ app.get('/api/ventas/carrito', autenticarApiKey, ventaController.obtenerCarrito)
 app.post('/api/ventas/carrito/remover', autenticarApiKey, ventaController.removerDelCarrito);
 app.post('/api/ventas/carrito/pagar', autenticarApiKey, ventaController.pagarCarrito);
 
+// Ruta para historial de compras del usuario
+app.get('/api/ventas/historial/compras', autenticarApiKey, ventaController.obtenerHistorialCompras);
+
 // Ruta genérica de ventas (DEBE ir después de las rutas específicas)
 app.get('/api/ventas/:id', autenticarApiKey, ventaController.obtenerVentaPorId);
 

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - SkillTrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      min-height: 100vh;
+    }
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .admin-gradient {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    }
+    .toast {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <nav class="flex items-center gap-2 text-sm text-white/70 mb-6">
+      <a href="/admin" class="hover:text-white transition-colors flex items-center gap-1">
+        <i class="fas fa-shield-alt"></i>
+        Panel Admin
+      </a>
+      <i class="fas fa-chevron-right text-xs"></i>
+      <a href="/admin_usuarios" class="hover:text-white transition-colors flex items-center gap-1">
+        <i class="fas fa-users"></i>
+        Usuarios
+      </a>
+      <i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-white font-medium">Editar Usuario</span>
+    </nav>
+
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-white mb-2">
+        <i class="fas fa-user-edit mr-3"></i>
+        Editar Usuario
+      </h1>
+      <p class="text-red-100">Modificar información del usuario: <strong><%= usuario.nombre %></strong></p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="bg-white rounded-2xl card-shadow p-8 fade-in">
+    <form action="/admin/usuario/<%= usuario._id %>/editar" method="POST" class="space-y-6">
+      
+      <!-- Información Personal -->
+      <div class="border-b border-gray-200 pb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="fas fa-user text-red-600 mr-2"></i>
+          Información Personal
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre Completo
+            </label>
+            <input type="text" 
+                   id="nombre" 
+                   name="nombre" 
+                   value="<%= usuario.nombre || '' %>"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                   placeholder="Nombre completo del usuario">
+          </div>
+
+          <div>
+            <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+              Teléfono
+            </label>
+            <input type="tel" 
+                   id="telefono" 
+                   name="telefono" 
+                   value="<%= usuario.telefono || '' %>"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                   placeholder="Número de teléfono">
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label for="biografia" class="block text-sm font-medium text-gray-700 mb-2">
+            Biografía
+          </label>
+          <textarea id="biografia" 
+                    name="biografia" 
+                    rows="4"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all resize-none"
+                    placeholder="Biografía del usuario"><%= usuario.biografia || '' %></textarea>
+        </div>
+      </div>
+
+      <!-- Configuración de Privacidad -->
+      <div class="border-b border-gray-200 pb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="fas fa-shield-alt text-red-600 mr-2"></i>
+          Configuración de Privacidad
+        </h3>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            Visibilidad del Perfil
+          </label>
+          <div class="space-y-3">
+            <label class="flex items-center">
+              <input type="radio" 
+                     name="visibilidad" 
+                     value="publico" 
+                     <%= (usuario.visibilidad === 'publico' || !usuario.visibilidad) ? 'checked' : '' %>
+                     class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300">
+              <span class="ml-3 text-sm text-gray-700">
+                <i class="fas fa-globe text-green-500 mr-1"></i>
+                Público - Visible para todos los usuarios
+              </span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" 
+                     name="visibilidad" 
+                     value="privado" 
+                     <%= usuario.visibilidad === 'privado' ? 'checked' : '' %>
+                     class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300">
+              <span class="ml-3 text-sm text-gray-700">
+                <i class="fas fa-lock text-red-500 mr-1"></i>
+                Privado - Solo visible para el usuario
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferencias de Notificaciones -->
+      <div class="pb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="fas fa-bell text-red-600 mr-2"></i>
+          Preferencias de Notificaciones
+        </h3>
+        
+        <div class="space-y-4">
+          <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <span class="text-sm font-medium text-gray-900">Notificaciones por Email</span>
+              <p class="text-xs text-gray-500">Recibir actualizaciones importantes por correo electrónico</p>
+            </div>
+            <input type="checkbox" 
+                   name="notificaciones_email" 
+                   <%= (usuario.preferencias?.notificaciones_email !== false) ? 'checked' : '' %>
+                   class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+          </label>
+
+          <label class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <span class="text-sm font-medium text-gray-900">Notificaciones de Cursos</span>
+              <p class="text-xs text-gray-500">Recibir notificaciones sobre nuevos cursos y actualizaciones</p>
+            </div>
+            <input type="checkbox" 
+                   name="notificaciones_cursos" 
+                   <%= (usuario.preferencias?.notificaciones_cursos !== false) ? 'checked' : '' %>
+                   class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+          </label>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex flex-col sm:flex-row gap-4 pt-6">
+        <button type="submit" 
+                class="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i>
+          Guardar Cambios
+        </button>
+        
+        <a href="/admin_usuarios" 
+           class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors flex items-center justify-center text-center">
+          <i class="fas fa-times mr-2"></i>
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<script>
+// Mostrar notificaciones basadas en parámetros URL
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  if (urlParams.has('error')) {
+    const error = urlParams.get('error');
+    showToast(decodeURIComponent(error), 'error');
+  }
+  
+  if (urlParams.has('mensaje')) {
+    const mensaje = urlParams.get('mensaje');
+    showToast(decodeURIComponent(mensaje), 'success');
+  }
+});
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  const bgColor = type === 'success' ? 'bg-green-500' : 
+                  type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+  
+  toast.className = `toast ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm`;
+  toast.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()" class="ml-auto">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  
+  document.getElementById('toast-container').appendChild(toast);
+  
+  // Mostrar toast
+  setTimeout(() => toast.classList.add('show'), 100);
+  
+  // Auto-eliminar después de 5 segundos
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+</script>
+
+</body>
+</html>

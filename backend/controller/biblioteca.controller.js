@@ -412,7 +412,6 @@ const agregarFavorito = async (req, res) => {
         const usuarioId = req.usuario.id || req.usuario._id;
         const { cursoId } = req.params; // Obtener del parámetro de la URL
         
-        console.log('Agregando favorito:', { usuarioId, cursoId });
 
         if (!cursoId) {
             return res.status(400).json({
@@ -519,7 +518,6 @@ const removerFavorito = async (req, res) => {
 const obtenerFavoritos = async (req, res) => {
     try {
         const usuarioId = req.usuario.id || req.usuario._id;
-        console.log('❤️ Obteniendo favoritos para usuario:', usuarioId);
 
         // Obtener o crear biblioteca del usuario
         let biblioteca = await Biblioteca.findOne({ usuario: usuarioId })
@@ -542,7 +540,6 @@ const obtenerFavoritos = async (req, res) => {
 
         // Obtener favoritos
         const favoritos = biblioteca.favoritos || [];
-        console.log('❤️ Favoritos encontrados:', favoritos.length);
 
         res.json({
             success: true,
@@ -723,7 +720,11 @@ const editarCursoDesdeLibreria = async (req, res) => {
             });
         }
 
-        if (curso.owner.toString() !== usuarioId.toString()) {
+        // Verificar permisos: propietario del curso O administrador
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = curso.owner.toString() === usuarioId.toString();
+        
+        if (!esPropietario && !esAdmin) {
             return res.status(403).json({
                 error: 'No tienes permisos para editar este curso'
             });
@@ -811,7 +812,11 @@ const eliminarCursoDesdeLibreria = async (req, res) => {
             });
         }
 
-        if (curso.owner.toString() !== usuarioId.toString()) {
+        // Verificar permisos: propietario del curso O administrador
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = curso.owner.toString() === usuarioId.toString();
+        
+        if (!esPropietario && !esAdmin) {
             return res.status(403).json({
                 error: 'No tienes permisos para eliminar este curso'
             });
@@ -889,7 +894,6 @@ const obtenerCursosDeUsuario = async (req, res) => {
             });
         }
 
-        console.log('🔍 Buscando cursos para usuario:', usuarioId);
         
         // Obtener cursos del usuario especificado (incluyendo borradores y activos)
         const cursos = await Curso.find({ 
@@ -900,8 +904,6 @@ const obtenerCursosDeUsuario = async (req, res) => {
         .populate('owner', 'nombre email')
         .sort({ fechaCreacion: -1 });
 
-        console.log('📚 Cursos encontrados para usuario:', cursos.length);
-        console.log('📋 Estados de cursos:', cursos.map(c => ({ titulo: c.titulo, estado: c.estadoCurso })));
 
         res.json({
             success: true,
@@ -922,7 +924,6 @@ const obtenerCursosDeUsuario = async (req, res) => {
 const obtenerCursosPorIntercambioActivo = async (req, res) => {
     try {
         const usuarioId = req.usuario.id || req.usuario._id;
-        console.log('📚 Obteniendo cursos por intercambio activo para usuario:', usuarioId);
 
         // Buscar intercambios activos donde el usuario es receptor
         const intercambiosActivos = await Exchange.find({
@@ -940,7 +941,6 @@ const obtenerCursosPorIntercambioActivo = async (req, res) => {
         .populate('emisor', 'nombre email')
         .sort({ fechaInicio: -1 });
 
-        console.log('🔄 Intercambios activos encontrados:', intercambiosActivos.length);
 
         // Extraer los cursos de los intercambios (el usuario receptor accede al curso del emisor)
         const cursosIntercambio = intercambiosActivos
@@ -956,7 +956,6 @@ const obtenerCursosPorIntercambioActivo = async (req, res) => {
                 }
             }));
 
-        console.log('📚 Cursos de intercambio procesados:', cursosIntercambio.length);
 
         res.json({
             success: true,
@@ -978,7 +977,6 @@ const obtenerCursosPorIntercambioActivo = async (req, res) => {
 const obtenerCursosComprados = async (req, res) => {
     try {
         const usuarioId = req.usuario.id || req.usuario._id;
-        console.log('🛒 Obteniendo cursos comprados para usuario:', usuarioId);
 
         // Buscar ventas completadas del usuario
         const ventas = await Venta.find({
@@ -994,7 +992,6 @@ const obtenerCursosComprados = async (req, res) => {
         })
         .sort({ fechaCompra: -1 });
 
-        console.log('🛒 Ventas encontradas:', ventas.length);
 
         // Extraer cursos de las ventas
         const cursosComprados = [];
@@ -1014,7 +1011,6 @@ const obtenerCursosComprados = async (req, res) => {
             });
         });
 
-        console.log('🛒 Cursos comprados procesados:', cursosComprados.length);
 
         res.json({
             success: true,

@@ -28,6 +28,10 @@ app.use(cookieParser());
 // Estáticos opcionales (si usas public/ para assets del front)
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
+// Servir archivos CSS y JS directamente
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+
 // Inyectar variables globales para las vistas (por ejemplo, base de API)
 app.locals.API_BASE = API_BASE;
 
@@ -182,15 +186,36 @@ app.post('/curso/:cursoId/editar', async (req, res) => {
     return res.redirect('/login');
   }
   
+  const { cursoId } = req.params;
+  
   try {
-    const { cursoId } = req.params;
+    console.log('=== ACTUALIZANDO CURSO ===');
+    console.log('Curso ID:', cursoId);
+    console.log('Token disponible:', !!req.cookies?.auth_token);
+    console.log('Datos del formulario:', req.body);
+    
     const { data } = await api.put(`/biblioteca/cursos/${cursoId}`, req.body, { __req: req });
     
-    // Redirigir a la biblioteca con mensaje de éxito
-    res.redirect('/biblioteca?mensaje=Curso actualizado exitosamente');
+    console.log('Curso actualizado exitosamente:', data);
+    
+    // Verificar si es administrador para redirigir al panel admin
+    const esAdmin = res.locals.user?.email === 'skilltrade_admin@gmail.com';
+    
+    if (esAdmin) {
+      // Si es admin, redirigir al panel de cursos admin
+      res.redirect('/admin_cursos?mensaje=Curso actualizado exitosamente');
+    } else {
+      // Si es usuario normal, redirigir a la biblioteca
+      res.redirect('/biblioteca?mensaje=Curso actualizado exitosamente');
+    }
   } catch (err) {
-    console.error('Error updating curso:', err.message);
-    const errorMsg = err.response?.data?.error || 'Error al actualizar el curso';
+    console.error('=== ERROR ACTUALIZANDO CURSO ===');
+    console.error('Status:', err.response?.status);
+    console.error('Data:', err.response?.data);
+    console.error('Message:', err.message);
+    console.error('Headers enviados:', err.config?.headers);
+    
+    const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Error al actualizar el curso';
     res.redirect(`/biblioteca/editar/${cursoId}?error=${encodeURIComponent(errorMsg)}`);
   }
 });
@@ -590,6 +615,19 @@ app.put('/api/intercambios/:id/rechazar', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error rechazando intercambio:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.response?.data?.error || 'Error interno del servidor'
+    });
+  }
+});
+
+app.put('/api/intercambios/:id/cancelar', async (req, res) => {
+  try {
+    const response = await api.put(`/intercambios/${req.params.id}/cancelar`, req.body, { __req: req });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error cancelando intercambio:', error.message);
     res.status(error.response?.status || 500).json({
       success: false,
       error: error.response?.data?.error || 'Error interno del servidor'
@@ -1113,6 +1151,27 @@ app.post('/carrito/pagar', async (req, res) => {
   res.redirect('/ventas');
 });
 
+// Ruta proxy para historial de compras
+app.get('/api/ventas/historial/compras', async (req, res) => {
+  if (!req.cookies?.auth_token) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    const response = await api.get(`/ventas/historial/compras`, { 
+      __req: req,
+      params: req.query
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error obteniendo historial de compras:', error.message);
+    if (error.response) {
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+});
+
 // ===== RUTAS DE MERCADOPAGO =====
 
 // Crear preferencia de pago
@@ -1272,7 +1331,16 @@ app.post('/perfil/editar', async (req, res) => {
     console.log('Respuesta exitosa del backend:', response.data);
     console.log('Status code:', response.status);
     
-    res.redirect('/perfil?success=perfil_actualizado');
+    // Verificar si es administrador para redirigir al panel admin
+    const esAdmin = res.locals.user?.email === 'skilltrade_admin@gmail.com';
+    
+    if (esAdmin) {
+      // Si es admin, redirigir al panel de usuarios admin
+      res.redirect('/admin_usuarios?mensaje=Usuario actualizado exitosamente');
+    } else {
+      // Si es usuario normal, redirigir a su perfil
+      res.redirect('/perfil?success=perfil_actualizado');
+    }
   } catch (err) {
     console.error('ERROR al editar perfil:');
     console.error('Status:', err.response?.status);
@@ -1360,6 +1428,47 @@ const verificarAdminFrontend = (req, res, next) => {
   
   next();
 };
+
+// Perfil: ver perfil de usuario desde admin (solo para administradores)
+app.get('/perfil/:id', verificarAdminFrontend, async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    console.log(`Admin viendo perfil de usuario: ${id}`);
+    const { data } = await api.get(`/usuarios/${id}`, { __req: req });
+    const usuario = data?.data?.usuario || data?.usuario || data || null;
+    
+    if (!usuario) {
+      return res.status(404).render('pages/error', { 
+        title: 'Usuario no encontrado', 
+        error: 'El usuario que buscas no existe' 
+      });
+    }
+    
+    console.log(`Perfil obtenido para usuario: ${usuario.nombre} (${usuario.email})`);
+    
+    // Renderizar vista específica para admin
+    res.render('pages/admin_ver_usuario', { 
+      title: `Perfil de ${usuario.nombre}`, 
+      usuario,
+      esAdmin: true
+    });
+  } catch (err) {
+    console.error('Error al obtener perfil de usuario desde admin:', err.response?.status, err.message);
+    
+    if (err.response?.status === 404) {
+      res.status(404).render('pages/error', { 
+        title: 'Usuario no encontrado', 
+        error: 'El usuario que buscas no existe' 
+      });
+    } else {
+      res.status(500).render('pages/error', { 
+        title: 'Error del servidor', 
+        error: 'Error interno del servidor' 
+      });
+    }
+  }
+});
 
 // Panel de administrador principal
 app.get('/admin', verificarAdminFrontend, async (req, res) => {
@@ -1475,6 +1584,97 @@ app.get('/admin_intercambios', verificarAdminFrontend, async (req, res) => {
       mensaje: 'Error al cargar los intercambios',
       codigo: 500
     });
+  }
+});
+
+// ===== RUTAS PROXY PARA OPERACIONES ADMIN =====
+
+// Eliminar curso desde panel admin
+app.delete('/api/admin/cursos/:id', verificarAdminFrontend, async (req, res) => {
+  try {
+    console.log('=== ELIMINANDO CURSO DESDE ADMIN ===');
+    console.log('Curso ID:', req.params.id);
+    console.log('Token disponible:', !!req.cookies?.auth_token);
+    
+    const { data } = await api.delete(`/admin/cursos/${req.params.id}`, { __req: req });
+    console.log('Respuesta del backend:', data);
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error al eliminar curso:', error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || 'Error interno del servidor'
+    });
+  }
+});
+
+// Eliminar usuario desde panel admin
+app.delete('/api/admin/usuarios/:id', verificarAdminFrontend, async (req, res) => {
+  try {
+    console.log('=== ELIMINANDO USUARIO DESDE ADMIN ===');
+    console.log('Usuario ID:', req.params.id);
+    console.log('Token disponible:', !!req.cookies?.auth_token);
+    
+    const { data } = await api.delete(`/admin/usuarios/${req.params.id}`, { __req: req });
+    console.log('Respuesta del backend:', data);
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || 'Error interno del servidor'
+    });
+  }
+});
+
+// Editar usuario desde panel admin (GET - mostrar formulario)
+app.get('/admin/usuario/:id/editar', verificarAdminFrontend, async (req, res) => {
+  try {
+    console.log('=== CARGANDO FORMULARIO EDITAR USUARIO ADMIN ===');
+    console.log('Usuario ID:', req.params.id);
+    
+    const { data } = await api.get(`/usuarios/${req.params.id}`, { __req: req });
+    const usuario = data?.data?.usuario || data?.usuario || data;
+    
+    if (!usuario) {
+      return res.status(404).render('pages/error', {
+        title: 'Usuario no encontrado',
+        mensaje: 'El usuario que intentas editar no existe',
+        codigo: 404
+      });
+    }
+    
+    res.render('pages/admin_editar_usuario', {
+      title: `Editar Usuario: ${usuario.nombre}`,
+      usuario
+    });
+  } catch (error) {
+    console.error('Error al cargar usuario para editar:', error.response?.data || error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar los datos del usuario',
+      codigo: 500
+    });
+  }
+});
+
+// Editar usuario desde panel admin (POST - procesar formulario)
+app.post('/admin/usuario/:id/editar', verificarAdminFrontend, async (req, res) => {
+  try {
+    console.log('=== ACTUALIZANDO USUARIO DESDE ADMIN ===');
+    console.log('Usuario ID:', req.params.id);
+    console.log('Datos del formulario:', req.body);
+    
+    const { data } = await api.put(`/usuarios/${req.params.id}`, req.body, { __req: req });
+    console.log('Usuario actualizado exitosamente:', data);
+    
+    res.redirect('/admin_usuarios?mensaje=Usuario actualizado exitosamente');
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error.response?.data || error.message);
+    const errorMsg = error.response?.data?.message || 'Error al actualizar el usuario';
+    res.redirect(`/admin/usuario/${req.params.id}/editar?error=${encodeURIComponent(errorMsg)}`);
   }
 });
 
