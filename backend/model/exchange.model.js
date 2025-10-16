@@ -161,10 +161,20 @@ exchangeSchema.index({ receptor: 1 });
 exchangeSchema.index({ estado: 1 });
 exchangeSchema.index({ fechaSolicitud: -1 });
 
-// Índice parcial único para evitar múltiples intercambios activos/pendientes entre el mismo par y cursos
+// Índices para optimizar consultas sin restricciones de unicidad
+exchangeSchema.index({ emisor: 1, estado: 1 });
+exchangeSchema.index({ receptor: 1, estado: 1 });
+exchangeSchema.index({ cursoEmisor: 1, estado: 1 });
+exchangeSchema.index({ cursoReceptor: 1, estado: 1 });
+
+// Índice único solo para evitar intercambios exactamente duplicados (mismo emisor, receptor y cursos)
 exchangeSchema.index(
-    { emisor: 1, receptor: 1, cursoEmisor: 1, cursoReceptor: 1, estado: 1 },
-    { unique: true, partialFilterExpression: { estado: { $in: ['pendiente', 'activo'] } } }
+    { emisor: 1, receptor: 1, cursoEmisor: 1, cursoReceptor: 1 },
+    { 
+        unique: true, 
+        partialFilterExpression: { estado: { $in: ['pendiente'] } },
+        name: 'unique_pending_exchange'
+    }
 );
 
 // Virtual para estado del intercambio

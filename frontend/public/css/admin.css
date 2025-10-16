@@ -1,0 +1,7 @@
+.card-shadow { 
+  box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1); 
+}
+
+.admin-gradient { 
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); 
+}

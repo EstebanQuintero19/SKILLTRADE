@@ -273,6 +273,7 @@ const obtenerPerfil = async (req, res) => {
             success: true,
             data: {
                 usuario: {
+                    _id: usuario._id,
                     id: usuario._id,
                     email: usuario.email,
                     nombre: usuario.nombre,
@@ -359,14 +360,30 @@ const editarPerfil = async (req, res) => {
         console.log('Usuario autenticado:', req.usuario);
         
         const { nombre, biografia, telefono, notificaciones_email, notificaciones_cursos, visibilidad } = req.body;
-        const usuarioId = req.usuario.id;
+        
+        // Determinar qué usuario editar: si hay :id en params y es admin, editar ese usuario; sino, editar perfil propio
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const usuarioIdAEditar = req.params.id && esAdmin ? req.params.id : req.usuario.id;
+        
+        console.log('editarPerfil - Es admin:', esAdmin);
+        console.log('editarPerfil - ID del usuario a editar:', usuarioIdAEditar);
+        console.log('editarPerfil - ID del usuario autenticado:', req.usuario.id);
 
-        const usuario = await Usuario.findById(usuarioId);
+        const usuario = await Usuario.findById(usuarioIdAEditar);
         if (!usuario) {
-            console.log('editarPerfil - Usuario no encontrado:', usuarioId);
+            console.log('editarPerfil - Usuario no encontrado:', usuarioIdAEditar);
             return res.status(404).json({
                 success: false,
                 message: 'Usuario no encontrado'
+            });
+        }
+        
+        // Verificar permisos: solo puede editar su propio perfil, excepto el admin
+        if (usuarioIdAEditar !== req.usuario.id && !esAdmin) {
+            console.log('editarPerfil - Sin permisos para editar otro usuario');
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permisos para editar este usuario'
             });
         }
 

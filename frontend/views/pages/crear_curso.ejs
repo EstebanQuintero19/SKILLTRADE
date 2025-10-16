@@ -7,14 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-    .upload-area {
-      background-image: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cpattern id='a' patternUnits='userSpaceOnUse' width='20' height='20' patternTransform='scale(2) rotate(0)'%3e%3crect x='0' y='0' width='100%25' height='100%25' fill='%23f8fafc'/%3e%3cpath d='m0 10h20M10 0v20' stroke-width='0.5' stroke='%23e2e8f0' fill='none'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='100%25' height='100%25' fill='url(%23a)'/%3e%3c/svg%3e");
-    }
-  </style>
+  <link rel="stylesheet" href="/css/crear_curso.css">
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
 
@@ -259,87 +252,7 @@
   </main>
 
   <!-- JavaScript para funcionalidad -->
-  <script>
-    // Preview de imagen
-    document.getElementById('imagen').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('previewImg').src = e.target.result;
-          document.getElementById('fileName').textContent = file.name;
-          document.getElementById('imagePreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // Manejo del formulario
-    document.getElementById('crearCursoForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      
-      // Mostrar loading
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creando curso...';
-      submitBtn.disabled = true;
-      
-      try {
-        const response = await fetch('/api/cursos', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-          alert('¡Curso creado exitosamente!');
-          window.location.href = '/cursos';
-        } else {
-          console.error('Error response:', response.status, result);
-          throw new Error(result.message || result.error || `Error ${response.status}: ${response.statusText}`);
-        }
-      } catch (error) {
-        console.error('Error completo:', error);
-        alert('Error al crear el curso: ' + error.message);
-      } finally {
-        // Restaurar botón
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
-    });
-
-    // Validación en tiempo real
-    document.getElementById('titulo').addEventListener('input', function() {
-      if (this.value.length > 100) {
-        this.setCustomValidity('El título no puede exceder 100 caracteres');
-      } else {
-        this.setCustomValidity('');
-      }
-    });
-
-    document.getElementById('descripcion').addEventListener('input', function() {
-      if (this.value.length > 1000) {
-        this.setCustomValidity('La descripción no puede exceder 1000 caracteres');
-      } else {
-        this.setCustomValidity('');
-      }
-    });
-    
-    // Validación del precio
-    document.getElementById('precio').addEventListener('input', function() {
-      const precio = parseFloat(this.value);
-      if (precio > 100000) {
-        this.setCustomValidity('El precio máximo es $100,000');
-      } else if (precio < 0) {
-        this.setCustomValidity('El precio no puede ser negativo');
-      } else {
-        this.setCustomValidity('');
-      }
-    });
-  </script>
+  <script src="/js/crear_curso.js"></script>
 
 </body>
 </html>

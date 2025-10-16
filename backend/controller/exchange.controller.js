@@ -50,18 +50,16 @@ const crearExchange = async (req, res) => {
             return res.status(400).json({ error: 'No puedes intercambiar con tus propios cursos' });
         }
 
-        // 4) Choques con intercambios activos (simétrico)
-        const conflicto = await Exchange.findOne({
-            estado: { $in: ['pendiente', 'aceptado', 'activo'] },
-            $or: [
-                { cursoEmisor },
-                { cursoReceptor: cursoEmisor },
-                { cursoEmisor: cursoReceptor },
-                { cursoReceptor }
-            ]
+        // 4) Verificar que no exista ya un intercambio pendiente exactamente igual
+        const intercambioExistente = await Exchange.findOne({
+            emisor: emisorId,
+            receptor: cursoReceptorDoc.owner,
+            cursoEmisor,
+            cursoReceptor,
+            estado: 'pendiente'
         });
-        if (conflicto) {
-            return res.status(400).json({ error: 'Uno de los cursos ya está en un intercambio activo' });
+        if (intercambioExistente) {
+            return res.status(400).json({ error: 'Ya existe una solicitud de intercambio pendiente entre estos mismos cursos y usuarios' });
         }
 
         // 5) Crear intercambio
@@ -116,9 +114,6 @@ const aceptarExchange = async (req, res) => {
         const { fechaInicio } = req.body;
         const receptorId = req.usuario.id || req.usuario._id;
 
-        console.log('🔄 Intentando aceptar intercambio:', id);
-        console.log('👤 Usuario que acepta:', req.usuario);
-        console.log('🆔 Receptor ID extraído:', receptorId);
 
         if (!fechaInicio) {
             return res.status(400).json({
@@ -135,10 +130,6 @@ const aceptarExchange = async (req, res) => {
             });
         }
 
-        console.log('📋 Intercambio encontrado:');
-        console.log('  - Receptor en DB:', exchange.receptor.toString());
-        console.log('  - Usuario actual:', receptorId.toString());
-        console.log('  - ¿Son iguales?:', exchange.receptor.toString() === receptorId.toString());
 
         if (exchange.receptor.toString() !== receptorId.toString()) {
             return res.status(403).json({
@@ -198,7 +189,14 @@ const rechazarExchange = async (req, res) => {
     try {
         const { id } = req.params;
         const { motivo } = req.body;
-        const receptorId = req.usuario.id;
+        
+        const receptorId = req.usuario.id || req.usuario._id;
+        if (!receptorId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado correctamente'
+            });
+        }
 
         const exchange = await Exchange.findById(id);
         if (!exchange) {
@@ -207,8 +205,8 @@ const rechazarExchange = async (req, res) => {
                 message: 'Intercambio no encontrado'
             });
         }
-
-        if (exchange.receptor.toString() !== receptorId) {
+        
+        if (exchange.receptor.toString() !== receptorId.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Solo el receptor puede rechazar el intercambio'
@@ -340,8 +338,8 @@ const obtenerExchanges = async (req, res) => {
         const exchanges = await Exchange.find(filtro)
             .populate('cursoEmisor', 'titulo categoria imagen')
             .populate('cursoReceptor', 'titulo categoria imagen')
-            .populate('emisor', 'nombre')
-            .populate('receptor', 'nombre')
+            .populate('emisor', '_id nombre email')
+            .populate('receptor', '_id nombre email')
             .sort({ fechaSolicitud: -1 });
 
         res.json({
@@ -373,8 +371,8 @@ const obtenerHistorial = async (req, res) => {
         })
             .populate('cursoEmisor', 'titulo categoria')
             .populate('cursoReceptor', 'titulo categoria')
-            .populate('emisor', 'nombre')
-            .populate('receptor', 'nombre')
+            .populate('emisor', '_id nombre email')
+            .populate('receptor', '_id nombre email')
             .sort({ fechaSolicitud: -1 });
 
         res.json({

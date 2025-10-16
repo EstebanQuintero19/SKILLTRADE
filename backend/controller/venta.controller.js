@@ -176,19 +176,20 @@ const confirmarVenta = async (req, res) => {
 const obtenerHistorialCompras = async (req, res) => {
     try {
         const usuarioId = req.usuario._id;
-        const { page = 1, limit = 10, estado } = req.query;
+        const { page = 1, estado } = req.query;
+        const limit = 5; // Fijo en 5 compras por página según solicitud del usuario
 
         // Construir filtros
         const filtros = { comprador: usuarioId };
         if (estado) filtros.estado = estado;
 
-        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const skip = (parseInt(page) - 1) * limit;
 
         const ventas = await Venta.find(filtros)
-            .populate('items.curso', 'titulo imagen categoria')
+            .populate('items.curso', 'titulo imagen categoria precio')
             .sort({ fechaCompra: -1 })
             .skip(skip)
-            .limit(parseInt(limit));
+            .limit(limit);
 
         const total = await Venta.countDocuments(filtros);
 
@@ -196,9 +197,9 @@ const obtenerHistorialCompras = async (req, res) => {
             ventas,
             paginacion: {
                 pagina: parseInt(page),
-                totalPaginas: Math.ceil(total / parseInt(limit)),
+                totalPaginas: Math.ceil(total / limit),
                 totalElementos: total,
-                elementosPorPagina: parseInt(limit)
+                elementosPorPagina: limit
             }
         });
 

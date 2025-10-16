@@ -1,0 +1,61 @@
+/* Estilos para la página de detalle del curso */
+
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+
+.card-shadow { 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    min-width: 300px;
+    padding: 16px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    transform: translateX(400px);
+    transition: transform 0.3s ease-in-out;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast.success { 
+    background: linear-gradient(135deg, #10b981, #059669); 
+}
+
+.toast.error { 
+    background: linear-gradient(135deg, #ef4444, #dc2626); 
+}
+
+.toast.info { 
+    background: linear-gradient(135deg, #3b82f6, #2563eb); 
+}
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

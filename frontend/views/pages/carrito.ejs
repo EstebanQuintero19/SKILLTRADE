@@ -7,21 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-    .card-shadow:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-    .fade-in { animation: fadeIn 0.6s ease-out; }
-    .fade-in-delay { animation: fadeIn 0.8s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .hero-pattern { background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px; }
-    .course-card { animation: fadeInUp 0.6s ease-out forwards; }
-    .course-card:nth-child(2) { animation-delay: 0.1s; }
-    .course-card:nth-child(3) { animation-delay: 0.2s; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    .bg-custom { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 30%, #ddd6fe 60%, #e0e7ff 100%); }
-  </style>
+  <link rel="stylesheet" href="/css/carrito_styles.css">
 </head>
 <body class="bg-custom min-h-screen">
 
@@ -318,147 +304,12 @@
 <%- include('../partials/footer') %>
 
 <script>
-// Datos de sesión para autenticación
-window.sessionData = {
-  signedIn: <%= locals.signedIn ? 'true' : 'false' %>,
-  token: '<%= locals.token || '' %>',
-  user: <%- locals.user ? JSON.stringify(locals.user) : 'null' %>
-};
-
-function getAuthToken() {
-  if (window.sessionData && window.sessionData.token) {
-    return window.sessionData.token;
-  }
-  return localStorage.getItem('authToken') || '';
-}
-
-function pagarConMercadoPago() {
-  const token = getAuthToken();
-  
-  if (!token) {
-    alert('Debes iniciar sesión para realizar el pago');
-    window.location.href = '/login';
-    return;
-  }
-
-  // Mostrar loading
-  const button = event.target;
-  const originalText = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...';
-  button.disabled = true;
-
-  // Crear preferencia de pago
-  fetch('/api/mercadopago/crear-preferencia', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': token,
-      'Authorization': `Bearer ${token}`
-    },
-    credentials: 'include' // Incluir cookies de autenticación
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    // Redirigir a MercadoPago
-    if (data.init_point) {
-      window.location.href = data.init_point;
-    } else if (data.sandbox_init_point) {
-      window.location.href = data.sandbox_init_point;
-    } else {
-      throw new Error('No se pudo obtener el enlace de pago');
-    }
-  })
-  .catch(error => {
-    console.error('Error al crear preferencia de pago:', error);
-    alert('Error al procesar el pago: ' + error.message);
-    
-    // Restaurar botón
-    button.innerHTML = originalText;
-    button.disabled = false;
-  });
-}
-
-// Función para remover curso del carrito
-function removerDelCarrito(cursoId) {
-  if (!confirm('¿Estás seguro de que quieres eliminar este curso del carrito?')) {
-    return;
-  }
-
-  const token = getAuthToken();
-  
-  if (!token) {
-    alert('Debes iniciar sesión para modificar el carrito');
-    window.location.href = '/login';
-    return;
-  }
-
-  // Realizar petición para remover del carrito
-  fetch('/api/ventas/carrito/remover', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': token,
-      'Authorization': `Bearer ${token}`
-    },
-    credentials: 'include',
-    body: JSON.stringify({ cursoId })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    // Mostrar notificación de éxito
-    mostrarNotificacion('Curso eliminado del carrito exitosamente', 'success');
-    
-    // Recargar la página para mostrar los cambios
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  })
-  .catch(error => {
-    console.error('Error al remover del carrito:', error);
-    mostrarNotificacion('Error al eliminar el curso: ' + error.message, 'error');
-  });
-}
-
-// Sistema de notificaciones
-function mostrarNotificacion(mensaje, tipo = 'info') {
-  const notification = document.createElement('div');
-  notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-white max-w-sm transform translate-x-full transition-transform duration-300 ${
-    tipo === 'success' ? 'bg-green-500' : 
-    tipo === 'error' ? 'bg-red-500' : 
-    'bg-blue-500'
-  }`;
-  
-  notification.innerHTML = `
-    <div class="flex items-center justify-between">
-      <span>${mensaje}</span>
-      <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  // Animar entrada
-  setTimeout(() => {
-    notification.classList.remove('translate-x-full');
-  }, 100);
-  
-  // Auto-eliminar después de 5 segundos
-  setTimeout(() => {
-    notification.classList.add('translate-x-full');
-    setTimeout(() => notification.remove(), 300);
-  }, 5000);
-}
+// Pasar datos de sesión al JavaScript externo
+var signedIn = <%= locals.signedIn ? 'true' : 'false' %>;
+var token = '<%= locals.token || '' %>';
+var user = <%- locals.user ? JSON.stringify(locals.user) : 'null' %>;
 </script>
+<script src="/js/carrito_functions.js"></script>
 
 </body>
 </html>
