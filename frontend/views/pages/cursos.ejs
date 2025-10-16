@@ -1,3 +1,37 @@
+<!--
+/**
+ * PÁGINA DE CURSOS - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página principal para explorar y filtrar cursos disponibles en la plataforma.
+ * Incluye sistema de búsqueda, filtros por categoría, paginación y funcionalidades
+ * para usuarios autenticados como crear cursos e intercambios.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación con estadísticas y botones de acción
+ * - FILTROS Y BÚSQUEDA: Sistema de filtrado y búsqueda de cursos
+ * - GRID DE CURSOS: Listado paginado de cursos con información detallada
+ * - PAGINACIÓN: Controles de navegación entre páginas
+ * - MODAL INTERCAMBIO: Funcionalidad para solicitar intercambios
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Arquitectura backend-first (filtros vía URL params)
+ * - Paginación de 6 cursos por página
+ * - Búsqueda en tiempo real por título y descripción
+ * - Filtros por categoría, nivel y precio
+ * - Sistema de carrito de compras integrado
+ * - Funcionalidad de intercambios para usuarios autenticados
+ * 
+ * VARIABLES EJS:
+ * - cursos: Array de cursos para mostrar
+ * - paginacion: Objeto con información de paginación
+ * - q, categoria, nivel, precioMin, precioMax: Parámetros de filtros
+ * - signedIn: Estado de autenticación del usuario
+ * - estadisticas: Métricas generales de la plataforma
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,10 +49,10 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   
-  <!-- Hero Section -->
+  <!--HERO SECTION - Presentación y estadísticas-->
   <section class="mb-12">
     <div class="gradient-bg rounded-2xl p-8 md:p-12 text-white relative overflow-hidden">
-      <!-- Decorative elements -->
+      <!-- Elementos decorativos de fondo -->
       <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
       <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
       
@@ -33,7 +67,7 @@
               Descubre conocimientos increíbles y acelera tu crecimiento profesional con nuestros cursos especializados
             </p>
             
-            <!-- Estadísticas rápidas -->
+            <!-- ESTADÍSTICAS RÁPIDAS: Métricas dinámicas -->
             <div class="flex flex-wrap gap-6">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -75,13 +109,16 @@
             </div>
           </div>
           
+          <!-- BOTONES DE ACCIÓN: Solo para usuarios autenticados -->
           <% if (locals.signedIn) { %>
           <div class="flex-shrink-0 flex gap-4">
+            <!-- Botón para crear nuevo curso -->
             <a href="/cursos/crear" 
                class="inline-flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               <i class="fas fa-plus mr-3"></i>
               Crear Curso
             </a>
+            <!-- Botón para iniciar intercambio -->
             <button onclick="abrirModalIntercambio()" 
                     class="inline-flex items-center px-8 py-4 bg-teal-500 text-white font-bold rounded-xl hover:bg-teal-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               <i class="fas fa-exchange-alt mr-3"></i>
@@ -94,10 +131,10 @@
     </div>
   </section>
 
-  <!-- Filtros y Búsqueda -->
+  <!--FILTROS Y BÚSQUEDA - Sistema de filtrado-->
   <section class="mb-8">
     <div class="bg-white rounded-2xl card-shadow p-6">
-      <!-- Formulario de búsqueda -->
+      <!-- FORMULARIO DE BÚSQUEDA: Envía GET al servidor -->
       <form method="GET" action="/cursos" class="mb-6">
         <div class="relative">
           <input 
@@ -107,7 +144,7 @@
             placeholder="Buscar cursos por título, categoría o instructor..." 
           />
           <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-          <!-- Mantener otros filtros en la búsqueda -->
+          <!-- Campos ocultos para mantener filtros activos -->
           <% if (categoria) { %><input type="hidden" name="categoria" value="<%= categoria %>"><% } %>
           <% if (nivel) { %><input type="hidden" name="nivel" value="<%= nivel %>"><% } %>
           <% if (precioMin) { %><input type="hidden" name="precioMin" value="<%= precioMin %>"><% } %>
@@ -115,8 +152,9 @@
         </div>
       </form>
 
-      <!-- Filtros rápidos -->
+      <!-- FILTROS RÁPIDOS: Enlaces con parámetros URL -->
       <div class="flex flex-wrap gap-3">
+        <!-- Filtro: Todos los cursos -->
         <a href="/cursos<%= q ? '?q=' + encodeURIComponent(q) : '' %>" 
            class="px-4 py-2 rounded-lg border transition-all <%= !categoria ? 'filter-active' : 'border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600' %>">
           <i class="fas fa-th-large mr-2"></i>

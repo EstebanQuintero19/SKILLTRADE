@@ -1,3 +1,41 @@
+<!--
+/**
+ * PANEL DE ADMINISTRADOR - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Dashboard principal del administrador con estadísticas generales,
+ * accesos rápidos a todas las secciones de gestión y resumen
+ * del estado de la plataforma.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación del panel con gradiente rojo
+ * - ESTADÍSTICAS: Métricas principales de la plataforma
+ * - ACCIONES RÁPIDAS: Enlaces directos a secciones de gestión
+ * - ACTIVIDAD RECIENTE: Últimas acciones en la plataforma
+ * 
+ * FUNCIONALIDADES:
+ * - Vista general de estadísticas clave
+ * - Navegación rápida a sección de gestión
+ * - Acceso restringido solo para administrador
+ * - Diseño diferenciado con tema rojo/admin
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Acceso restringido por email específico
+ * - Gradiente rojo distintivo del admin
+ * - Tarjetas de estadísticas con iconos
+ * - Enlaces directos a cada sección de gestión
+ * - Responsive design adaptativo
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - estadisticas: Objeto con métricas de la plataforma
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/admin_panel.css: Estilos específicos del panel
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +50,7 @@
     <%- include('../partials/header') %>
     
     <div class="min-h-screen bg-gray-50">
-        <!-- Hero Section -->
+        <!--HERO SECTION - Presentación del panel con gradiente rojo-->
         <div class="admin-gradient text-white py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
@@ -29,10 +67,10 @@
             </div>
         </div>
 
-        <!-- Estadísticas Principales -->
+        <!--ESTADÍSTICAS PRINCIPALES - Métricas clave de la plataforma-->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Total Cursos -->
+                <!--TOTAL CURSOS - Estadística de cursos en la plataforma-->
                 <div class="bg-white rounded-xl card-shadow p-6 stat-card">
                     <div class="flex items-center justify-between">
                         <div>

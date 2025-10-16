@@ -1,15 +1,52 @@
+/**
+ * Controlador de MercadoPago - SkillTrade
+ * 
+ * Integración completa con la pasarela de pagos MercadoPago:
+ * - Creación de preferencias de pago desde el carrito
+ * - Procesamiento de webhooks de notificación
+ * - Gestión de estados de pago y callbacks
+ * - Conversión automática de carrito a venta completada
+ * - Manejo de metadata y referencias externas
+ * 
+ * Flujo de pago completo:
+ * 1. Usuario procede al pago desde el carrito
+ * 2. Se crea preferencia de pago en MercadoPago
+ * 3. Usuario es redirigido a la plataforma de pago
+ * 4. MercadoPago procesa el pago y envía webhook
+ * 5. Sistema confirma el pago y crea venta
+ * 6. Se limpia el carrito y se actualiza biblioteca del usuario
+ */
+
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const Carrito = require('../model/carrito.model');
 const Venta = require('../model/venta.model');
 const Curso = require('../model/curso.model');
 const Usuario = require('../model/usuario.model');
 
-// Configuración de MercadoPago
+/**
+ * Configuración del cliente MercadoPago
+ * 
+ * Utiliza token de acceso desde variables de entorno con fallback
+ * para desarrollo. En producción debe configurarse el token real.
+ */
 const client = new MercadoPagoConfig({ 
     accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || 'APP_USR-8399021515903188-101212-305b6cfb27c418f7d29694aeaffa5e92-2919258121'
 });
 
-// Crear preferencia de pago para el carrito
+/**
+ * Crear preferencia de pago para el carrito del usuario
+ * 
+ * Genera una preferencia de pago en MercadoPago con:
+ * - Items del carrito del usuario autenticado
+ * - Configuración de moneda (COP - Pesos colombianos)
+ * - URLs de callback para éxito, fallo y pendiente
+ * - Metadata para tracking y referencia
+ * - Expiración de 24 horas
+ * 
+ * @param {Object} req - Request con usuario autenticado
+ * @param {Object} res - Response con URL de pago o mensaje de error
+ * @returns {Object} JSON con init_point de MercadoPago o error
+ */
 const crearPreferenciaPago = async (req, res) => {
     try {
         console.log('MercadoPago - Iniciando creación de preferencia');

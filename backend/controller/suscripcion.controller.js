@@ -1,9 +1,52 @@
+/**
+ * Controlador de Suscripciones - SkillTrade
+ * 
+ * Maneja el sistema de suscripciones a creadores de contenido:
+ * - Creación de suscripciones con diferentes planes
+ * - Gestión de renovaciones automáticas y manuales
+ * - Cancelación y reactivación de suscripciones
+ * - Verificación de acceso a contenido premium
+ * - Procesamiento de pagos recurrentes
+ * - Notificaciones de vencimientos y renovaciones
+ * 
+ * Tipos de suscripción disponibles:
+ * - mensual: Renovación cada 30 días
+ * - trimestral: Renovación cada 90 días
+ * - anual: Renovación cada 365 días
+ * 
+ * Estados de suscripción:
+ * - activa: Suscripción vigente con acceso completo
+ * - vencida: Suscripción expirada, acceso limitado
+ * - cancelada: Suscripción cancelada por el usuario
+ * - suspendida: Suscripción suspendida por problemas de pago
+ * 
+ * Funcionalidades principales:
+ * - CRUD completo de suscripciones
+ * - Validación de métodos de pago
+ * - Cálculo automático de fechas de renovación
+ * - Integración con sistema de notificaciones
+ * - Prevención de auto-suscripciones
+ */
+
 const Suscripcion = require('../model/suscripcion.model');
 const Usuario = require('../model/usuario.model');
 const Curso = require('../model/curso.model');
 const Notificacion = require('../model/notificacion.model');
 
-// RF-SUS-01: Suscribirse por pago
+/**
+ * RF-SUS-01: Crear nueva suscripción a creador
+ * 
+ * Procesa la suscripción de un usuario a un creador de contenido:
+ * - Validación de datos de suscripción y método de pago
+ * - Verificación de existencia del creador
+ * - Prevención de auto-suscripciones
+ * - Cálculo de fechas de inicio y renovación
+ * - Creación de notificación al creador
+ * 
+ * @param {Object} req - Request con datos de suscripción y usuario autenticado
+ * @param {Object} res - Response con suscripción creada o error
+ * @returns {Object} JSON con resultado de la operación
+ */
 const crearSuscripcion = async (req, res) => {
     try {
         const { creador, tipo, precio, metodoPago } = req.body;

@@ -1,5 +1,34 @@
+/**
+ * Middleware de Administración - SkillTrade
+ * 
+ * Proporciona verificación de permisos de administrador para rutas protegidas.
+ * Solo permite acceso al usuario administrador específico del sistema.
+ * 
+ * Características de seguridad:
+ * - Verificación de API Key válida
+ * - Validación de email específico de administrador
+ * - Logging detallado para auditoría
+ * - Manejo de errores robusto
+ * 
+ * Email de administrador autorizado: skilltrade_admin@gmail.com
+ */
+
 const Usuario = require('../model/usuario.model');
 
+/**
+ * Middleware de verificación de permisos de administrador
+ * 
+ * Valida que el usuario autenticado sea el administrador del sistema:
+ * - Extrae API Key de headers múltiples (x-api-key, rh-api-key, authorization)
+ * - Busca usuario correspondiente en base de datos
+ * - Verifica email específico de administrador
+ * - Adjunta usuario al request para uso posterior
+ * 
+ * @param {Object} req - Request object de Express
+ * @param {Object} res - Response object de Express  
+ * @param {Function} next - Función next para continuar middleware chain
+ * @returns {Object} JSON con error si no es admin, o continúa al siguiente middleware
+ */
 const verificarAdmin = async (req, res, next) => {
     try {
         console.log('=== VERIFICAR ADMIN MIDDLEWARE ===');

@@ -1,6 +1,40 @@
+/**
+ * Modelo de Carrito de Compras - SkillTrade
+ * 
+ * Gestiona el carrito de compras temporal de cada usuario:
+ * - Un carrito por usuario (relación 1:1)
+ * - Múltiples items con cursos y cantidades
+ * - Cálculo automático de totales
+ * - Validaciones de precios y cantidades
+ * - Integración con MercadoPago para pagos
+ * - Limpieza automática después de compra exitosa
+ * 
+ * Características principales:
+ * - Persistencia temporal hasta completar compra
+ * - Validaciones de integridad de precios
+ * - Prevención de items duplicados
+ * - Cálculo automático de totales
+ * - Soporte para múltiples pasarelas de pago
+ * - Limpieza automática post-transacción
+ * 
+ * Flujo de uso:
+ * 1. Usuario agrega cursos al carrito
+ * 2. Sistema valida precios y disponibilidad
+ * 3. Se calcula total automáticamente
+ * 4. Usuario procede al pago
+ * 5. Se crea preferencia de pago (MercadoPago)
+ * 6. Después de pago exitoso, carrito se limpia
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Carrito de Compras
+ * 
+ * Estructura temporal para gestionar items de compra
+ * con validaciones financieras y soporte para pagos.
+ */
 const carritoSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,

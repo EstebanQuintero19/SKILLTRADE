@@ -1,3 +1,35 @@
+<!--
+/**
+ * PÁGINA DE CARRITO - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página del carrito de compras que muestra los cursos seleccionados,
+ * permite remover items, ver resumen del pedido y proceder al pago
+ * con MercadoPago.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Breadcrumb y título del carrito
+ * - LISTA DE CURSOS: Cursos agregados con opción de remover
+ * - RESUMEN: Total, garantías y botón de pago
+ * - ESTADO VACÍO: Mensaje cuando no hay items
+ * 
+ * FUNCIONALIDADES:
+ * - Mostrar cursos del carrito con detalles
+ * - Remover cursos del carrito
+ * - Calcular total automáticamente
+ * - Integración con MercadoPago
+ * - Redirección a exploración de cursos
+ * 
+ * VARIABLES EJS:
+ * - carrito: Array de cursos en el carrito
+ * - total: Monto total del carrito
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/carrito_styles.css: Estilos específicos
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,15 +43,15 @@
 </head>
 <body class="bg-custom min-h-screen">
 
-<!-- Header -->
+<!--HEADER GLOBAL-->
 <%- include('../partials/header') %>
 
-<!-- Hero Section -->
+<!--HERO SECTION - Breadcrumb y presentación del carrito-->
 <div class="gradient-bg hero-pattern relative overflow-hidden">
   <div class="absolute inset-0 bg-black opacity-20"></div>
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="text-center">
-      <!-- Breadcrumb -->
+      <!--BREADCRUMB - Navegación contextual-->
       <div class="flex items-center justify-center space-x-2 text-white/80 text-sm mb-6 fade-in">
         <a href="/" class="hover:text-white transition-colors">
           <i class="fas fa-home"></i> Inicio

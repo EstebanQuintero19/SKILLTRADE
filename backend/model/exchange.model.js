@@ -1,6 +1,39 @@
+/**
+ * Modelo de Intercambio - SkillTrade
+ * 
+ * Gestiona el sistema de intercambio temporal de cursos entre usuarios:
+ * - Solicitudes de intercambio entre dos usuarios
+ * - Gestión de estados del ciclo de vida del intercambio
+ * - Control de acceso temporal a cursos intercambiados
+ * - Validaciones de propiedad y disponibilidad
+ * - Sistema de comentarios y motivos de rechazo
+ * - Fechas de inicio, fin y duración configurable
+ * 
+ * Flujo de intercambio:
+ * 1. pendiente: Solicitud creada, esperando respuesta del receptor
+ * 2. aceptado: Receptor acepta, se programa inicio del intercambio
+ * 3. activo: Intercambio en curso, ambos usuarios tienen acceso temporal
+ * 4. finalizado: Intercambio completado, acceso temporal removido
+ * 5. rechazado: Receptor rechaza la solicitud
+ * 6. cancelado: Cualquier usuario cancela antes o durante el intercambio
+ * 
+ * Características principales:
+ * - Intercambio temporal con duración configurable
+ * - Validaciones cruzadas de usuarios y cursos
+ * - Sistema de notificaciones automáticas
+ * - Control de acceso granular por fechas
+ * - Prevención de intercambios duplicados o inválidos
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Intercambio
+ * 
+ * Estructura completa para gestionar intercambios temporales de cursos
+ * con validaciones de negocio y control de estados.
+ */
 const exchangeSchema = new Schema({
     emisor: {
         type: Schema.Types.ObjectId,

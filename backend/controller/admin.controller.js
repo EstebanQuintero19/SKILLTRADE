@@ -1,9 +1,36 @@
+/**
+ * Controlador de Administración - SkillTrade
+ * 
+ * Maneja todas las operaciones del panel de administración:
+ * - Estadísticas generales del sistema
+ * - Gestión paginada de cursos, usuarios, ventas e intercambios
+ * - Operaciones de eliminación con permisos de administrador
+ * - Métricas y reportes para toma de decisiones
+ * 
+ * Funcionalidades principales:
+ * - Dashboard con métricas clave del negocio
+ * - CRUD completo para gestión de contenido
+ * - Paginación optimizada para grandes volúmenes de datos
+ * - Validaciones de seguridad y permisos
+ */
+
 const Curso = require('../model/curso.model');
 const Usuario = require('../model/usuario.model');
 const Venta = require('../model/venta.model');
 const Exchange = require('../model/exchange.model');
 
-// Obtener estadísticas generales del panel
+/**
+ * Obtener estadísticas generales del panel de administración
+ * 
+ * Calcula y retorna métricas clave del sistema:
+ * - Conteos totales de entidades principales
+ * - Ingresos totales mediante agregación de ventas
+ * - Datos para dashboard administrativo
+ * 
+ * @param {Object} req - Request object de Express
+ * @param {Object} res - Response object con estadísticas del sistema
+ * @returns {Object} JSON con métricas generales o mensaje de error
+ */
 const obtenerEstadisticas = async (req, res) => {
     try {
         const totalCursos = await Curso.countDocuments();
@@ -11,7 +38,7 @@ const obtenerEstadisticas = async (req, res) => {
         const totalVentas = await Venta.countDocuments();
         const totalIntercambios = await Exchange.countDocuments();
 
-        // Calcular ingresos totales
+        // Calcular ingresos totales mediante agregación MongoDB
         const ventasAgregadas = await Venta.aggregate([
             { $group: { _id: null, total: { $sum: '$total' } } }
         ]);
@@ -36,19 +63,32 @@ const obtenerEstadisticas = async (req, res) => {
     }
 };
 
-// Obtener cursos paginados
+/**
+ * Obtener cursos con paginación para panel de administración
+ * 
+ * Retorna lista paginada de cursos con información del propietario:
+ * - Paginación fija de 5 cursos por página
+ * - Ordenamiento por fecha de creación (más recientes primero)
+ * - Población de datos del propietario (nombre y email)
+ * - Metadatos de paginación para navegación
+ * 
+ * @param {Object} req - Request con parámetro page en query
+ * @param {Object} res - Response con cursos paginados y metadatos
+ * @returns {Object} JSON con cursos y información de paginación
+ */
 const obtenerCursosPaginados = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 cursos por página
+        const limit = 5; // Límite fijo para consistencia en panel admin
         const skip = (page - 1) * limit;
 
         const totalCursos = await Curso.countDocuments();
         const totalPaginas = Math.ceil(totalCursos / limit);
 
+        // Obtener cursos con información del propietario
         const cursos = await Curso.find()
             .populate('owner', 'nombre email')
-            .sort({ fechaCreacion: -1 })
+            .sort({ fechaCreacion: -1 }) // Más recientes primero
             .skip(skip)
             .limit(limit);
 

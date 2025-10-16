@@ -1,6 +1,33 @@
+/**
+ * Modelo de Biblioteca Personal - SkillTrade
+ * 
+ * Define la estructura de la biblioteca personal de cada usuario:
+ * - Gestión de cursos adquiridos por diferentes métodos
+ * - Seguimiento de progreso y actividad de aprendizaje
+ * - Sistema de recordatorios y recursos personales
+ * - Colecciones personalizadas de cursos
+ * - Preferencias de usuario (notificaciones, privacidad, interfaz)
+ * - Sistema de logros y gamificación
+ * - Lista de cursos favoritos
+ * 
+ * Características principales:
+ * - Una biblioteca por usuario (relación 1:1)
+ * - Múltiples métodos de adquisición de cursos
+ * - Tracking detallado de progreso de aprendizaje
+ * - Sistema de colecciones para organización
+ * - Configuraciones granulares de privacidad
+ * - Gamificación con logros y puntos
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Biblioteca Personal
+ * 
+ * Estructura completa para gestionar la experiencia de aprendizaje
+ * personalizada de cada usuario en la plataforma.
+ */
 const bibliotecaSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,

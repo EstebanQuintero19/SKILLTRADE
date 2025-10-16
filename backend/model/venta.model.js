@@ -1,6 +1,37 @@
+/**
+ * Modelo de Venta - SkillTrade
+ * 
+ * Registra todas las transacciones de compra-venta de cursos:
+ * - Información completa de comprador y vendedor
+ * - Detalles de items vendidos con precios históricos
+ * - Estados de transacción y métodos de pago
+ * - Integración con MercadoPago y otras pasarelas
+ * - Direcciones de envío para contenido físico
+ * - Tracking de fechas y estados de procesamiento
+ * 
+ * Características principales:
+ * - Registro inmutable de transacciones
+ * - Soporte para múltiples items por venta
+ * - Integración con sistemas de pago externos
+ * - Validaciones de integridad de datos financieros
+ * - Historial completo para reportes y análisis
+ * 
+ * Estados de venta:
+ * - pendiente: Venta creada, esperando pago
+ * - completada: Pago confirmado, acceso otorgado
+ * - cancelada: Transacción cancelada o fallida
+ * - reembolsada: Dinero devuelto al comprador
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Venta
+ * 
+ * Estructura completa para registrar transacciones de compra-venta
+ * con validaciones financieras y soporte para múltiples pasarelas de pago.
+ */
 const ventaSchema = new Schema({
     comprador: {
         type: Schema.Types.ObjectId,

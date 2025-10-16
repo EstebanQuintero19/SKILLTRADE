@@ -1,3 +1,48 @@
+/**
+ * SERVIDOR FRONTEND - SkillTrade
+ * 
+ * DESCRIPCIÓN:
+ * Servidor frontend que actúa como proxy entre las vistas EJS y el backend API.
+ * Maneja la renderización de páginas, autenticación de sesiones, rutas proxy
+ * y comunicación con el backend para todas las funcionalidades.
+ * 
+ * ARQUITECTURA:
+ * - Servidor Express independiente del backend
+ * - Motor de vistas EJS para renderizado server-side
+ * - Sistema de proxy para comunicación con backend API
+ * - Middleware de autenticación basado en cookies
+ * - Manejo de archivos estáticos (CSS, JS, imágenes)
+ * 
+ * FUNCIONALIDADES PRINCIPALES:
+ * - Renderizado de todas las páginas EJS
+ * - Autenticación y gestión de sesiones
+ * - Proxy de rutas API hacia el backend
+ * - Middleware de verificación de permisos admin
+ * - Manejo de subida de archivos
+ * - Configuración de CORS y seguridad
+ * 
+ * RUTAS PRINCIPALES:
+ * - Páginas públicas: /, /login, /registro, /cursos
+ * - Páginas autenticadas: /perfil, /biblioteca, /carrito
+ * - Panel admin: /admin, /admin_cursos, /admin_usuarios
+ * - Comercio: /ventas, /intercambios, /pago/*
+ * - API Proxy: /api/* -> Backend API
+ * 
+ * CONFIGURACIÓN:
+ * - Puerto: FRONTEND_PORT (default: 4000)
+ * - Backend API: API_BASE (default: http://localhost:3000)
+ * - API Key: FRONTEND_API_KEY para desarrollo
+ * 
+ * DEPENDENCIAS:
+ * - express: Servidor web y routing
+ * - ejs: Motor de plantillas
+ * - axios: Cliente HTTP para backend
+ * - cookie-parser: Manejo de cookies de sesión
+ * - multer: Subida de archivos
+ * - morgan: Logging HTTP
+ * - cors: Configuración CORS
+ */
+
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -13,29 +58,29 @@ const app = express();
 const PORT = process.env.FRONTEND_PORT || 4000; // puerto del servidor FRONT
 const API_BASE = process.env.API_BASE || 'http://localhost:3000'; // backend API base
 
-// Motor de vistas: EJS
+// MOTOR DE VISTAS EJS
 app.set('view engine', 'ejs');
 // Ruta a las vistas (este proyecto usa frontend/frontend/views)
 app.set('views', path.join(__dirname, 'views'));
 
-// Middlewares
+// MIDDLEWARES GLOBALES
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Estáticos opcionales (si usas public/ para assets del front)
+// ARCHIVOS ESTÁTICOS
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 // Servir archivos CSS y JS directamente
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
-// Inyectar variables globales para las vistas (por ejemplo, base de API)
+// VARIABLES GLOBALES PARA VISTAS EJS
 app.locals.API_BASE = API_BASE;
 
-// Axios client con API Key (si existe)
+// CLIENTE AXIOS PARA COMUNICACIÓN CON BACKEND API
 const FRONTEND_API_KEY = process.env.FRONTEND_API_KEY || process.env.API_KEY;
 const api = axios.create({ baseURL: `${API_BASE}/api` });
 api.interceptors.request.use((config) => {
@@ -52,6 +97,24 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * MIDDLEWARE DE AUTENTICACIÓN GLOBAL
+ * 
+ * Verifica la presencia de token de autenticación en cookies y obtiene
+ * datos del usuario para inyectarlos en todas las vistas EJS.
+ * 
+ * FUNCIONALIDADES:
+ * - Verificación de token en cookies
+ * - Obtención de datos de usuario desde backend
+ * - Inyección de variables globales en res.locals
+ * - Manejo inteligente de errores de autenticación
+ * - Limpieza de cookies inválidas
+ * 
+ * VARIABLES INYECTADAS:
+ * - signedIn: Boolean indicando si el usuario está autenticado
+ * - user: Objeto con datos del usuario (null si no autenticado)
+ * - token: Token de autenticación para uso en JavaScript
+ */
 // Middleware para inyectar signedIn y datos de usuario
 app.use(async (req, res, next) => {
   const hasToken = Boolean(req.cookies?.auth_token);
@@ -90,7 +153,16 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Rutas de páginas
+/**
+ * ========================================
+ * RUTAS DE PÁGINAS PRINCIPALES
+ * ========================================
+ * 
+ * Rutas que renderizan vistas EJS para el usuario final.
+ * Incluye páginas públicas, autenticadas y de administración.
+ */
+
+// RUTA HOME - Página principal con cursos destacados
 app.get('/', async (req, res) => {
   console.log(`Ruta HOME - signedIn: ${res.locals.signedIn}, user: ${res.locals.user ? res.locals.user.nombre : 'null'}`);
   try {
@@ -126,8 +198,10 @@ app.get('/', async (req, res) => {
   }
 });
 
+// RUTA HOME ALTERNATIVA
 app.get('/home', (req, res) => res.render('pages/home', { title: 'Home usuario', API_BASE }));
-// Ruta para editar curso desde biblioteca
+
+// RUTA EDITAR CURSO DESDE BIBLIOTECA - Con verificación de permisos
 app.get('/biblioteca/editar/:cursoId', async (req, res) => {
   if (!req.cookies?.auth_token) {
     return res.redirect('/login');
@@ -394,7 +468,8 @@ app.get('/cursos/:id', async (req, res) => {
     if (!curso) {
       return res.status(404).render('pages/error', { 
         title: 'Curso no encontrado',
-        error: 'El curso que buscas no existe o ha sido eliminado.'
+        mensaje: 'El curso que buscas no existe o ha sido eliminado.',
+        codigo: 404
       });
     }
     
@@ -407,7 +482,8 @@ app.get('/cursos/:id', async (req, res) => {
     console.error('Error fetching curso detail:', error.message);
     res.status(500).render('pages/error', { 
       title: 'Error',
-      error: 'Error interno del servidor al cargar el curso.'
+      mensaje: 'Error interno del servidor al cargar el curso.',
+      codigo: 500
     });
   }
 });
@@ -1257,7 +1333,8 @@ app.get('/usuario/:id', async (req, res) => {
     if (!usuario) {
       return res.status(404).render('pages/error', { 
         title: 'Usuario no encontrado', 
-        error: 'El usuario que buscas no existe' 
+        mensaje: 'El usuario que buscas no existe',
+        codigo: 404
       });
     }
     
@@ -1278,12 +1355,14 @@ app.get('/usuario/:id', async (req, res) => {
     } else if (err.response?.status === 404) {
       res.status(404).render('pages/error', { 
         title: 'Usuario no encontrado', 
-        error: 'El usuario que buscas no existe' 
+        mensaje: 'El usuario que buscas no existe',
+        codigo: 404
       });
     } else {
       res.status(500).render('pages/error', { 
         title: 'Error del servidor', 
-        error: 'Error interno del servidor' 
+        mensaje: 'Error interno del servidor',
+        codigo: 500
       });
     }
   }
@@ -1429,46 +1508,8 @@ const verificarAdminFrontend = (req, res, next) => {
   next();
 };
 
-// Perfil: ver perfil de usuario desde admin (solo para administradores)
-app.get('/perfil/:id', verificarAdminFrontend, async (req, res) => {
-  const { id } = req.params;
-  
-  try {
-    console.log(`Admin viendo perfil de usuario: ${id}`);
-    const { data } = await api.get(`/usuarios/${id}`, { __req: req });
-    const usuario = data?.data?.usuario || data?.usuario || data || null;
-    
-    if (!usuario) {
-      return res.status(404).render('pages/error', { 
-        title: 'Usuario no encontrado', 
-        error: 'El usuario que buscas no existe' 
-      });
-    }
-    
-    console.log(`Perfil obtenido para usuario: ${usuario.nombre} (${usuario.email})`);
-    
-    // Renderizar vista específica para admin
-    res.render('pages/admin_ver_usuario', { 
-      title: `Perfil de ${usuario.nombre}`, 
-      usuario,
-      esAdmin: true
-    });
-  } catch (err) {
-    console.error('Error al obtener perfil de usuario desde admin:', err.response?.status, err.message);
-    
-    if (err.response?.status === 404) {
-      res.status(404).render('pages/error', { 
-        title: 'Usuario no encontrado', 
-        error: 'El usuario que buscas no existe' 
-      });
-    } else {
-      res.status(500).render('pages/error', { 
-        title: 'Error del servidor', 
-        error: 'Error interno del servidor' 
-      });
-    }
-  }
-});
+// Esta ruta se eliminó porque ya existe /admin/usuario/:id/ver
+// que maneja la funcionalidad de ver usuarios desde el panel admin
 
 // Panel de administrador principal
 app.get('/admin', verificarAdminFrontend, async (req, res) => {
@@ -1530,10 +1571,15 @@ app.get('/admin_usuarios', verificarAdminFrontend, async (req, res) => {
     const page = req.query.page || 1;
     const { data } = await api.get(`/admin/usuarios?page=${page}`, { __req: req });
     
+    console.log('=== DATOS DE USUARIOS ADMIN ===');
+    console.log('Data completa:', JSON.stringify(data, null, 2));
+    console.log('Usuarios array:', data?.usuarios);
+    console.log('Primer usuario:', data?.usuarios?.[0]);
+    
     res.render('pages/admin_usuarios', {
       title: 'Gestión de Usuarios - Admin',
-      usuarios: data?.usuarios || [],
-      paginacion: data?.paginacion || {}
+      usuarios: data.usuarios || [],
+      paginacion: data.paginacion || {}
     });
   } catch (error) {
     console.error('Error al cargar usuarios admin:', error.message);
@@ -1629,6 +1675,39 @@ app.delete('/api/admin/usuarios/:id', verificarAdminFrontend, async (req, res) =
   }
 });
 
+// Ruta de prueba para verificar que funciona
+app.get('/test-admin-user', verificarAdminFrontend, (req, res) => {
+  res.send('<h1>Ruta de prueba funcionando</h1><p>Si ves esto, las rutas admin funcionan correctamente</p>');
+});
+
+// Ver usuario desde panel admin
+app.get('/admin/usuario/:id/ver', verificarAdminFrontend, async (req, res) => {
+  try {
+    const { data } = await api.get(`/usuarios/${req.params.id}`, { __req: req });
+    const usuario = data?.data?.usuario || data?.usuario || data;
+    
+    if (!usuario) {
+      return res.status(404).render('pages/error', {
+        title: 'Usuario no encontrado',
+        mensaje: 'El usuario que intentas ver no existe',
+        codigo: 404
+      });
+    }
+    
+    res.render('pages/admin_ver_usuario', {
+      title: `Ver Usuario: ${usuario.nombre}`,
+      usuario
+    });
+  } catch (error) {
+    console.error('Error al cargar usuario:', error.response?.data || error.message);
+    res.status(500).render('pages/error', {
+      title: 'Error',
+      mensaje: 'Error al cargar los datos del usuario',
+      codigo: 500
+    });
+  }
+});
+
 // Editar usuario desde panel admin (GET - mostrar formulario)
 app.get('/admin/usuario/:id/editar', verificarAdminFrontend, async (req, res) => {
   try {
@@ -1684,7 +1763,13 @@ app.get('/health', (req, res) => {
 });
 
 // 404
-app.use((req, res) => res.status(404).send('Not Found'));
+app.use((req, res) => {
+  res.status(404).render('pages/error', {
+    title: 'Página no encontrada',
+    mensaje: 'La página que buscas no existe',
+    codigo: 404
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Frontend server listening on http://localhost:${PORT}`);

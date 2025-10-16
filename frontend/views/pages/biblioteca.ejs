@@ -1,3 +1,37 @@
+<!--
+/**
+ * PÁGINA DE BIBLIOTECA - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de biblioteca personal del usuario que organiza y muestra todos
+ * sus cursos categorizados por tipo de acceso: propios, intercambio,
+ * favoritos y comprados. Incluye navegación por pestañas y carga dinámica.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Presentación de la biblioteca personal
+ * - NAVEGACIÓN: Pestañas para diferentes categorías de cursos
+ * - CONTENEDOR: Área dinámica para mostrar cursos según categoría
+ * 
+ * CATEGORÍAS DE CURSOS:
+ * - MIS CURSOS: Cursos creados por el usuario
+ * - POR INTERCAMBIO: Cursos obtenidos mediante intercambios
+ * - FAVORITOS: Cursos marcados como favoritos
+ * - COMPRADOS: Cursos adquiridos mediante compra
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Navegación por pestañas con JavaScript
+ * - Carga dinámica de contenido por AJAX
+ * - Animaciones de transición entre secciones
+ * - Diseño responsive con grid adaptativo
+ * - Estados activos visuales en navegación
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/biblioteca.css: Estilos específicos
+ * - /js/biblioteca_new.js: JavaScript para funcionalidad dinámica
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,7 +47,7 @@
 
 <%- include('../partials/header') %>
 
-<!-- Hero Section -->
+<!--HERO SECTION - Presentación de la biblioteca personal-->
 <section class="gradient-bg relative overflow-hidden">
   <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
   <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
@@ -31,7 +65,7 @@
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Navegación de Secciones -->
+  <!--NAVEGACIÓN DE SECCIONES - Pestañas para categorías de cursos-->
   <div class="bg-white rounded-xl card-shadow p-6 mb-8">
     <div class="flex flex-wrap gap-4 justify-center">
       <button onclick="cambiarSeccion('propios')" id="tab-propios" class="section-tab section-active px-6 py-3 rounded-lg font-medium flex items-center gap-2">
@@ -53,13 +87,14 @@
     </div>
   </div>
 
-  <!-- Contenedor de Cursos -->
+  <!--CONTENEDOR DE CURSOS - Área dinámica para mostrar cursos-->
   <div id="contenedor-cursos" class="animate-fade-in">
-    <!-- Los cursos se cargarán aquí dinámicamente -->
+    <!--Los cursos se cargarán aquí dinámicamente vía JavaScript-->
   </div>
 
 </main>
 
+<!--JAVASCRIPT ESPECÍFICO - Navegación por pestañas y carga dinámica-->
 <script src="/js/biblioteca_new.js"></script>
 
 </body>

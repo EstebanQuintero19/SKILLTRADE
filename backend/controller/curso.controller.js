@@ -1,10 +1,34 @@
+/**
+ * Controlador de Cursos - SkillTrade
+ * 
+ * Maneja todas las operaciones CRUD relacionadas con cursos educativos:
+ * - Creación y edición de cursos
+ * - Consulta y filtrado de cursos
+ * - Gestión de precios y visibilidad
+ * - Estadísticas y métricas de cursos
+ * - Integración con sistema de ventas e intercambios
+ */
+
 const Curso = require('../model/curso.model');
 const Owner = require('../model/owner.model');
 const Usuario = require('../model/usuario.model');
 const Exchange = require('../model/exchange.model');
 const Venta = require('../model/venta.model');
 
-// RF-CUR-01: Crear curso (titulo, descripcion, categoria, imagen, adjuntos)
+/**
+ * RF-CUR-01: Crear nuevo curso educativo
+ * 
+ * Procesa la creación de un curso con validaciones completas:
+ * - Validación de campos requeridos (título, descripción, categoría)
+ * - Procesamiento de imagen subida via multer
+ * - Normalización de datos (nivel, precio, visibilidad)
+ * - Asociación con el usuario propietario
+ * - Creación de registro de ownership
+ * 
+ * @param {Object} req - Request object con datos del curso y usuario autenticado
+ * @param {Object} res - Response object para enviar respuesta
+ * @returns {Object} JSON con el curso creado o mensaje de error
+ */
 const crearCurso = async (req, res) => {
     try {
         console.log('=== CREAR CURSO DEBUG ===');

@@ -1,6 +1,26 @@
 /**
- * Middleware centralizado de manejo de errores
- * Captura todas las excepciones y retorna respuestas consistentes
+ * Middleware de Manejo de Errores - SkillTrade
+ * 
+ * Sistema centralizado para captura y procesamiento de errores:
+ * - Manejo de errores de Mongoose y MongoDB
+ * - Errores de validación con mensajes descriptivos
+ * - Errores de autenticación y autorización
+ * - Errores de aplicación personalizados
+ * - Logging detallado para debugging
+ * - Respuestas consistentes y seguras
+ * 
+ * Tipos de errores manejados:
+ * - ValidationError: Errores de validación de Mongoose
+ * - CastError: Errores de formato de ObjectId
+ * - MongoServerError: Errores de duplicados y base de datos
+ * - AppError: Errores personalizados de la aplicación
+ * - Errores no operacionales: Bugs y errores inesperados
+ * 
+ * Características de seguridad:
+ * - No expone información sensible en producción
+ * - Stack traces solo en desarrollo
+ * - Logging completo para auditoría
+ * - Respuestas sanitizadas para el cliente
  */
 
 const config = require('../config/environment');

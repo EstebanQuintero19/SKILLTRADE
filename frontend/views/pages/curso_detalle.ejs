@@ -1,3 +1,43 @@
+<!--
+/**
+ * PÁGINA DETALLE DE CURSO - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de detalle completo de un curso específico. Muestra toda
+ * la información del curso, opciones de compra/intercambio, verificación
+ * de acceso y funcionalidades interactivas según el estado del usuario.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - BREADCRUMB: Navegación de regreso a cursos
+ * - CONTENIDO PRINCIPAL: Imagen, título, descripción y detalles
+ * - SIDEBAR: Precio, acciones y información del instructor
+ * - VERIFICACIÓN: Sistema de acceso según tipo de usuario
+ * 
+ * FUNCIONALIDADES:
+ * - Verificación de acceso al curso (propio, comprado, intercambio)
+ * - Agregar al carrito para cursos de pago
+ * - Información del instructor y contacto
+ * - Badges informativos (nivel, categorías, duración)
+ * - Responsive design adaptativo
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Verificación dinámica de acceso vía JavaScript
+ * - Integración con sistema de carrito
+ * - Título dinámico en head
+ * - Imagen de curso con fallback
+ * - Estados condicionales según autenticación
+ * 
+ * VARIABLES EJS:
+ * - curso: Objeto completo con datos del curso
+ * - signedIn: Estado de autenticación del usuario
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/curso_detalle.css: Estilos específicos
+ * - JavaScript inline para verificación de acceso
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +52,7 @@
 <body class="bg-gray-50 min-h-screen">
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <!-- Breadcrumb -->
+  <!--BREADCRUMB - Navegación de regreso-->
   <nav class="flex items-center gap-2 text-sm text-[#6f6880] mb-6">
     <a href="/cursos" class="hover:text-[#5a1593] transition-colors">
       <i class="fas fa-arrow-left mr-2"></i>Volver a Cursos
@@ -22,9 +62,9 @@
   </nav>
 
   <div class="grid lg:grid-cols-3 gap-8">
-    <!-- Contenido principal -->
+    <!--CONTENIDO PRINCIPAL - Imagen, título y descripción-->
     <div class="lg:col-span-2">
-      <!-- Imagen del curso -->
+      <!--IMAGEN DEL CURSO - Con badge de nivel-->
       <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-6">
         <div 
           class="w-full h-full bg-cover bg-center"
@@ -37,16 +77,16 @@
         </div>
       </div>
 
-      <!-- Título y descripción -->
+      <!--TÍTULO Y DESCRIPCIÓN - Información principal del curso-->
       <div class="bg-white rounded-xl shadow-sm border border-[#edeaf0] p-6 mb-6">
         <h1 class="text-3xl font-bold text-[#151117] mb-4"><%= curso?.titulo %></h1>
         
-        <!-- Información de acceso al curso -->
+        <!--INFORMACIÓN DE ACCESO - Dinámica según tipo de usuario-->
         <div id="acceso-info" class="mb-4 hidden"></div>
         
         <p class="text-[#6f6880] leading-relaxed mb-6"><%= curso?.descripcion %></p>
 
-        <!-- Información del curso en badges -->
+        <!--BADGES INFORMATIVOS - Nivel, categorías, duración-->
         <div class="flex flex-wrap gap-3">
           <% if (curso?.categoria && curso.categoria.length > 0) { %>
             <% curso.categoria.forEach(cat => { %>

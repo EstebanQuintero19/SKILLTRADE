@@ -1,6 +1,26 @@
+/**
+ * Modelo de Curso - SkillTrade
+ * 
+ * Define la estructura de datos para los cursos educativos en la plataforma.
+ * Incluye información del contenido, metadatos, pricing, estadísticas y validaciones.
+ * 
+ * Características principales:
+ * - Soporte para múltiples categorías y archivos adjuntos
+ * - Sistema de calificaciones y estadísticas
+ * - Validaciones de integridad de datos
+ * - Soporte para cursos gratuitos y de pago
+ * - Tracking de popularidad y engagement
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Curso
+ * 
+ * Define la estructura completa de un curso educativo con todas
+ * sus propiedades, validaciones y restricciones de negocio.
+ */
 const cursoSchema = new Schema({
     titulo: {
         type: String,

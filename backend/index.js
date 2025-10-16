@@ -1,3 +1,15 @@
+/**
+ * SkillTrade Backend API Server
+ * 
+ * Servidor principal de la aplicación SkillTrade que maneja:
+ * - Autenticación y autorización de usuarios
+ * - Gestión de cursos y contenido educativo
+ * - Sistema de intercambios entre usuarios
+ * - Procesamiento de pagos con MercadoPago
+ * - Panel de administración
+ * - Carrito de compras y ventas
+ */
+
 const express = require('express');
 const morgan = require('morgan');
 const multer = require('multer');
@@ -10,25 +22,58 @@ const logger = require('./services/winston-logger');
 
 const app = express();
 
-// Configuración de multer para subida de archivos
+/**
+ * Configuración de Multer para manejo de archivos
+ * 
+ * Configura el almacenamiento de archivos subidos por los usuarios,
+ * incluyendo imágenes de cursos y contenido multimedia.
+ */
 const storage = multer.diskStorage({
+    /**
+     * Define el directorio de destino para archivos subidos
+     * @param {Object} req - Request object de Express
+     * @param {Object} file - Archivo siendo subido
+     * @param {Function} cb - Callback function
+     */
     destination: function (req, file, cb) {
         cb(null, config.UPLOAD_PATH);
     },
+    
+    /**
+     * Genera un nombre único para el archivo subido
+     * Formato: fieldname-timestamp-random.extension
+     * @param {Object} req - Request object de Express
+     * @param {Object} file - Archivo siendo subido
+     * @param {Function} cb - Callback function
+     */
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
+/**
+ * Configuración principal de Multer con validaciones de seguridad
+ * 
+ * Define límites de tamaño, tipos de archivo permitidos y filtros
+ * de seguridad para prevenir subida de archivos maliciosos.
+ */
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: config.MAX_FILE_SIZE,
-        files: 1 // Solo un archivo por petición
+        fileSize: config.MAX_FILE_SIZE, // Límite de tamaño definido en configuración
+        files: 1 // Solo un archivo por petición para evitar sobrecarga
     },
+    
+    /**
+     * Filtro de validación de tipos de archivo
+     * Solo permite imágenes y videos específicos para seguridad
+     * @param {Object} req - Request object de Express
+     * @param {Object} file - Archivo siendo validado
+     * @param {Function} cb - Callback function
+     */
     fileFilter: function (req, file, cb) {
-        // Validación más estricta de archivos
+        // Lista blanca de tipos MIME permitidos
         const allowedMimes = [
             'image/jpeg',
             'image/jpg', 
@@ -48,57 +93,98 @@ const upload = multer({
     }
 });
 
-// ===== CORS BÁSICO =====
+/**
+ * Configuración de CORS (Cross-Origin Resource Sharing)
+ * 
+ * Permite peticiones desde el frontend y otros orígenes autorizados.
+ * Habilita el envío de cookies y credenciales entre dominios.
+ */
 const cors = require('cors');
 app.use(cors({
-    origin: ['http://localhost:4000', 'http://localhost:3001', 'http://localhost:3000'],
-    credentials: true,
-    optionsSuccessStatus: 200
+    origin: ['http://localhost:4000', 'http://localhost:3001', 'http://localhost:3000'], // Orígenes permitidos para desarrollo
+    credentials: true, // Permite envío de cookies y headers de autenticación
+    optionsSuccessStatus: 200 // Soporte para navegadores legacy
 }));
 
-// ===== MIDDLEWARE GENERAL =====
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+/**
+ * Middleware de parsing de datos
+ * 
+ * Configura Express para procesar JSON y datos de formularios
+ * con límites de tamaño para prevenir ataques DoS.
+ */
+app.use(express.json({ limit: '10mb' })); // Parser JSON con límite de 10MB
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parser de formularios con soporte para objetos anidados
 
-// ===== CONFIGURACIÓN DE SESIONES =====
+/**
+ * Configuración de sesiones de usuario
+ * 
+ * Utiliza MongoDB como store de sesiones para persistencia
+ * y escalabilidad en entornos distribuidos.
+ */
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'skilltrade-session-secret-key',
-    resave: false,
-    saveUninitialized: true, // Cambiar a true para crear sesión inmediatamente
+    secret: process.env.SESSION_SECRET || 'skilltrade-session-secret-key', // Clave secreta para firmar cookies
+    resave: false, // No guardar sesión si no hay cambios
+    saveUninitialized: true, // Crear sesión inmediatamente para CAPTCHA y otros casos
+    
+    // Store de sesiones en MongoDB para persistencia
     store: MongoStore.create({
         mongoUrl: config.MONGODB_URI,
-        touchAfter: 24 * 3600 // lazy session update
+        touchAfter: 24 * 3600 // Actualización lazy cada 24 horas para performance
     }),
+    
+    // Configuración de cookies de sesión
     cookie: {
-        secure: false, // false para desarrollo local
-        httpOnly: false, // false para permitir acceso desde JavaScript si es necesario
-        maxAge: 1000 * 60 * 60 * 24, // 24 horas
-        sameSite: 'lax'
+        secure: false, // false para desarrollo local (HTTP), true para producción (HTTPS)
+        httpOnly: false, // false para permitir acceso desde JavaScript del frontend
+        maxAge: 1000 * 60 * 60 * 24, // Duración: 24 horas
+        sameSite: 'lax' // Protección CSRF moderada
     },
-    name: 'skilltrade.sid' // Nombre personalizado para la cookie de sesión
+    name: 'skilltrade.sid' // Nombre personalizado para identificar la aplicación
 }));
 
-// ===== ARCHIVOS ESTÁTICOS =====
+/**
+ * Configuración de archivos estáticos
+ * 
+ * Sirve archivos subidos (imágenes, videos) desde el directorio uploads
+ * con acceso público para visualización en el frontend.
+ */
 app.use('/uploads', express.static(config.UPLOAD_PATH));
 
-// ===== CONFIGURACIÓN DE MONGOOSE =====
+/**
+ * Configuración de Mongoose ODM
+ * 
+ * Habilita modo estricto para queries para mejor performance
+ * y prevención de inyecciones NoSQL.
+ */
 mongoose.set('strictQuery', true);
 
-// ===== CONEXIÓN A BASE DE DATOS =====
-
+/**
+ * Conexión a base de datos MongoDB
+ * 
+ * Establece conexión con configuración optimizada para producción:
+ * - Pool de conexiones para concurrencia
+ * - Timeouts configurados para evitar cuelgues
+ * - Manejo de errores sin cerrar el servidor
+ */
 mongoose.connect(config.MONGODB_URI, {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
-    bufferCommands: false
+    maxPoolSize: 10, // Máximo 10 conexiones simultáneas
+    serverSelectionTimeoutMS: 10000, // Timeout de selección de servidor: 10s
+    socketTimeoutMS: 45000, // Timeout de socket: 45s
+    bufferCommands: false // Deshabilitar buffering para mejor control de errores
 }).catch(err => {
     console.error('Error inicial de conexión a MongoDB:', err.message);
-    // No cerrar el servidor, solo mostrar el error
+    // No cerrar el servidor para permitir reconexión automática
 });
 
+/**
+ * Event listeners para monitoreo de conexión a MongoDB
+ * 
+ * Registra eventos de conexión, errores y desconexiones
+ * para logging y debugging de la base de datos.
+ */
 mongoose.connection.on('connected', () => {
     logger.info('Conectado a MongoDB', {
         environment: config.NODE_ENV,
@@ -117,11 +203,28 @@ mongoose.connection.on('disconnected', () => {
     logger.warn('Desconectado de MongoDB');
 });
 
-// ===== CONFIGURACIÓN GLOBAL =====
+/**
+ * Configuración global de la aplicación
+ * 
+ * Hace disponible la instancia de multer para todas las rutas
+ * que necesiten manejar subida de archivos.
+ */
 app.locals.upload = upload;
 
-// ===== RUTAS =====
-// Cargar controladores necesarios
+/**
+ * ===== CONFIGURACIÓN DE RUTAS API =====
+ * 
+ * Define todas las rutas de la API REST organizadas por funcionalidad:
+ * - Autenticación y gestión de usuarios
+ * - CRUD de cursos y contenido educativo
+ * - Sistema de biblioteca personal
+ * - Carrito de compras y ventas
+ * - Panel de administración
+ * - Sistema de intercambios entre usuarios
+ * - Integración con MercadoPago
+ */
+
+// Cargar controladores de negocio
 const usuarioController = require('./controller/usuario.controller');
 const cursoController = require('./controller/curso.controller');
 const bibliotecaController = require('./controller/biblioteca.controller');
@@ -129,7 +232,7 @@ const ventaController = require('./controller/venta.controller');
 const adminController = require('./controller/admin.controller');
 const exchangeController = require('./controller/exchange.controller');
 
-// Cargar middleware de autenticación
+// Cargar middleware de seguridad y autenticación
 const { autenticarApiKey } = require('./middleware/auth');
 const { verificarAdmin } = require('./middleware/admin.middleware');
 const { generarCaptcha } = require('./middleware/captcha');
@@ -310,13 +413,13 @@ server.on('error', (err) => {
 
 // Evitar que el proceso se cierre por errores no manejados
 process.on('uncaughtException', (err) => {
-    console.error('❌ Excepción no capturada:', err.message);
+    console.error('Excepción no capturada:', err.message);
     console.error('Stack:', err.stack);
     // No cerrar el proceso, solo loguear el error
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Promesa rechazada no manejada:', reason);
+    console.error('Promesa rechazada no manejada:', reason);
     // No cerrar el proceso, solo loguear el error
 });
 

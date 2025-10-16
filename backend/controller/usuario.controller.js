@@ -1,3 +1,14 @@
+/**
+ * Controlador de Usuarios - SkillTrade
+ * 
+ * Maneja todas las operaciones relacionadas con usuarios:
+ * - Registro y autenticación
+ * - Gestión de perfiles
+ * - Cambio de contraseñas
+ * - Búsqueda de usuarios
+ * - Estadísticas generales
+ */
+
 const Usuario = require('../model/usuario.model');
 const Biblioteca = require('../model/biblioteca.model');
 const Suscripcion = require('../model/suscripcion.model');
@@ -7,17 +18,38 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { validarCaptcha } = require('../middleware/captcha');
 
-// Generar API Key única
+/**
+ * Genera una API Key única para autenticación de usuarios
+ * 
+ * Utiliza crypto.randomBytes para generar una clave segura
+ * de 32 bytes convertida a hexadecimal (64 caracteres).
+ * 
+ * @returns {string} API Key de 64 caracteres hexadecimales
+ */
 const generarApiKey = () => {
     return crypto.randomBytes(32).toString('hex');
 };
 
-// RF-USU-01: Registrar usuario (email, nombre, password hash)
+/**
+ * RF-USU-01: Registrar nuevo usuario en el sistema
+ * 
+ * Procesa el registro de un nuevo usuario con validaciones completas:
+ * - Validación de campos requeridos
+ * - Verificación de formato de email
+ * - Validación de contraseña y confirmación
+ * - Verificación de CAPTCHA anti-bot
+ * - Hash seguro de contraseña
+ * - Generación de API Key para autenticación
+ * 
+ * @param {Object} req - Request object con datos del usuario
+ * @param {Object} res - Response object para enviar respuesta
+ * @returns {Object} JSON con resultado del registro
+ */
 const registrarUsuario = async (req, res) => {
     try {
         const { email, nombre, password, confirmPassword, biografia, telefono } = req.body;
 
-        // Validar campos requeridos
+        // Validar campos requeridos para el registro
         if (!email || !nombre || !password) {
             return res.status(400).json({
                 success: false,
@@ -314,29 +346,56 @@ const obtenerUsuarioPorId = async (req, res) => {
         }
 
         // Solo mostrar información pública si el perfil es privado
-        if (usuario.visibilidad === 'privado' && req.usuario.id !== id) {
+        // EXCEPCIÓN: El administrador puede ver cualquier perfil
+        const esAdmin = req.usuario.email === 'skilltrade_admin@gmail.com';
+        const esPropietario = req.usuario.id === id;
+        
+        if (usuario.visibilidad === 'privado' && !esPropietario && !esAdmin) {
             return res.status(403).json({
                 success: false,
                 message: 'Perfil privado'
             });
         }
 
-        res.json({
-            success: true,
-            data: {
-                usuario: {
-                    id: usuario._id,
-                    nombre: usuario.nombre,
-                    biografia: usuario.biografia,
-                    fechaCreacion: usuario.fechaCreacion,
-                    estadisticas: {
-                        cursosCreados: usuario.estadisticas.cursosCreados,
-                        cursosCompartidos: usuario.estadisticas.cursosCompartidos,
-                        intercambiosRealizados: usuario.estadisticas.intercambiosRealizados
+        // Si es administrador, devolver información completa
+        if (esAdmin) {
+            res.json({
+                success: true,
+                data: {
+                    usuario: {
+                        _id: usuario._id,
+                        id: usuario._id,
+                        nombre: usuario.nombre,
+                        email: usuario.email,
+                        telefono: usuario.telefono,
+                        biografia: usuario.biografia,
+                        visibilidad: usuario.visibilidad,
+                        fechaRegistro: usuario.fechaRegistro,
+                        fechaCreacion: usuario.fechaCreacion,
+                        preferencias: usuario.preferencias,
+                        estadisticas: usuario.estadisticas
                     }
                 }
-            }
-        });
+            });
+        } else {
+            // Para usuarios normales, información limitada
+            res.json({
+                success: true,
+                data: {
+                    usuario: {
+                        id: usuario._id,
+                        nombre: usuario.nombre,
+                        biografia: usuario.biografia,
+                        fechaCreacion: usuario.fechaCreacion,
+                        estadisticas: {
+                            cursosCreados: usuario.estadisticas.cursosCreados,
+                            cursosCompartidos: usuario.estadisticas.cursosCompartidos,
+                            intercambiosRealizados: usuario.estadisticas.intercambiosRealizados
+                        }
+                    }
+                }
+            });
+        }
 
     } catch (error) {
         console.error('Error al obtener usuario:', error);

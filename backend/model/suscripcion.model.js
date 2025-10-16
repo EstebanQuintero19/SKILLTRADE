@@ -1,6 +1,42 @@
+/**
+ * Modelo de Suscripción - SkillTrade
+ * 
+ * Gestiona las suscripciones de usuarios a creadores de contenido:
+ * - Suscripciones con diferentes planes de duración
+ * - Sistema de renovación automática y manual
+ * - Control de estados y fechas de vigencia
+ * - Validaciones de integridad entre suscriptor y creador
+ * - Métodos de pago configurables
+ * - Prevención de auto-suscripciones
+ * 
+ * Tipos de suscripción disponibles:
+ * - mensual: Duración de 30 días
+ * - trimestral: Duración de 90 días  
+ * - anual: Duración de 365 días
+ * 
+ * Estados de suscripción:
+ * - activa: Suscripción vigente con acceso completo
+ * - vencida: Suscripción expirada, sin acceso
+ * - cancelada: Suscripción cancelada por el usuario
+ * 
+ * Características principales:
+ * - Una suscripción activa por par suscriptor-creador
+ * - Renovación automática configurable
+ * - Validaciones de fechas y precios
+ * - Métodos de utilidad para gestión de estados
+ * - Índices optimizados para consultas frecuentes
+ * - Prevención de suscripciones duplicadas
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Suscripción
+ * 
+ * Estructura completa para gestionar suscripciones a creadores
+ * con validaciones de negocio y control de estados.
+ */
 const suscripcionSchema = new Schema({
     suscriptor: {
         type: Schema.Types.ObjectId,

@@ -1,3 +1,37 @@
+<!--
+/**
+ * PÁGINA DE REGISTRO - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Formulario de registro para nuevos usuarios. Incluye validación de campos,
+ * confirmación de contraseña, sistema CAPTCHA de seguridad y campos opcionales
+ * para información adicional del perfil.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HEADER: Título y descripción del registro
+ * - FORMULARIO: Campos de información personal y credenciales
+ * - VALIDACIONES: Confirmación de contraseña y CAPTCHA
+ * - LOGIN: Enlace para usuarios existentes
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Validación HTML5 en campos requeridos
+ * - Confirmación de contraseña en tiempo real
+ * - Sistema CAPTCHA matemático anti-bot
+ * - Botones ojito para mostrar/ocultar contraseñas
+ * - Campos opcionales para perfil completo
+ * - Manejo de errores con mensajes descriptivos
+ * - Diseño responsive y accesible
+ * 
+ * VARIABLES EJS:
+ * - error: Mensaje de error si el registro falla
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - /css/auth.css: Estilos específicos de autenticación
+ * - /js/registro.js: JavaScript para validaciones
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,13 +46,15 @@
 
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md">
+    <!--CARD PRINCIPAL - Contenedor del formulario de registro-->
     <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+      <!--HEADER - Título y descripción-->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Crear cuenta</h1>
         <p class="text-gray-600">Únete a SkillTrade y comienza a aprender</p>
       </div>
       
-      <!-- Mensaje de error -->
+      <!--MENSAJE DE ERROR - Mostrado si el registro falla-->
       <% if (typeof error !== 'undefined' && error) { %>
         <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 flex items-start gap-3">
           <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,17 +67,21 @@
         </div>
       <% } %>
       
+      <!--FORMULARIO DE REGISTRO - Campos de información personal-->
       <form class="space-y-4" method="post" action="/registro">
+        <!--CAMPO NOMBRE - Requerido-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
           <input class="w-full h-12 rounded-lg border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" type="text" name="nombre" required />
         </div>
         
+        <!--CAMPO EMAIL - Requerido con validación HTML5-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
           <input class="w-full h-12 rounded-lg border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" type="email" name="email" required />
         </div>
         
+        <!--CAMPO CONTRASEÑA - Con botón ojito y validación mínima-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
           <div class="relative">
@@ -67,6 +107,7 @@
           <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
         </div>
         
+        <!--CONFIRMACIÓN CONTRASEÑA - Con validación en tiempo real-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar contraseña</label>
           <div class="relative">
@@ -93,17 +134,19 @@
           </div>
         </div>
         
+        <!--CAMPO BIOGRAFÍA - Opcional para perfil-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Biografía (opcional)</label>
           <textarea class="w-full rounded-lg border border-gray-300 p-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" name="biografia" rows="3" placeholder="Cuéntanos un poco sobre ti..."></textarea>
         </div>
         
+        <!--CAMPO TELÉFONO - Opcional para contacto-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono (opcional)</label>
           <input class="w-full h-12 rounded-lg border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" type="text" name="telefono" />
         </div>
         
-        <!-- CAPTCHA -->
+        <!--SISTEMA CAPTCHA - Verificación anti-bot matemática-->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Verificación de seguridad
@@ -138,11 +181,13 @@
           <p class="text-xs text-gray-500 mt-1">Resuelve la operación matemática para continuar</p>
         </div>
         
+        <!--BOTÓN DE ENVÍO - Procesa registro con validaciones-->
         <button id="submitBtn" class="w-full h-12 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed" type="submit">
           Crear Cuenta
         </button>
       </form>
       
+      <!--ENLACE A LOGIN - Para usuarios existentes-->
       <div class="mt-6 pt-6 border-t border-gray-200 text-center">
         <p class="text-sm text-gray-600">
           ¿Ya tienes cuenta? 
@@ -153,6 +198,7 @@
   </div>
 </div>
 
+<!--JAVASCRIPT ESPECÍFICO - Validaciones y CAPTCHA-->
 <script src="/js/registro.js"></script>
 
 </body>

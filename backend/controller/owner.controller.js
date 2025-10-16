@@ -1,9 +1,45 @@
+/**
+ * Controlador de Propietarios (Owner) - SkillTrade
+ * 
+ * Gestiona el sistema de propietarios de cursos y creadores de contenido:
+ * - Registro de usuarios como creadores de contenido
+ * - Configuración de precios de suscripción
+ * - Gestión de estadísticas de creadores
+ * - Validación de permisos de creación de cursos
+ * - Actualización de información de propietarios
+ * 
+ * Funcionalidades principales:
+ * - Conversión de usuarios regulares a creadores
+ * - Configuración de modelos de monetización
+ * - Prevención de duplicados de propietarios
+ * - Validación de precios de suscripción
+ * - Integración con sistema de cursos y suscripciones
+ * 
+ * Características del sistema:
+ * - Un usuario puede ser propietario de múltiples cursos
+ * - Cada propietario puede configurar su precio de suscripción
+ * - Validaciones de integridad para evitar inconsistencias
+ * - Soporte para diferentes modelos de monetización
+ */
+
 const Owner = require('../model/owner.model');
 const Usuario = require('../model/usuario.model');
 const Curso = require('../model/curso.model');
 const Suscripcion = require('../model/suscripcion.model');
 
-// Crear owner (propietario de cursos)
+/**
+ * Crear nuevo propietario de cursos
+ * 
+ * Convierte un usuario regular en creador de contenido:
+ * - Validación de datos de propietario
+ * - Verificación de existencia del usuario
+ * - Prevención de duplicados de propietarios
+ * - Configuración inicial de valor de suscripción
+ * 
+ * @param {Object} req - Request con datos del propietario
+ * @param {Object} res - Response con propietario creado o error
+ * @returns {Object} JSON con resultado de la operación
+ */
 const crearOwner = async (req, res) => {
     try {
         const { usuario, valorSuscripcion } = req.body;

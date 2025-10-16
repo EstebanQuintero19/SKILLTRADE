@@ -1,3 +1,26 @@
+<!--
+/**
+ * GESTIÓN DE INTERCAMBIOS ADMIN - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de administración para gestionar todos los intercambios de la plataforma.
+ * Permite ver, aprobar, rechazar y cancelar intercambios con tabla paginada.
+ * 
+ * FUNCIONALIDADES:
+ * - Listado paginado de todos los intercambios (5 por página)
+ * - Información detallada: usuarios, cursos, estado, duración
+ * - Acciones: aprobar, rechazar, cancelar intercambios
+ * - Breadcrumb de navegación admin
+ * - Tabla responsive con diseño moderno
+ * 
+ * VARIABLES EJS:
+ * - title: Título de la página
+ * - intercambios: Array de intercambios paginados
+ * - paginacion: Objeto con información de paginación
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +38,7 @@
     <%- include('../partials/header') %>
     
     <div class="min-h-screen bg-gray-50">
-        <!-- Header -->
+        <!--HEADER - Breadcrumb y título de sección-->
         <div class="admin-gradient text-white py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between">

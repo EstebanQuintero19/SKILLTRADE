@@ -1,6 +1,32 @@
+/**
+ * Middleware de CAPTCHA - SkillTrade
+ * 
+ * Sistema de validación anti-bot mediante operaciones matemáticas simples:
+ * - Generación de operaciones aritméticas aleatorias
+ * - Hash seguro del resultado con salt secreto
+ * - Validación de respuestas del usuario
+ * - Almacenamiento temporal en sesión del servidor
+ * - Limpieza automática después de uso
+ * 
+ * Características de seguridad:
+ * - Operaciones variables (suma, resta, multiplicación)
+ * - Hash SHA-256 con salt configurable
+ * - Sesión temporal para prevenir reutilización
+ * - Validación tanto client-side como server-side
+ */
+
 const crypto = require('crypto');
 
-// Generar CAPTCHA matemático simple
+/**
+ * Generar CAPTCHA matemático simple
+ * 
+ * Crea una operación aritmética aleatoria con diferentes rangos:
+ * - Suma: números de 1-20
+ * - Resta: números de 10-39 menos 1-10 (resultado siempre positivo)
+ * - Multiplicación: números de 1-10
+ * 
+ * @returns {Object} Objeto con pregunta, hash del resultado y resultado para debug
+ */
 const generarCaptcha = () => {
     const operaciones = ['+', '-', '*'];
     const operacion = operaciones[Math.floor(Math.random() * operaciones.length)];
@@ -27,7 +53,7 @@ const generarCaptcha = () => {
     
     const pregunta = `${num1} ${operacion} ${num2} = ?`;
     
-    // Generar hash del resultado para validación
+    // Generar hash seguro del resultado para validación
     const hash = crypto.createHash('sha256')
         .update(`${resultado}:${process.env.CAPTCHA_SECRET || 'skilltrade-captcha-secret'}`)
         .digest('hex');
@@ -39,7 +65,18 @@ const generarCaptcha = () => {
     };
 };
 
-// Validar respuesta del CAPTCHA
+/**
+ * Validar respuesta del CAPTCHA del usuario
+ * 
+ * Compara el hash de la respuesta del usuario con el hash esperado:
+ * - Genera hash de la respuesta usando el mismo salt
+ * - Compara de forma segura con el hash almacenado
+ * - Previene ataques de timing mediante comparación constante
+ * 
+ * @param {string|number} respuestaUsuario - Respuesta numérica del usuario
+ * @param {string} hashEsperado - Hash SHA-256 del resultado correcto
+ * @returns {boolean} true si la respuesta es correcta, false en caso contrario
+ */
 const validarCaptcha = (respuestaUsuario, hashEsperado) => {
     if (!respuestaUsuario || !hashEsperado) {
         return false;

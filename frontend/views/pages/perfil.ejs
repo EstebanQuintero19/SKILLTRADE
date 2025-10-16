@@ -1,3 +1,37 @@
+<!--
+/**
+ * PÁGINA DE PERFIL - SkillTrade Frontend
+ * @author SkillTrade Team
+ * @version 1.0.0
+ * 
+ * DESCRIPCIÓN:
+ * Página de perfil de usuario que muestra información personal, estadísticas,
+ * acciones rápidas y historial de compras. Diferencia entre perfil propio
+ * y perfil de otros usuarios con funcionalidades específicas.
+ * 
+ * SECCIONES PRINCIPALES:
+ * - HERO SECTION: Avatar, información básica y estadísticas
+ * - SIDEBAR: Acciones rápidas y configuración (solo perfil propio)
+ * - CONTENIDO PRINCIPAL: Información detallada y historial
+ * - HISTORIAL COMPRAS: Sección dinámica con paginación
+ * 
+ * CARACTERÍSTICAS TÉCNICAS:
+ * - Estilos CSS personalizados para animaciones
+ * - Avatar con efecto shimmer y estado online
+ * - Estadísticas con efectos hover
+ * - Carga dinámica de historial de compras
+ * - Diferenciación de permisos según usuario
+ * - Diseño responsive con grid adaptativo
+ * 
+ * VARIABLES EJS:
+ * - usuario: Objeto con datos del usuario a mostrar
+ * - esPropio: Boolean que indica si es el perfil del usuario actual
+ * 
+ * ARCHIVOS RELACIONADOS:
+ * - Estilos CSS inline para animaciones específicas
+ * - JavaScript inline para funcionalidad de historial
+ */
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,19 +84,19 @@
 
 <%- include('../partials/header') %>
 
-<!-- Hero Section del Perfil -->
+<!--HERO SECTION - Avatar, información básica y estadísticas-->
 <section class="gradient-bg relative overflow-hidden">
-  <!-- Elementos decorativos -->
+  <!--Elementos decorativos de fondo-->
   <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48"></div>
   <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
   
   <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="flex flex-col md:flex-row items-center gap-8">
       
-      <!-- Avatar y info básica -->
+      <!--AVATAR Y INFO BÁSICA - Foto de perfil y datos principales-->
       <div class="text-center md:text-left">
         <div class="relative inline-block mb-6">
-          <!-- Avatar principal -->
+          <!--Avatar principal con efecto shimmer-->
           <div class="w-32 h-32 md:w-40 md:h-40 rounded-full profile-avatar border-4 border-white shadow-2xl flex items-center justify-center">
             <% if (usuario?.fotoUrl && usuario.fotoUrl !== 'https://via.placeholder.com/200') { %>
               <img src="<%= usuario.fotoUrl %>" alt="<%= usuario?.nombre %>" class="w-full h-full rounded-full object-cover">
@@ -71,12 +105,12 @@
             <% } %>
           </div>
           
-          <!-- Indicador de estado online -->
+          <!--Indicador de estado online con animación-->
           <div class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg">
             <div class="w-full h-full bg-green-500 rounded-full animate-ping"></div>
           </div>
           
-          <!-- Botón de editar foto -->
+          <!--Botón de editar foto-->
           <button class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-purple-600 hover:bg-gray-50 transition-colors">
             <i class="fas fa-camera text-sm"></i>
           </button>
@@ -98,7 +132,7 @@
         </div>
       </div>
       
-      <!-- Estadísticas rápidas -->
+      <!--ESTADÍSTICAS RÁPIDAS - Métricas del usuario con efectos hover-->
       <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
         <div class="stat-card bg-white/20 backdrop-blur rounded-xl p-4 text-center text-white">
           <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -140,11 +174,11 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="grid lg:grid-cols-3 gap-8">
     
-    <!-- Sidebar con acciones rápidas -->
+    <!--SIDEBAR - Acciones rápidas y configuración-->
     <aside class="lg:col-span-1 space-y-6">
       
       <% if (typeof esPropio !== 'undefined' && esPropio) { %>
-      <!-- Tarjeta de acciones (solo para perfil propio) -->
+      <!--TARJETA DE ACCIONES - Solo visible para perfil propio-->
       <div class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <i class="fas fa-cogs text-purple-600 mr-2"></i>

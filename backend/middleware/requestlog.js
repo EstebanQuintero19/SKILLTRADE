@@ -1,7 +1,16 @@
 
 /**
- * @deprecated Este middleware ha sido reemplazado por request-logger.js
- * Se mantiene por compatibilidad pero se recomienda migrar al nuevo sistema
+ * Middleware de Request Log (Deprecated) - SkillTrade
+ * 
+ * Versión legacy del sistema de logging de peticiones HTTP.
+ * Este middleware ha sido reemplazado por request-logger.js
+ * que utiliza Winston para un logging más robusto.
+ * 
+ * Funcionalidades básicas:
+ * - Logging simple de peticiones HTTP
+ * - Medición de tiempo de respuesta
+ * - Captura de información básica de usuario
+ * - Registro de User-Agent y dirección IP
  */
 
 const logger = require('../logger');

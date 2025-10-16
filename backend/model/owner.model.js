@@ -1,6 +1,38 @@
+/**
+ * Modelo de Propietario (Owner) - SkillTrade
+ * 
+ * Representa a los creadores de contenido y propietarios de cursos:
+ * - Extensión del modelo de usuario para creadores
+ * - Gestión de cursos creados y suscriptores
+ * - Sistema de calificaciones y reputación
+ * - Configuración de precios de suscripción
+ * - Estadísticas de engagement y popularidad
+ * 
+ * Características principales:
+ * - Relación 1:1 con usuario (un usuario puede ser owner)
+ * - Lista de cursos creados por el propietario
+ * - Contador de suscriptores activos
+ * - Sistema de rating promedio (0-5 estrellas)
+ * - Valor de suscripción configurable
+ * - Validaciones de integridad de datos numéricos
+ * 
+ * Funcionalidades del sistema:
+ * - Conversión de usuarios regulares a creadores
+ * - Tracking de popularidad y engagement
+ * - Monetización a través de suscripciones
+ * - Sistema de reputación basado en calificaciones
+ * - Gestión centralizada de contenido creado
+ */
+
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/**
+ * Esquema de Propietario
+ * 
+ * Estructura para gestionar creadores de contenido con
+ * estadísticas, cursos y configuración de monetización.
+ */
 const ownerSchema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,

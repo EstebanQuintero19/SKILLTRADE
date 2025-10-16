@@ -1,3 +1,29 @@
+/**
+ * Controlador de Biblioteca - SkillTrade
+ * 
+ * Maneja la biblioteca personal de cada usuario y el acceso a cursos:
+ * - Gestión de cursos propios del usuario
+ * - Cursos adquiridos por compra, suscripción o intercambio
+ * - Sistema de favoritos y colecciones
+ * - Verificación de acceso a contenido
+ * - Edición y eliminación de cursos con permisos
+ * - Integración con sistema de intercambios temporales
+ * 
+ * Tipos de acceso a cursos:
+ * - Propios: Cursos creados por el usuario
+ * - Comprados: Cursos adquiridos mediante pago
+ * - Suscripción: Cursos incluidos en plan de suscripción
+ * - Intercambio: Acceso temporal por intercambio activo
+ * - Favoritos: Cursos marcados como favoritos
+ * 
+ * Funcionalidades principales:
+ * - CRUD completo de biblioteca personal
+ * - Verificación granular de permisos de acceso
+ * - Gestión de favoritos y colecciones
+ * - Integración con sistema de ventas e intercambios
+ * - Soporte para administradores con permisos especiales
+ */
+
 const Curso = require('../model/curso.model');
 const Usuario = require('../model/usuario.model');
 const Venta = require('../model/venta.model');
@@ -5,7 +31,19 @@ const Exchange = require('../model/exchange.model');
 const Suscripcion = require('../model/suscripcion.model');
 const Biblioteca = require('../model/biblioteca.model');
 
-// RF-BIB-01: Cursos propios
+/**
+ * RF-BIB-01: Obtener cursos propios del usuario
+ * 
+ * Retorna los cursos creados por el usuario autenticado con:
+ * - Paginación configurable
+ * - Filtros por categoría y estado
+ * - Información del propietario poblada
+ * - Ordenamiento por fecha de creación
+ * 
+ * @param {Object} req - Request con usuario autenticado y parámetros de filtro
+ * @param {Object} res - Response con cursos propios paginados
+ * @returns {Object} JSON con cursos y metadatos de paginación
+ */
 const obtenerCursosPropios = async (req, res) => {
     try {
         const usuarioId = req.usuario._id;
